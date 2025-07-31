@@ -1,0 +1,50 @@
+# Development environment overrides
+# This file is automatically loaded by docker-compose for local development
+
+version: '3.8'
+
+services:
+  postgres:
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: medusa-store-dev
+    ports:
+      - "5432:5432"
+
+  redis:
+    ports:
+      - "6379:6379"
+
+  backend:
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgres://postgres:postgres@postgres:5432/medusa-store-dev
+      - REDIS_URL=redis://redis:6379
+      - JWT_SECRET=dev-jwt-secret-not-for-production
+      - COOKIE_SECRET=dev-cookie-secret-not-for-production
+      - STORE_CORS=http://localhost:3000,http://localhost:8000
+      - ADMIN_CORS=http://localhost:9000,http://localhost:7001
+      - AUTH_CORS=http://localhost:9000,http://localhost:3000
+      - DISABLE_MEDUSA_ADMIN=false
+      - MEDUSA_BACKEND_URL=http://localhost:9000
+    volumes:
+      - ./backend:/server
+      - /server/node_modules
+    ports:
+      - "9000:9000"
+      - "7001:7001"
+    command: ["npm", "run", "dev"]
+
+  storefront:
+    environment:
+      - NODE_ENV=development
+      - NEXT_PUBLIC_MEDUSA_BACKEND_URL=http://localhost:9000
+      - NEXT_PUBLIC_BASE_URL=http://localhost:3000
+    volumes:
+      - ./storefront:/app
+      - /app/node_modules
+      - /app/.next
+    ports:
+      - "3000:3000"
+    command: ["npm", "run", "dev"]
