@@ -18,8 +18,13 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Gyvagaudziaispastai Store - Wildlife Control Solutions",
-  description: "Professional wildlife control products and solutions for managing nuisance animals effectively and humanely.",
+  title: "Gyvagaudziaispastai Store - Live Animal Traps",
+  description: "Professional live animal traps for humane wildlife capture. Safe, effective traps for raccoons, squirrels, cats, rabbits and more. Trusted since 1940.",
+};
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
 };
 
 export default function RootLayout({

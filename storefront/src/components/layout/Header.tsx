@@ -2,9 +2,10 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
-import { ShoppingCart, Search, Menu, X, User, Heart, Shield, Truck, Phone } from 'lucide-react'
-import { Button, TextField, DropdownMenu, Flex, Text, Badge, Separator } from '@radix-ui/themes'
+import { ShoppingCart, Search, Menu, X, User, Heart, Shield, Truck, Phone, Box } from 'lucide-react'
+import { Button, TextField, DropdownMenu, Flex, Text, Separator } from '@radix-ui/themes'
 import { brandColors, componentStyles } from '@/utils/colors'
+import TrapLogo from '@/components/ui/TrapLogo'
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -19,70 +20,70 @@ export default function Header() {
       }}>
         <Flex justify="center" align="center" gap="2">
           <Truck className="w-4 h-4" />
-          <Text size="2" weight="medium">FREE SHIPPING ON ORDERS $75+ | 30-DAY RETURN GUARANTEE</Text>
+          <Text size="2" weight="medium">NEMOKAMAS PRISTATYMAS SPĄSTAMS NUO €75+ | 30 DIENŲ GRĄŽINIMO GARANTIJA</Text>
           <Shield className="w-4 h-4" />
         </Flex>
       </div>
 
       {/* Main navigation */}
-      <div className="container mx-auto px-4 py-4">
-        <Flex align="center" justify="between" gap="4">
+      <div className="container mx-auto px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 md:py-3">
+        <div className="flex items-center justify-between gap-1 sm:gap-2 md:gap-4">
           {/* Modern logo */}
           <Link href="/" className="flex items-center group">
             <div className="relative">
               <div 
-                className="w-12 h-12 rounded-xl flex items-center justify-center text-white shadow-lg group-hover:shadow-xl transition-all duration-300"
+                className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 lg:w-12 lg:h-12 rounded-md sm:rounded-lg md:rounded-xl flex items-center justify-center text-white shadow-sm sm:shadow-md lg:shadow-lg group-hover:shadow-xl transition-all duration-300"
                 style={{ 
                   background: componentStyles.gradients.primary,
                   boxShadow: componentStyles.buttons.primary.shadow 
                 }}
               >
-                <Heart className="w-6 h-6 fill-current" />
+                <TrapLogo className="w-6 h-6" />
               </div>
               <div className="absolute -top-1 -right-1 w-4 h-4 bg-amber-400 rounded-full flex items-center justify-center">
                 <Shield className="w-2.5 h-2.5 text-amber-800" />
               </div>
             </div>
-            <div className="ml-4">
-              <h1 className="text-xl font-bold tracking-tight" style={{ color: brandColors.primary }}>
-                WildControl
+            <div className="ml-2 sm:ml-3 md:ml-4">
+              <h1 className="text-sm sm:text-lg md:text-xl font-bold tracking-tight truncate" style={{ color: brandColors.primary }}>
+                Gyvagaudziaispastai
               </h1>
-              <Text size="1" color="gray" className="font-medium">
-                Professional Solutions
-              </Text>
+              <p className="text-xs text-gray-600 font-medium hidden sm:block">
+                Humaniški gyvūnų spąstai
+              </p>
             </div>
           </Link>
 
           {/* Professional navigation */}
-          <nav className="hidden lg:flex items-center">
-            <Flex align="center" gap="2">
+          <nav className="hidden xl:flex items-center">
+            <div className="flex items-center gap-1">
               {[
-                { label: 'Products', href: '/products' },
-                { label: 'Solutions', href: '/solutions' },
-                { label: 'Learning Center', href: '/learning' },
-                { label: 'Support', href: '/support' }
+                { label: 'Gyvūnų spąstai', href: '/traps' },
+                { label: 'Pagal gyvūno dydį', href: '/size' },
+                { label: 'Kaip naudoti', href: '/guide' },
+                { label: 'Pagalba', href: '/support' }
               ].map((item) => (
                 <Link 
                   key={item.label}
                   href={item.href}
-                  className="px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 hover:bg-gray-50 relative group"
+                  className="px-3 py-2 rounded-lg font-medium text-sm transition-all duration-200 hover:bg-gray-50 relative group"
                   style={{ color: brandColors.textSecondary }}
                 >
                   {item.label}
                   <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-0.5 transition-all duration-200 group-hover:w-3/4" style={{ backgroundColor: brandColors.primary }} />
                 </Link>
               ))}
-            </Flex>
+            </div>
           </nav>
 
           {/* Modern search and actions */}
-          <Flex align="center" gap="3">
+          <div className="flex items-center gap-1 sm:gap-2 md:gap-3">
             {/* Search */}
-            <div className="hidden md:block relative">
+            <div className="hidden lg:block relative">
               <TextField.Root 
-                placeholder="Search wildlife solutions..." 
+                placeholder="Ieškoti gyvūnų spąstų..." 
                 size="3" 
-                className="w-80"
+                className="w-48 lg:w-64 xl:w-80"
                 style={{ 
                   borderRadius: '12px',
                   border: `1px solid ${brandColors.gray200}`,
@@ -96,7 +97,7 @@ export default function Header() {
             </div>
 
             {/* Professional action buttons */}
-            <Flex align="center" gap="2">
+            <div className="flex items-center gap-1 sm:gap-2">
               {/* User Account */}
               <DropdownMenu.Root>
                 <DropdownMenu.Trigger>
@@ -107,20 +108,20 @@ export default function Header() {
                 <DropdownMenu.Content align="end" className="w-48">
                   <DropdownMenu.Item className="font-medium">
                     <User className="w-4 h-4 mr-2" />
-                    Sign In
+                    Prisijungti
                   </DropdownMenu.Item>
                   <DropdownMenu.Item>
                     <div className="w-4 h-4 mr-2" />
-                    Create Account
+                    Sukurti paskyrą
                   </DropdownMenu.Item>
                   <DropdownMenu.Separator />
                   <DropdownMenu.Item>
                     <div className="w-4 h-4 mr-2" />
-                    My Orders
+                    Mano užsakymai
                   </DropdownMenu.Item>
                   <DropdownMenu.Item>
                     <Heart className="w-4 h-4 mr-2" />
-                    Wishlist
+                    Pageidavimų sąrašas
                   </DropdownMenu.Item>
                 </DropdownMenu.Content>
               </DropdownMenu.Root>
@@ -143,7 +144,7 @@ export default function Header() {
               {/* Professional CTA */}
               <Button 
                 size="3"
-                className="hidden md:flex items-center gap-2 font-medium px-4 py-2 ml-2"
+                className="hidden xl:flex items-center gap-2 font-medium px-4 py-2 ml-2"
                 style={{ 
                   background: `linear-gradient(135deg, ${brandColors.primary} 0%, ${brandColors.primaryHover} 100%)`,
                   color: brandColors.white,
@@ -153,65 +154,66 @@ export default function Header() {
                 }}
               >
                 <Phone className="w-4 h-4" />
-                <span>Get Expert Help</span>
+                <span className="hidden 2xl:inline">Gauti ekspertų pagalbą</span>
+                <span className="xl:inline 2xl:hidden">Pagalba</span>
               </Button>
-            </Flex>
-          </Flex>
+            </div>
+          </div>
 
           {/* Mobile menu toggle */}
           <Button
             variant="ghost"
             size="3"
-            className="lg:hidden"
+            className="xl:hidden"
             onClick={toggleMenu}
             style={{ color: brandColors.textSecondary }}
           >
             {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </Button>
-        </Flex>
+        </div>
 
         {/* Mobile Navigation */}
         {isMenuOpen && (
-          <div className="lg:hidden mt-6 pb-4 border-t pt-6" style={{ borderColor: brandColors.gray200 }}>
-            <Flex direction="column" gap="1">
-              <Button variant="ghost" size="3" className="justify-start font-medium w-full">
-                <Link href="/products">Products</Link>
-              </Button>
-              <Button variant="ghost" size="3" className="justify-start font-medium w-full">
-                <Link href="/solutions">Solutions</Link>
-              </Button>
-              <Button variant="ghost" size="3" className="justify-start font-medium w-full">
-                <Link href="/learning">Learning</Link>
-              </Button>
-              <Button variant="ghost" size="3" className="justify-start font-medium w-full">
-                <Link href="/support">Support</Link>
-              </Button>
-              <Separator className="my-3" />
-              <div className="md:hidden">
-                <TextField.Root 
-                  placeholder="Search..." 
-                  size="3"
-                  className="w-full mb-3"
-                  style={{ borderRadius: '12px' }}
-                >
-                  <TextField.Slot>
-                    <Search className="w-4 h-4" />
-                  </TextField.Slot>
-                </TextField.Root>
+          <div className="xl:hidden mt-4 sm:mt-6 pb-3 sm:pb-4 border-t pt-4 sm:pt-6" style={{ borderColor: brandColors.gray200 }}>
+            <div className="flex flex-col gap-1">
+              <Link href="/traps" className="w-full p-2 sm:p-3 text-left font-medium rounded-lg hover:bg-gray-50 transition-colors" style={{ color: brandColors.textSecondary }}>
+                Gyvūnų spąstai
+              </Link>
+              <Link href="/size" className="w-full p-2 sm:p-3 text-left font-medium rounded-lg hover:bg-gray-50 transition-colors" style={{ color: brandColors.textSecondary }}>
+                Pagal gyvūno dydį
+              </Link>
+              <Link href="/guide" className="w-full p-2 sm:p-3 text-left font-medium rounded-lg hover:bg-gray-50 transition-colors" style={{ color: brandColors.textSecondary }}>
+                Kaip naudoti
+              </Link>
+              <Link href="/support" className="w-full p-2 sm:p-3 text-left font-medium rounded-lg hover:bg-gray-50 transition-colors" style={{ color: brandColors.textSecondary }}>
+                Pagalba
+              </Link>
+              <div className="h-px my-3 bg-gray-200"></div>
+              <div className="lg:hidden mb-3">
+                <div className="relative">
+                  <input 
+                    type="text"
+                    placeholder="Ieškoti gyvūnų spąstų..."
+                    className="w-full p-3 pl-10 rounded-lg border text-sm"
+                    style={{ 
+                      borderColor: brandColors.gray200,
+                      backgroundColor: brandColors.backgroundSecondary 
+                    }}
+                  />
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4" style={{ color: brandColors.textTertiary }} />
+                </div>
               </div>
-              <Button 
-                size="3"
-                className="font-medium w-full"
+              <button 
+                className="w-full p-3 font-medium rounded-lg text-white flex items-center justify-center gap-2 transition-all"
                 style={{ 
                   background: componentStyles.gradients.primary,
-                  color: brandColors.white,
                   borderRadius: '12px'
                 }}
               >
                 <Phone className="w-4 h-4" />
-                Get Quote
-              </Button>
-            </Flex>
+                Gauti ekspertų pagalbą
+              </button>
+            </div>
           </div>
         )}
       </div>

@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { Facebook, Twitter, Instagram, Youtube, Mail, Phone, MapPin, Heart, Shield, Award, Truck } from 'lucide-react'
-import { Button, Text, Heading, Flex, Grid, Section, Container, Separator } from '@radix-ui/themes'
+import TrapLogo from '@/components/ui/TrapLogo'
+import { Button, Text, Heading, Flex, Grid, Section, Container } from '@radix-ui/themes'
 import { brandColors, componentStyles } from '@/utils/colors'
 
 export default function Footer() {
@@ -13,58 +14,58 @@ export default function Footer() {
       <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-transparent pointer-events-none" />
       
       {/* Trust indicators bar */}
-      <div className="border-b border-white/10 py-8">
+      <div className="border-b border-white/10 py-6 sm:py-8">
         <Container size="4">
-          <Grid columns={{ initial: "2", md: "4" }} gap="6">
-            <Flex align="center" gap="3" className="text-center md:text-left">
-              <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ 
+          <Grid columns={{ initial: "1", sm: "2", lg: "4" }} gap={{ initial: "4", sm: "6" }}>
+            <Flex align="center" gap="3" className="text-center sm:text-left" justify={{ initial: "center", sm: "start" }}>
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center" style={{ 
                 background: 'rgba(255, 255, 255, 0.1)',
                 backdropFilter: 'blur(10px)'
               }}>
-                <Shield className="w-6 h-6" />
+                <Shield className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
               <div>
-                <Text size="3" weight="bold" className="block">30-Day Guarantee</Text>
-                <Text size="2" className="opacity-80">Risk-free returns</Text>
+                <Text size={{ initial: "2", sm: "3" }} weight="bold" className="block">30 dienų garantija</Text>
+                <Text size={{ initial: "1", sm: "2" }} className="opacity-80">Saugus grąžinimas</Text>
               </div>
             </Flex>
             
-            <Flex align="center" gap="3" className="text-center md:text-left">
-              <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ 
+            <Flex align="center" gap="3" className="text-center sm:text-left" justify={{ initial: "center", sm: "start" }}>
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center" style={{ 
                 background: 'rgba(255, 255, 255, 0.1)',
                 backdropFilter: 'blur(10px)'
               }}>
-                <Truck className="w-6 h-6" />
+                <Truck className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
               <div>
-                <Text size="3" weight="bold" className="block">Free Shipping</Text>
-                <Text size="2" className="opacity-80">Orders over $75</Text>
+                <Text size={{ initial: "2", sm: "3" }} weight="bold" className="block">Nemokamas pristatymas</Text>
+                <Text size={{ initial: "1", sm: "2" }} className="opacity-80">Užsakymams nuo €75</Text>
               </div>
             </Flex>
             
-            <Flex align="center" gap="3" className="text-center md:text-left">
-              <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ 
+            <Flex align="center" gap="3" className="text-center sm:text-left" justify={{ initial: "center", sm: "start" }}>
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center" style={{ 
                 background: 'rgba(255, 255, 255, 0.1)',
                 backdropFilter: 'blur(10px)'
               }}>
-                <Award className="w-6 h-6" />
+                <Award className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
               <div>
-                <Text size="3" weight="bold" className="block">Expert Support</Text>
-                <Text size="2" className="opacity-80">Professional advice</Text>
+                <Text size={{ initial: "2", sm: "3" }} weight="bold" className="block">Ekspertų pagalba</Text>
+                <Text size={{ initial: "1", sm: "2" }} className="opacity-80">Profesionalūs patarimai</Text>
               </div>
             </Flex>
             
-            <Flex align="center" gap="3" className="text-center md:text-left">
-              <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ 
+            <Flex align="center" gap="3" className="text-center sm:text-left" justify={{ initial: "center", sm: "start" }}>
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center" style={{ 
                 background: 'rgba(255, 255, 255, 0.1)',
                 backdropFilter: 'blur(10px)'
               }}>
-                <Heart className="w-6 h-6" />
+                <TrapLogo className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
               <div>
-                <Text size="3" weight="bold" className="block">Humane Solutions</Text>
-                <Text size="2" className="opacity-80">Wildlife friendly</Text>
+                <Text size={{ initial: "2", sm: "3" }} weight="bold" className="block">Humaniški sprendimai</Text>
+                <Text size={{ initial: "1", sm: "2" }} className="opacity-80">Draugiški gyvūnams</Text>
               </div>
             </Flex>
           </Grid>
@@ -74,41 +75,41 @@ export default function Footer() {
       {/* Main footer content */}
       <Section size="3">
         <Container size="4">
-          <Grid columns={{ initial: "1", md: "2", lg: "4" }} gap="8">
+          <Grid columns={{ initial: "1", sm: "2", lg: "4" }} gap={{ initial: "6", sm: "8" }}>
             {/* Company Info */}
-            <div>
-              <Flex align="center" gap="3" className="mb-6">
+            <div className="text-center sm:text-left">
+              <Flex align="center" gap="3" className="mb-4 sm:mb-6" justify={{ initial: "center", sm: "start" }}>
                 <div className="relative">
                   <div 
-                    className="w-10 h-10 rounded-xl flex items-center justify-center text-white shadow-lg"
+                    className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center text-white shadow-lg"
                     style={{ 
                       background: componentStyles.gradients.accent,
                       boxShadow: '0 8px 32px rgba(139, 92, 246, 0.3)'
                     }}
                   >
-                    <Heart className="w-5 h-5 fill-current" />
+                    <TrapLogo className="w-4 h-4 sm:w-5 sm:h-5" />
                   </div>
-                  <div className="absolute -top-1 -right-1 w-3 h-3 bg-amber-400 rounded-full" />
+                  <div className="absolute -top-1 -right-1 w-2.5 h-2.5 sm:w-3 sm:h-3 bg-amber-400 rounded-full" />
                 </div>
                 <div>
-                  <Heading size="4" className="font-bold">WildControl</Heading>
-                  <Text size="1" className="opacity-80">Professional Solutions</Text>
+                  <Heading size={{ initial: "3", sm: "4" }} className="font-bold">Gyvagaudziaispastai</Heading>
+                  <Text size="1" className="opacity-80">Humaniški gyvūnų spąstai</Text>
                 </div>
               </Flex>
               
-              <Text size="2" className="mb-6 opacity-90 leading-relaxed">
-                Trusted by professionals and homeowners worldwide for effective, 
-                humane wildlife control solutions since 1940.
+              <Text size={{ initial: "1", sm: "2" }} className="mb-4 sm:mb-6 opacity-90 leading-relaxed">
+                Patikimi profesionalų ir namų savininkų visame pasaulyje dėl efektyvių,
+                humaniškų gyvūnų spąstų. Saugus pagavimas ir perkėlimas.
               </Text>
               
-              <Flex gap="3">
+              <Flex gap="2 sm:gap-3" justify={{ initial: "center", sm: "start" }}>
                 {[Facebook, Twitter, Instagram, Youtube].map((Icon, index) => (
                   <Link key={index} href="#" className="group">
-                    <div className="w-10 h-10 rounded-lg flex items-center justify-center transition-all duration-300 group-hover:scale-110" style={{ 
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center transition-all duration-300 group-hover:scale-110" style={{ 
                       background: 'rgba(255, 255, 255, 0.1)',
                       backdropFilter: 'blur(10px)'
                     }}>
-                      <Icon className="w-5 h-5 group-hover:text-amber-300 transition-colors" />
+                      <Icon className="w-4 h-4 sm:w-5 sm:h-5 group-hover:text-amber-300 transition-colors" />
                     </div>
                   </Link>
                 ))}
@@ -116,18 +117,18 @@ export default function Footer() {
             </div>
 
             {/* Products & Solutions */}
-            <div>
-              <Heading size="4" className="mb-4 font-semibold">Products & Solutions</Heading>
-              <Flex direction="column" gap="2">
+            <div className="text-center sm:text-left">
+              <Heading size={{ initial: "3", sm: "4" }} className="mb-3 sm:mb-4 font-semibold">Gyvūnų spąstai</Heading>
+              <Flex direction="column" gap="1.5 sm:gap-2">
                 {[
-                  'Animal Traps',
-                  'Repellent Systems', 
-                  'Exclusion Products',
-                  'Monitoring Tools',
-                  'Professional Solutions',
-                  'Humane Devices'
+                  'Mažų gyvūnų spąstai',
+                  'Vidutinių gyvūnų spąstai', 
+                  'Didelių gyvūnų spąstai',
+                  '1 durų spąstai',
+                  '2 durų spąstai',
+                  'Profesionalūs spąstai'
                 ].map((item) => (
-                  <Link key={item} href="/products" className="text-white/80 hover:text-amber-300 transition-colors text-sm">
+                  <Link key={item} href="/traps" className="text-white/80 hover:text-amber-300 transition-colors text-xs sm:text-sm">
                     {item}
                   </Link>
                 ))}
@@ -135,18 +136,18 @@ export default function Footer() {
             </div>
 
             {/* Support & Resources */}
-            <div>
-              <Heading size="4" className="mb-4 font-semibold">Support & Resources</Heading>
-              <Flex direction="column" gap="2">
+            <div className="text-center sm:text-left">
+              <Heading size={{ initial: "3", sm: "4" }} className="mb-3 sm:mb-4 font-semibold">Pagalba ir ištekliai</Heading>
+              <Flex direction="column" gap="1.5 sm:gap-2">
                 {[
-                  'Help Center',
-                  'Installation Guides',
-                  'Video Tutorials',
-                  'Expert Consultation',
-                  'Warranty & Returns',
-                  'Track Your Order'
+                  'Spąstų įrengimo gidas',
+                  'Gyvūnų identifikavimas',
+                  'Masalo rekomendacijos',
+                  'Saugos instrukcijos',
+                  'Garantija ir grąžinimai',
+                  'Sekti užsakymą'
                 ].map((item) => (
-                  <Link key={item} href="/support" className="text-white/80 hover:text-amber-300 transition-colors text-sm">
+                  <Link key={item} href="/support" className="text-white/80 hover:text-amber-300 transition-colors text-xs sm:text-sm">
                     {item}
                   </Link>
                 ))}
@@ -154,72 +155,86 @@ export default function Footer() {
             </div>
 
             {/* Contact & Newsletter */}
-            <div>
-              <Heading size="4" className="mb-4 font-semibold">Stay Connected</Heading>
+            <div className="text-center sm:text-left">
+              <Heading size={{ initial: "3", sm: "4" }} className="mb-3 sm:mb-4 font-semibold">Susisiekite</Heading>
               
               {/* Contact Info */}
-              <Flex direction="column" gap="3" className="mb-6">
-                <Flex align="center" gap="3">
-                  <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ 
+              <Flex direction="column" gap="2 sm:gap-3" className="mb-4 sm:mb-6">
+                <Flex align="center" gap="2 sm:gap-3" justify={{ initial: "center", sm: "start" }}>
+                  <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center" style={{ 
                     background: 'rgba(255, 255, 255, 0.1)',
                     backdropFilter: 'blur(10px)'
                   }}>
-                    <Phone className="w-4 h-4 text-amber-300" />
+                    <Phone className="w-3 h-3 sm:w-4 sm:h-4 text-amber-300" />
                   </div>
-                  <Text size="2" className="opacity-90">1-800-WILDCONTROL</Text>
+                  <Text size={{ initial: "1", sm: "2" }} className="opacity-90">+370 5 123 4567</Text>
                 </Flex>
                 
-                <Flex align="center" gap="3">
-                  <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ 
+                <Flex align="center" gap="2 sm:gap-3" justify={{ initial: "center", sm: "start" }}>
+                  <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center" style={{ 
                     background: 'rgba(255, 255, 255, 0.1)',
                     backdropFilter: 'blur(10px)'
                   }}>
-                    <Mail className="w-4 h-4 text-amber-300" />
+                    <Mail className="w-3 h-3 sm:w-4 sm:h-4 text-amber-300" />
                   </div>
-                  <Text size="2" className="opacity-90">support@wildcontrol.com</Text>
+                  <Text size={{ initial: "1", sm: "2" }} className="opacity-90 break-all sm:break-normal">info@gyvagaudziaispastai.lt</Text>
                 </Flex>
                 
-                <Flex align="start" gap="3">
-                  <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ 
+                <Flex align="start" gap="2 sm:gap-3" justify={{ initial: "center", sm: "start" }}>
+                  <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center" style={{ 
                     background: 'rgba(255, 255, 255, 0.1)',
                     backdropFilter: 'blur(10px)'
                   }}>
-                    <MapPin className="w-4 h-4 text-amber-300" />
+                    <MapPin className="w-3 h-3 sm:w-4 sm:h-4 text-amber-300" />
                   </div>
-                  <Text size="2" className="opacity-90 leading-relaxed">
-                    Professional Wildlife Control<br />
-                    Solutions Worldwide
+                  <Text size={{ initial: "1", sm: "2" }} className="opacity-90 leading-relaxed">
+                    Profesionalūs gyvūnų kontrolės<br />
+                    sprendimai Lietuvoje
                   </Text>
                 </Flex>
               </Flex>
 
               {/* Newsletter */}
               <div>
-                <Text size="3" weight="medium" className="block mb-3">Get Expert Tips</Text>
-                <Flex gap="0" className="overflow-hidden rounded-lg">
-                  <input
-                    type="email"
-                    placeholder="Enter your email"
-                    className="flex-1 px-3 py-2 text-sm border-0 focus:outline-none focus:ring-0"
+                <div className="mb-3 sm:mb-4">
+                  <h3 className="text-base sm:text-lg font-semibold text-white mb-1 sm:mb-2">
+                    Gaukite patarimus ir pasiūlymus
+                  </h3>
+                  <p className="text-xs sm:text-sm opacity-80 text-white">
+                    Ekspertų patarimai ir išskirtiniai pasiūlymai kas savaitę
+                  </p>
+                </div>
+                
+                <div className="flex flex-col gap-2 sm:gap-3">
+                  <div className="relative">
+                    <input
+                      type="email"
+                      placeholder="Įveskite savo el. pašto adresą"
+                      className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm rounded-lg border border-white/20 focus:outline-none focus:ring-2 focus:border-transparent transition-all placeholder:text-white/60"
+                      style={{ 
+                        background: 'rgba(255, 255, 255, 0.1)',
+                        backdropFilter: 'blur(10px)',
+                        color: brandColors.white,
+                        focusRingColor: brandColors.secondary
+                      }}
+                    />
+                  </div>
+                  
+                  <button 
+                    className="w-full py-2 sm:py-3 text-sm font-medium rounded-lg transition-all hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2"
                     style={{ 
-                      background: 'rgba(255, 255, 255, 0.15)',
-                      backdropFilter: 'blur(10px)',
+                      background: `linear-gradient(135deg, ${brandColors.secondary} 0%, ${brandColors.warning} 100%)`,
                       color: brandColors.white,
-                      placeholder: { color: 'rgba(255, 255, 255, 0.7)' }
-                    }}
-                  />
-                  <Button 
-                    size="2"
-                    className="font-medium"
-                    style={{ 
-                      background: brandColors.secondary,
-                      color: brandColors.white,
-                      borderRadius: '0'
+                      focusRingColor: brandColors.secondary
                     }}
                   >
-                    Subscribe
-                  </Button>
-                </Flex>
+                    Prenumeruoti nemokamus patarimus
+                  </button>
+                  
+                  <p className="text-xs text-white/60 text-center">
+                    Jokio šlamšto. Atsisakyti galima bet kada.
+                  </p>
+                </div>
               </div>
             </div>
           </Grid>
@@ -239,19 +254,15 @@ export default function Footer() {
           >
             <Flex align="center" gap="4">
               <Text size="2" className="opacity-80">
-                © 2024 WildControl. All rights reserved.
-              </Text>
-              <div className="hidden md:block w-1 h-1 rounded-full bg-white/30" />
-              <Text size="2" className="opacity-80">
-                Trusted wildlife solutions since 1940
+                © 2024 Gyvagaudziaispastai. Visos teisės saugomos.
               </Text>
             </Flex>
             
             <Flex align="center" gap="6">
               {[
-                { label: 'Privacy Policy', href: '/privacy' },
-                { label: 'Terms', href: '/terms' },
-                { label: 'Accessibility', href: '/accessibility' }
+                { label: 'Privatumo politika', href: '/privacy' },
+                { label: 'Sąlygos', href: '/terms' },
+                { label: 'Prieinamumas', href: '/accessibility' }
               ].map((item) => (
                 <Link 
                   key={item.label} 
