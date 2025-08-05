@@ -54,9 +54,9 @@ services:
       - REDIS_URL=redis://redis:6379
       - JWT_SECRET=supersecret-jwt-key-change-in-production
       - COOKIE_SECRET=supersecret-cookie-key-change-in-production
-      - STORE_CORS=http://localhost:3000,http://localhost:8000
+      - STORE_CORS=http://localhost:3000,http://storefront:3000,http://localhost:8000
       - ADMIN_CORS=http://localhost:9000,http://localhost:7001
-      - AUTH_CORS=http://localhost:9000,http://localhost:3000
+      - AUTH_CORS=http://localhost:9000,http://localhost:3000,http://storefront:3000
       - DISABLE_MEDUSA_ADMIN=false
       - MEDUSA_BACKEND_URL=http://localhost:9000
     volumes:
@@ -67,7 +67,13 @@ services:
       - "7001:7001"
     networks:
       - gyvagaudziaispastai-network
-    command: ["./start.sh"]
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
+    command: ["/server/start-dev.sh"]
 
   # Next.js Storefront
   storefront:
@@ -76,10 +82,13 @@ services:
       dockerfile: Dockerfile
     container_name: gyvagaudziaispastai-storefront
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
     environment:
       - NEXT_PUBLIC_MEDUSA_BACKEND_URL=http://localhost:9000
       - NEXT_PUBLIC_BASE_URL=http://localhost:3000
+      - MEDUSA_BACKEND_URL=http://backend:9000
+      - NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY=pk_ffe2341af0aa127aa05b4354cc290b002495e3b46c21e62721339d32af07c074
     volumes:
       - ./storefront:/app
       - /app/node_modules
