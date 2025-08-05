@@ -1,15 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
-import Medusa from "@medusajs/js-sdk"
 
 const MEDUSA_BACKEND_URL = process.env.MEDUSA_BACKEND_URL || "http://backend:9000"
 const MEDUSA_PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || ""
-
-const sdk = new Medusa({
-  baseUrl: MEDUSA_BACKEND_URL,
-  debug: process.env.NODE_ENV === "development",
-  publishableKey: MEDUSA_PUBLISHABLE_KEY,
-})
 
 export async function GET(request: NextRequest) {
   try {
@@ -25,20 +18,44 @@ export async function GET(request: NextRequest) {
 
     console.log("Fetching shipping options for cart:", cartId)
 
-    // Get shipping options for the cart
-    const response = await sdk.client.fetch<{
-      shipping_options: any[]
-    }>(`/store/shipping-options`, {
-      query: { cart_id: cartId },
+    // First, get cart details to debug what might be wrong
+    const cartResponse = await fetch(`${MEDUSA_BACKEND_URL}/store/carts/${cartId}?fields=*shipping_address,*region,*sales_channel`, {
       headers: {
-        "x-publishable-api-key": MEDUSA_PUBLISHABLE_KEY,
-      }
+        'Content-Type': 'application/json',
+        'x-publishable-api-key': MEDUSA_PUBLISHABLE_KEY,
+      },
+    })
+    
+    const cartData = await cartResponse.json()
+    console.log("Cart details for shipping:", {
+      id: cartData.cart?.id,
+      region: cartData.cart?.region?.name,
+      region_id: cartData.cart?.region_id,
+      sales_channel: cartData.cart?.sales_channel?.name,
+      sales_channel_id: cartData.cart?.sales_channel_id,
+      has_shipping_address: !!cartData.cart?.shipping_address,
+      country_code: cartData.cart?.shipping_address?.country_code
     })
 
-    console.log("Shipping options:", response.shipping_options?.length || 0)
+    // Get shipping options for the cart using direct API call
+    const response = await fetch(`${MEDUSA_BACKEND_URL}/store/shipping-options?cart_id=${cartId}`, {
+      headers: {
+        'Content-Type': 'application/json',
+        'x-publishable-api-key': MEDUSA_PUBLISHABLE_KEY,
+      },
+    })
+    
+    const data = await response.json()
+    
+    console.log("Shipping options response:", {
+      status: response.status,
+      options_count: data.shipping_options?.length || 0,
+      error: data.error || data.message,
+      full_response: data
+    })
 
     return NextResponse.json({ 
-      shipping_options: response.shipping_options || []
+      shipping_options: data.shipping_options || []
     })
   } catch (error) {
     console.error('Error fetching shipping options:', error)

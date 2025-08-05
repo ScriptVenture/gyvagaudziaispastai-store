@@ -5,7 +5,6 @@ import { Button, Text, Flex, Box, Heading, Separator } from "@radix-ui/themes"
 import { MapPin, Truck, CreditCard, AlertCircle } from "lucide-react"
 import { HttpTypes } from "@medusajs/types"
 import { useRouter } from "next/navigation"
-import { removeCartId } from "@/lib/data/cookies"
 
 interface OrderReviewProps {
   cart: HttpTypes.StoreCart
@@ -23,40 +22,10 @@ export default function OrderReview({ cart, checkoutData, onBack }: OrderReviewP
       setLoading(true)
       setError(null)
 
-      // Check if this is a Paysera payment
-      if (checkoutData.paymentMethod?.id === 'paysera' || checkoutData.paymentProvider?.id === 'paysera') {
-        // Handle Paysera payment
-        const orderId = `order_${Date.now()}`
-        const totalAmount = Math.round(total * 100) // Convert to cents
+      console.log('Placing order with payment method:', checkoutData.paymentMethod?.id)
+      console.log('Cart total:', total, 'Currency:', cart.region?.currency_code)
 
-        const payseraResponse = await fetch('/api/paysera/create', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            orderId,
-            amount: totalAmount,
-            currency: cart.region?.currency_code || 'EUR'
-          }),
-        })
-
-        const payseraData = await payseraResponse.json()
-
-        if (!payseraResponse.ok) {
-          throw new Error(payseraData.error || 'Failed to create Paysera payment')
-        }
-
-        if (payseraData.success && payseraData.paymentUrl) {
-          // Redirect to Paysera payment page
-          window.location.href = payseraData.paymentUrl
-          return
-        } else {
-          throw new Error('Failed to create Paysera payment')
-        }
-      }
-
-      // Handle regular Medusa payments
+      // Use the standard Medusa checkout completion flow
       const response = await fetch('/api/checkout/complete', {
         method: 'POST',
         headers: {
@@ -78,8 +47,10 @@ export default function OrderReview({ cart, checkoutData, onBack }: OrderReviewP
       }
 
       if (data.success && data.order) {
-        // Clear cart from client-side cookies
-        removeCartId()
+        // Order was completed successfully (e.g., manual payment)
+        console.log('Order completed successfully:', data.order.id)
+        
+        // Cart is cleared on server-side by the API
         
         // Dispatch cart update event
         window.dispatchEvent(new Event('cart-updated'))
@@ -87,8 +58,18 @@ export default function OrderReview({ cart, checkoutData, onBack }: OrderReviewP
         // Redirect to confirmation page
         router.push(`/order/${data.order.id}/confirmation`)
       } else if (data.redirect_url) {
-        // For payment gateway redirects
+        // Payment requires external redirect (e.g., Paysera)
+        console.log('Redirecting to payment gateway:', data.redirect_url)
         window.location.href = data.redirect_url
+      } else if (!data.success && data.cart) {
+        // Cart still needs payment - this means payment session was created but needs user action
+        const paymentSession = data.cart.payment_sessions?.[0]
+        if (paymentSession?.data?.payment_url) {
+          console.log('Redirecting to Paysera payment:', paymentSession.data.payment_url)
+          window.location.href = paymentSession.data.payment_url
+        } else {
+          setError(data.message || "Payment is required to complete your order.")
+        }
       } else {
         setError(data.error || "Failed to complete order. Please try again.")
       }

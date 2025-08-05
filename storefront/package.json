@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@medusajs/types": "^2.8.8",
     "@radix-ui/colors": "^3.0.0",
     "@radix-ui/themes": "^3.2.1",
     "class-variance-authority": "^0.7.1",

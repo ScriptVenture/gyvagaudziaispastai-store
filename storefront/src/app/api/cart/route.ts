@@ -1,15 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
-import Medusa from "@medusajs/js-sdk"
 
 const MEDUSA_BACKEND_URL = process.env.MEDUSA_BACKEND_URL || "http://backend:9000"
 const MEDUSA_PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || ""
-
-const sdk = new Medusa({
-  baseUrl: MEDUSA_BACKEND_URL,
-  debug: process.env.NODE_ENV === "development",
-  publishableKey: MEDUSA_PUBLISHABLE_KEY,
-})
 
 export async function GET(request: NextRequest) {
   try {
@@ -22,9 +15,19 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ cart: null })
     }
 
-    const { cart } = await sdk.store.cart.retrieve(cartId, {
-      fields: "*items,*items.product,*items.variant,*items.thumbnail,+items.total"
+    const response = await fetch(`${MEDUSA_BACKEND_URL}/store/carts/${cartId}?fields=*items,*items.product,*items.variant,*items.thumbnail,+items.total,*region,*region.payment_providers`, {
+      headers: {
+        'Content-Type': 'application/json',
+        'x-publishable-api-key': MEDUSA_PUBLISHABLE_KEY,
+      },
     })
+    
+    if (!response.ok) {
+      throw new Error(`Failed to fetch cart: ${response.status}`)
+    }
+    
+    const data = await response.json()
+    const cart = data.cart
     
     console.log("Cart API - Retrieved cart with", cart.items.length, "items")
     

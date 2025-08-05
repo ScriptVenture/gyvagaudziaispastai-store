@@ -1,6 +1,5 @@
 import { useState } from "react"
 import { useCart } from "@/contexts/cart-context"
-import { setCartId } from "@/lib/data/cookies"
 
 export function useCartActions() {
   const { refreshCart } = useCart()
@@ -30,10 +29,7 @@ export function useCartActions() {
         throw new Error(data.error || 'Failed to add to cart')
       }
 
-      // Set cart ID in cookie if it's a new cart
-      if (data.cartId) {
-        setCartId(data.cartId)
-      }
+      // Cart ID is already set by the server-side API
 
       triggerCartUpdate()
       await refreshCart()

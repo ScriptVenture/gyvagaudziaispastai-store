@@ -1,15 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
-import Medusa from "@medusajs/js-sdk"
 
 const MEDUSA_BACKEND_URL = process.env.MEDUSA_BACKEND_URL || "http://backend:9000"
 const MEDUSA_PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || ""
-
-const sdk = new Medusa({
-  baseUrl: MEDUSA_BACKEND_URL,
-  debug: process.env.NODE_ENV === "development",
-  publishableKey: MEDUSA_PUBLISHABLE_KEY,
-})
 
 export async function POST(request: NextRequest) {
   try {
@@ -23,8 +16,16 @@ export async function POST(request: NextRequest) {
     if (!cartId) {
       console.log("Creating new cart...")
       
-      // Get the Europe region - following official MedusaJS pattern
-      const { regions } = await sdk.store.region.list()
+      // Get regions using direct API call
+      const regionsResponse = await fetch(`${MEDUSA_BACKEND_URL}/store/regions`, {
+        headers: {
+          'Content-Type': 'application/json',
+          'x-publishable-api-key': MEDUSA_PUBLISHABLE_KEY,
+        },
+      })
+      
+      const regionsData = await regionsResponse.json()
+      const regions = regionsData.regions
       console.log("Available regions:", regions.map(r => ({ id: r.id, name: r.name })))
       
       const europeRegion = regions.find(r => r.name === "Europe")
@@ -36,11 +37,20 @@ export async function POST(request: NextRequest) {
       
       console.log("Using region:", europeRegion.id, europeRegion.name)
       
-      // Create cart with region_id only (following official starter pattern)
-      const { cart } = await sdk.store.cart.create({
-        region_id: europeRegion.id
+      // Create cart with region_id using direct API call
+      const createCartResponse = await fetch(`${MEDUSA_BACKEND_URL}/store/carts`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-publishable-api-key': MEDUSA_PUBLISHABLE_KEY,
+        },
+        body: JSON.stringify({
+          region_id: europeRegion.id
+        })
       })
-      cartId = cart.id
+      
+      const createCartData = await createCartResponse.json()
+      cartId = createCartData.cart.id
       
       // Set cookie with proper options
       cookieStore.set('medusa_cart_id', cartId, {
@@ -52,17 +62,30 @@ export async function POST(request: NextRequest) {
       console.log("New cart created with ID:", cartId)
     }
 
-    // Add item to cart
+    // Add item to cart using direct API call
     console.log("Adding item to cart:", { cartId, variantId, quantity })
-    await sdk.store.cart.createLineItem(cartId, {
-      variant_id: variantId,
-      quantity,
+    await fetch(`${MEDUSA_BACKEND_URL}/store/carts/${cartId}/line-items`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-publishable-api-key': MEDUSA_PUBLISHABLE_KEY,
+      },
+      body: JSON.stringify({
+        variant_id: variantId,
+        quantity,
+      })
     })
 
-    // Retrieve updated cart
-    const { cart } = await sdk.store.cart.retrieve(cartId, {
-      fields: "*items,*items.product,*items.variant,*items.thumbnail"
+    // Retrieve updated cart using direct API call
+    const cartResponse = await fetch(`${MEDUSA_BACKEND_URL}/store/carts/${cartId}?fields=*items,*items.product,*items.variant,*items.thumbnail`, {
+      headers: {
+        'Content-Type': 'application/json',
+        'x-publishable-api-key': MEDUSA_PUBLISHABLE_KEY,
+      },
     })
+    
+    const cartData = await cartResponse.json()
+    const cart = cartData.cart
 
     console.log("Cart updated successfully, items:", cart.items.length)
 

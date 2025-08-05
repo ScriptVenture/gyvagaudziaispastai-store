@@ -6,6 +6,7 @@ import "../styles/colors.css";
 import { Theme } from "@radix-ui/themes";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
+import { Providers } from "@/components/providers/Providers";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -38,11 +39,13 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}
       >
         <Theme accentColor="green" grayColor="gray" radius="large" scaling="100%" appearance="light">
-          <Header />
-          <main className="flex-1">
-            {children}
-          </main>
-          <Footer />
+          <Providers>
+            <Header />
+            <main className="flex-1">
+              {children}
+            </main>
+            <Footer />
+          </Providers>
         </Theme>
       </body>
     </html>

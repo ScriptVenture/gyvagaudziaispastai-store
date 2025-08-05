@@ -1,15 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
-import Medusa from "@medusajs/js-sdk"
 
 const MEDUSA_BACKEND_URL = process.env.MEDUSA_BACKEND_URL || "http://backend:9000"
 const MEDUSA_PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || ""
-
-const sdk = new Medusa({
-  baseUrl: MEDUSA_BACKEND_URL,
-  debug: process.env.NODE_ENV === "development",
-  publishableKey: MEDUSA_PUBLISHABLE_KEY,
-})
 
 export async function POST(request: NextRequest) {
   try {
@@ -24,11 +17,26 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    await sdk.store.cart.updateLineItem(cartId, lineId, { quantity })
-
-    const { cart } = await sdk.store.cart.retrieve(cartId, {
-      fields: "*items,*items.product,*items.variant,*items.thumbnail"
+    // Update line item using direct API call
+    await fetch(`${MEDUSA_BACKEND_URL}/store/carts/${cartId}/line-items/${lineId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-publishable-api-key': MEDUSA_PUBLISHABLE_KEY,
+      },
+      body: JSON.stringify({ quantity })
     })
+
+    // Retrieve updated cart using direct API call
+    const cartResponse = await fetch(`${MEDUSA_BACKEND_URL}/store/carts/${cartId}?fields=*items,*items.product,*items.variant,*items.thumbnail`, {
+      headers: {
+        'Content-Type': 'application/json',
+        'x-publishable-api-key': MEDUSA_PUBLISHABLE_KEY,
+      },
+    })
+    
+    const cartData = await cartResponse.json()
+    const cart = cartData.cart
 
     // Fix image URLs for Docker environment
     if (cart.items) {

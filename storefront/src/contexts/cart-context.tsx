@@ -2,7 +2,6 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react"
 import { HttpTypes } from "@medusajs/types"
-import { getCartId } from "@/lib/data/cookies"
 
 interface CartContextType {
   cart: HttpTypes.StoreCart | null
@@ -13,6 +12,11 @@ interface CartContextType {
 const CartContext = createContext<CartContextType | undefined>(undefined)
 
 async function fetchCart() {
+  // Only fetch on client-side
+  if (typeof window === 'undefined') {
+    return null
+  }
+  
   try {
     const response = await fetch('/api/cart')
     if (!response.ok) return null
@@ -26,9 +30,20 @@ async function fetchCart() {
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [cart, setCart] = useState<HttpTypes.StoreCart | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(false)
+  const [mounted, setMounted] = useState(false)
+  
+  // Handle client-side mounting
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const refreshCart = useCallback(async () => {
+    // Only run on client-side after mounting
+    if (!mounted) {
+      return
+    }
+    
     try {
       setIsLoading(true)
       const cartData = await fetchCart()
@@ -38,20 +53,24 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setIsLoading(false)
     }
-  }, [])
+  }, [mounted])
 
   useEffect(() => {
-    refreshCart()
-  }, [refreshCart])
+    if (mounted) {
+      refreshCart()
+    }
+  }, [refreshCart, mounted])
 
-  // Listen for cart updates
+  // Listen for cart updates (client-side only)
   useEffect(() => {
     const handleCartUpdate = () => {
       refreshCart()
     }
 
-    window.addEventListener('cart-updated', handleCartUpdate)
-    return () => window.removeEventListener('cart-updated', handleCartUpdate)
+    if (typeof window !== 'undefined') {
+      window.addEventListener('cart-updated', handleCartUpdate)
+      return () => window.removeEventListener('cart-updated', handleCartUpdate)
+    }
   }, [refreshCart])
 
   return (

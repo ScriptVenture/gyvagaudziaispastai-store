@@ -34,21 +34,13 @@ export default function PaymentForm({
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    // Get payment providers from cart region and add Paysera
+    // Get payment providers from cart region
     const providers = cart?.region?.payment_providers || []
+    console.log('Available payment providers:', providers)
     
-    // Add Paysera as an additional option
-    const allProviders = [
-      ...providers,
-      {
-        id: "paysera",
-        name: "Paysera Payment"
-      }
-    ]
-    
-    setPaymentProviders(allProviders)
-    if (allProviders.length > 0 && !selected) {
-      setSelected(allProviders[0].id)
+    setPaymentProviders(providers)
+    if (providers.length > 0 && !selected) {
+      setSelected(providers[0].id)
     }
   }, [cart, selected])
 
@@ -80,7 +72,16 @@ export default function PaymentForm({
         throw new Error(data.error || 'Failed to initialize payment session')
       }
 
-      onUpdate({ paymentProvider: provider })
+      console.log('Payment session initialized successfully')
+      
+      onUpdate({ 
+        paymentProvider: provider,
+        paymentMethod: {
+          id: provider.id,
+          name: getProviderName(provider.id),
+          description: getProviderDescription(provider.id)
+        }
+      })
       onNext()
     } catch (err: any) {
       console.error('Error initializing payment:', err)
@@ -100,8 +101,10 @@ export default function PaymentForm({
         return "Paysera Payment"
       case "pp_system_default":
         return "Manual Payment"
+      case "pp_manual_manual":
+        return "Manual Payment"
       default:
-        return providerId.replace("pp_", "").replace("_", " ")
+        return (providerId?.replace("pp_", "")?.replace("_", " ") || providerId)?.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
     }
   }
 
@@ -115,8 +118,10 @@ export default function PaymentForm({
         return "Pay with Paysera - Bank transfer, cards, and e-wallets"
       case "pp_system_default":
         return "Manual payment processing"
+      case "pp_manual_manual":
+        return "Manual payment processing - Order will be processed manually"
       default:
-        return "Payment provider"
+        return "Secure payment processing"
     }
   }
 

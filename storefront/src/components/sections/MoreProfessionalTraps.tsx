@@ -1,8 +1,9 @@
 "use client"
 
 import { useState, useEffect } from "react";
-import { Star, Shield } from "lucide-react";
+import { Star, Shield, ShoppingCart } from "lucide-react";
 import { brandColors } from "@/utils/colors";
+import { useCart } from "@/contexts/cart-context";
 
 interface Product {
   id: string;
@@ -63,6 +64,8 @@ async function fetchMoreProfessionalProducts() {
 export default function MoreProfessionalTraps() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [addingToCart, setAddingToCart] = useState<string | null>(null);
+  const { refreshCart } = useCart();
 
   useEffect(() => {
     async function loadProducts() {
@@ -72,6 +75,44 @@ export default function MoreProfessionalTraps() {
     }
     loadProducts();
   }, []);
+
+  const handleAddToCart = async (product: Product) => {
+    if (!product.variants || product.variants.length === 0) {
+      alert('Šis produktas neturi variantų');
+      return;
+    }
+
+    setAddingToCart(product.id);
+    
+    try {
+      const mainVariant = product.variants[0];
+      const response = await fetch('/api/cart/add', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          variantId: mainVariant.id,
+          quantity: 1
+        }),
+      });
+
+      const data = await response.json();
+      
+      if (response.ok) {
+        console.log('Product added to cart successfully');
+        await refreshCart();
+        window.dispatchEvent(new Event('cart-updated'));
+      } else {
+        throw new Error(data.error || 'Failed to add to cart');
+      }
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      alert('Nepavyko pridėti į krepšelį. Bandykite dar kartą.');
+    } finally {
+      setAddingToCart(null);
+    }
+  };
 
   if (loading) {
     return (
@@ -196,12 +237,24 @@ export default function MoreProfessionalTraps() {
                       
                       {/* CTA Button */}
                       <button 
-                        className="w-full py-2 text-sm font-medium text-white rounded transition-colors hover:opacity-90"
+                        className="w-full py-2 text-sm font-medium text-white rounded transition-colors hover:opacity-90 disabled:opacity-50 flex items-center justify-center gap-2"
                         style={{ 
                           backgroundColor: brandColors.secondary
                         }}
+                        onClick={() => handleAddToCart(product)}
+                        disabled={addingToCart === product.id || !mainVariant}
                       >
-                        Pridėti į krepšelį
+                        {addingToCart === product.id ? (
+                          <>
+                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                            Pridedama...
+                          </>
+                        ) : (
+                          <>
+                            <ShoppingCart className="w-4 h-4" />
+                            Pridėti į krepšelį
+                          </>
+                        )}
                       </button>
                       
                       {/* Free Shipping */}

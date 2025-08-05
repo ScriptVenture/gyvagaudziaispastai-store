@@ -6,11 +6,16 @@ import { ShoppingCart, Search, Menu, X, User, Heart, Shield, Truck, Phone, Box }
 import { Button, TextField, DropdownMenu, Flex, Text, Separator } from '@radix-ui/themes'
 import { brandColors, componentStyles } from '@/utils/colors'
 import TrapLogo from '@/components/ui/TrapLogo'
+import { useCart } from '@/contexts/cart-context'
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const { cart, isLoading } = useCart()
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen)
+  
+  // Calculate total items in cart
+  const cartItemCount = cart?.items?.reduce((total, item) => total + item.quantity, 0) || 0
 
   return (
     <header className="bg-white border-b border-gray-100 sticky top-0 z-50 backdrop-blur-sm bg-white/95">
@@ -127,19 +132,24 @@ export default function Header() {
               </DropdownMenu.Root>
 
               {/* Shopping Cart */}
-              <div className="relative p-2 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer group">
+              <Link href="/cart" className="relative p-2 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer group">
                 <ShoppingCart className="w-5 h-5 group-hover:text-gray-700" style={{ color: brandColors.textTertiary }} />
-                <div 
-                  className="absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-xs font-semibold"
-                  style={{ 
-                    backgroundColor: brandColors.secondary,
-                    color: brandColors.white,
-                    fontSize: '10px'
-                  }}
-                >
-                  0
-                </div>
-              </div>
+                {cartItemCount > 0 && (
+                  <div 
+                    className="absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-xs font-semibold animate-pulse"
+                    style={{ 
+                      backgroundColor: brandColors.secondary,
+                      color: brandColors.white,
+                      fontSize: '10px'
+                    }}
+                  >
+                    {cartItemCount > 99 ? '99+' : cartItemCount}
+                  </div>
+                )}
+                {isLoading && cartItemCount === 0 && (
+                  <div className="absolute -top-1 -right-1 w-3 h-3 bg-gray-300 rounded-full animate-pulse"></div>
+                )}
+              </Link>
 
               {/* Professional CTA */}
               <Button 
