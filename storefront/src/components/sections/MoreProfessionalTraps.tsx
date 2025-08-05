@@ -26,26 +26,36 @@ interface Product {
 
 async function fetchMoreProfessionalProducts() {
   try {
-    console.log('Fetching more professional products from API...');
+    if (typeof window !== 'undefined') {
+      console.log('Fetching more professional products from API...');
+    }
     const response = await fetch('/api/products', {
       cache: 'no-store',
     });
     
-    console.log('API Response status:', response.status);
+    if (typeof window !== 'undefined') {
+      console.log('API Response status:', response.status);
+    }
     
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
-      console.error('API Error:', errorData);
+      if (typeof window !== 'undefined') {
+        console.error('API Error:', errorData);
+      }
       throw new Error(`Failed to fetch: ${response.status} - ${errorData.error || 'Unknown error'}`);
     }
     
     const data = await response.json();
-    console.log('Fetched professional products:', data.products?.length || 0, 'items');
+    if (typeof window !== 'undefined') {
+      console.log('Fetched professional products:', data.products?.length || 0, 'items');
+    }
     
     // Skip first 4 products (those are for bestsellers) and take next 4
     return data.products?.slice(4, 8) || [];
   } catch (error) {
-    console.error('Error fetching professional products:', error);
+    if (typeof window !== 'undefined') {
+      console.error('Error fetching professional products:', error);
+    }
     return [];
   }
 }

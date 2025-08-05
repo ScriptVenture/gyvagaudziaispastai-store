@@ -1,0 +1,9 @@
+{
+  "name": "paysera-payment-provider",
+  "version": "1.0.0",
+  "description": "Paysera payment provider for Medusa v2",
+  "main": "index.ts",
+  "dependencies": {
+    "@medusajs/framework": "^2.8.8"
+  }
+}

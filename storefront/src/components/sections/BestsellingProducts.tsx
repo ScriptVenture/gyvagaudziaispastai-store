@@ -26,24 +26,34 @@ interface Product {
 
 async function fetchProducts() {
   try {
-    console.log('Fetching products from API...');
+    if (typeof window !== 'undefined') {
+      console.log('Fetching products from API...');
+    }
     const response = await fetch('/api/products', {
       cache: 'no-store', // Ensure fresh data
     });
     
-    console.log('API Response status:', response.status);
+    if (typeof window !== 'undefined') {
+      console.log('API Response status:', response.status);
+    }
     
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
-      console.error('API Error:', errorData);
+      if (typeof window !== 'undefined') {
+        console.error('API Error:', errorData);
+      }
       throw new Error(`Failed to fetch: ${response.status} - ${errorData.error || 'Unknown error'}`);
     }
     
     const data = await response.json();
-    console.log('Fetched products:', data.products?.length || 0, 'items');
+    if (typeof window !== 'undefined') {
+      console.log('Fetched products:', data.products?.length || 0, 'items');
+    }
     return data.products || [];
   } catch (error) {
-    console.error('Error fetching products:', error);
+    if (typeof window !== 'undefined') {
+      console.error('Error fetching products:', error);
+    }
     return [];
   }
 }
