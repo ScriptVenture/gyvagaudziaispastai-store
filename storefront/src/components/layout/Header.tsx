@@ -85,20 +85,30 @@ export default function Header() {
           <div className="flex items-center gap-1 sm:gap-2 md:gap-3">
             {/* Search */}
             <div className="hidden lg:block relative">
-              <TextField.Root 
-                placeholder="Ieškoti gyvūnų spąstų..." 
-                size="3" 
-                className="w-48 lg:w-64 xl:w-80"
-                style={{ 
-                  borderRadius: '12px',
-                  border: `1px solid ${brandColors.gray200}`,
-                  backgroundColor: brandColors.backgroundSecondary 
-                }}
-              >
-                <TextField.Slot>
-                  <Search className="w-4 h-4" style={{ color: brandColors.textTertiary }} />
-                </TextField.Slot>
-              </TextField.Root>
+              <form onSubmit={(e) => {
+                e.preventDefault()
+                const formData = new FormData(e.currentTarget)
+                const searchQuery = formData.get('search') as string
+                if (searchQuery.trim()) {
+                  window.location.href = `/search?q=${encodeURIComponent(searchQuery.trim())}`
+                }
+              }}>
+                <TextField.Root 
+                  name="search"
+                  placeholder="Ieškoti gyvūnų spąstų..." 
+                  size="3" 
+                  className="w-48 lg:w-64 xl:w-80"
+                  style={{ 
+                    borderRadius: '12px',
+                    border: `1px solid ${brandColors.gray200}`,
+                    backgroundColor: brandColors.backgroundSecondary 
+                  }}
+                >
+                  <TextField.Slot>
+                    <Search className="w-4 h-4" style={{ color: brandColors.textTertiary }} />
+                  </TextField.Slot>
+                </TextField.Root>
+              </form>
             </div>
 
             {/* Professional action buttons */}
@@ -111,22 +121,30 @@ export default function Header() {
                   </div>
                 </DropdownMenu.Trigger>
                 <DropdownMenu.Content align="end" className="w-48">
-                  <DropdownMenu.Item className="font-medium">
-                    <User className="w-4 h-4 mr-2" />
-                    Prisijungti
+                  <DropdownMenu.Item className="font-medium" asChild>
+                    <Link href="/login">
+                      <User className="w-4 h-4 mr-2" />
+                      Prisijungti
+                    </Link>
                   </DropdownMenu.Item>
-                  <DropdownMenu.Item>
-                    <div className="w-4 h-4 mr-2" />
-                    Sukurti paskyrą
+                  <DropdownMenu.Item asChild>
+                    <Link href="/register">
+                      <div className="w-4 h-4 mr-2" />
+                      Sukurti paskyrą
+                    </Link>
                   </DropdownMenu.Item>
                   <DropdownMenu.Separator />
-                  <DropdownMenu.Item>
-                    <div className="w-4 h-4 mr-2" />
-                    Mano užsakymai
+                  <DropdownMenu.Item asChild>
+                    <Link href="/account/orders">
+                      <div className="w-4 h-4 mr-2" />
+                      Mano užsakymai
+                    </Link>
                   </DropdownMenu.Item>
-                  <DropdownMenu.Item>
-                    <Heart className="w-4 h-4 mr-2" />
-                    Pageidavimų sąrašas
+                  <DropdownMenu.Item asChild>
+                    <Link href="/account/wishlist">
+                      <Heart className="w-4 h-4 mr-2" />
+                      Pageidavimų sąrašas
+                    </Link>
                   </DropdownMenu.Item>
                 </DropdownMenu.Content>
               </DropdownMenu.Root>
@@ -152,21 +170,23 @@ export default function Header() {
               </Link>
 
               {/* Professional CTA */}
-              <Button 
-                size="3"
-                className="hidden xl:flex items-center gap-2 font-medium px-4 py-2 ml-2"
-                style={{ 
-                  background: `linear-gradient(135deg, ${brandColors.primary} 0%, ${brandColors.primaryHover} 100%)`,
-                  color: brandColors.white,
-                  borderRadius: '8px',
-                  boxShadow: '0 2px 8px rgba(15, 76, 58, 0.15)',
-                  border: 'none'
-                }}
-              >
-                <Phone className="w-4 h-4" />
-                <span className="hidden 2xl:inline">Gauti ekspertų pagalbą</span>
-                <span className="xl:inline 2xl:hidden">Pagalba</span>
-              </Button>
+              <Link href="/support">
+                <Button 
+                  size="3"
+                  className="hidden xl:flex items-center gap-2 font-medium px-4 py-2 ml-2"
+                  style={{ 
+                    background: `linear-gradient(135deg, ${brandColors.primary} 0%, ${brandColors.primaryHover} 100%)`,
+                    color: brandColors.white,
+                    borderRadius: '8px',
+                    boxShadow: '0 2px 8px rgba(15, 76, 58, 0.15)',
+                    border: 'none'
+                  }}
+                >
+                  <Phone className="w-4 h-4" />
+                  <span className="hidden 2xl:inline">Gauti ekspertų pagalbą</span>
+                  <span className="xl:inline 2xl:hidden">Pagalba</span>
+                </Button>
+              </Link>
             </div>
           </div>
 
@@ -200,29 +220,41 @@ export default function Header() {
               </Link>
               <div className="h-px my-3 bg-gray-200"></div>
               <div className="lg:hidden mb-3">
-                <div className="relative">
-                  <input 
-                    type="text"
-                    placeholder="Ieškoti gyvūnų spąstų..."
-                    className="w-full p-3 pl-10 rounded-lg border text-sm"
-                    style={{ 
-                      borderColor: brandColors.gray200,
-                      backgroundColor: brandColors.backgroundSecondary 
-                    }}
-                  />
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4" style={{ color: brandColors.textTertiary }} />
-                </div>
+                <form onSubmit={(e) => {
+                  e.preventDefault()
+                  const formData = new FormData(e.currentTarget)
+                  const searchQuery = formData.get('search') as string
+                  if (searchQuery.trim()) {
+                    window.location.href = `/search?q=${encodeURIComponent(searchQuery.trim())}`
+                  }
+                }}>
+                  <div className="relative">
+                    <input 
+                      type="text"
+                      name="search"
+                      placeholder="Ieškoti gyvūnų spąstų..."
+                      className="w-full p-3 pl-10 rounded-lg border text-sm"
+                      style={{ 
+                        borderColor: brandColors.gray200,
+                        backgroundColor: brandColors.backgroundSecondary 
+                      }}
+                    />
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4" style={{ color: brandColors.textTertiary }} />
+                  </div>
+                </form>
               </div>
-              <button 
-                className="w-full p-3 font-medium rounded-lg text-white flex items-center justify-center gap-2 transition-all"
-                style={{ 
-                  background: componentStyles.gradients.primary,
-                  borderRadius: '12px'
-                }}
-              >
-                <Phone className="w-4 h-4" />
-                Gauti ekspertų pagalbą
-              </button>
+              <Link href="/support" className="w-full">
+                <button 
+                  className="w-full p-3 font-medium rounded-lg text-white flex items-center justify-center gap-2 transition-all"
+                  style={{ 
+                    background: componentStyles.gradients.primary,
+                    borderRadius: '12px'
+                  }}
+                >
+                  <Phone className="w-4 h-4" />
+                  Gauti ekspertų pagalbą
+                </button>
+              </Link>
             </div>
           </div>
         )}

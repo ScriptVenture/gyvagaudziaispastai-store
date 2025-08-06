@@ -78,19 +78,23 @@ export default function Home() {
 
               {/* CTA Buttons */}
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                <button 
-                  className="px-8 py-4 text-lg font-semibold rounded-xl bg-gradient-to-r from-green-600 via-green-500 to-green-600 text-white transition-all duration-300 hover:transform hover:scale-105 hover:shadow-2xl hover:from-green-700 hover:via-green-600 hover:to-green-700 focus:outline-none focus:ring-4 focus:ring-green-500/40 shadow-xl border border-green-400/20"
-                  style={{ boxShadow: '0 8px 32px rgba(34, 197, 94, 0.3)' }}
-                >
-                  🛒 Peržiūrėti spąstus
-                </button>
+                <Link href="/traps">
+                  <button 
+                    className="px-8 py-4 text-lg font-semibold rounded-xl bg-gradient-to-r from-green-600 via-green-500 to-green-600 text-white transition-all duration-300 hover:transform hover:scale-105 hover:shadow-2xl hover:from-green-700 hover:via-green-600 hover:to-green-700 focus:outline-none focus:ring-4 focus:ring-green-500/40 shadow-xl border border-green-400/20"
+                    style={{ boxShadow: '0 8px 32px rgba(34, 197, 94, 0.3)' }}
+                  >
+                    🛒 Peržiūrėti spąstus
+                  </button>
+                </Link>
                 
-                <button 
-                  className="px-8 py-4 text-lg font-semibold rounded-xl border-2 border-green-600/30 text-green-700 bg-white/95 backdrop-blur-sm hover:bg-green-50 hover:border-green-600/60 hover:shadow-xl transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-green-500/30 shadow-lg"
-                  style={{ boxShadow: '0 4px 16px rgba(34, 197, 94, 0.1)' }}
-                >
-                  📋 Montavimo gidai
-                </button>
+                <Link href="/guide">
+                  <button 
+                    className="px-8 py-4 text-lg font-semibold rounded-xl border-2 border-green-600/30 text-green-700 bg-white/95 backdrop-blur-sm hover:bg-green-50 hover:border-green-600/60 hover:shadow-xl transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-green-500/30 shadow-lg"
+                    style={{ boxShadow: '0 4px 16px rgba(34, 197, 94, 0.1)' }}
+                  >
+                    📋 Montavimo gidai
+                  </button>
+                </Link>
               </div>
 
               {/* Trust Stats */}
@@ -293,28 +297,28 @@ export default function Home() {
                   icon: Squirrel,
                   title: "Maži gyvūnai",
                   description: "Gyvūnų spąstai voverėms, burundukami, žiurkėms ir kitiems smulkiems gyvūnams",
-                  href: "/traps/small",
+                  href: "/size",
                   color: brandColors.primary
                 },
                 {
                   icon: Cat,
                   title: "Vidutiniai gyvūnai",
                   description: "Humaniški spąstai katėms, triušiams, skunksams ir vidutinio dydžio gyvūnams",
-                  href: "/traps/medium",
+                  href: "/size",
                   color: brandColors.secondary
                 },
                 {
                   icon: Search,
                   title: "Dideli gyvūnai",
                   description: "Stiprūs spąstai meškėnams, opossumams ir dideliems gyvūnams",
-                  href: "/traps/large",
+                  href: "/size",
                   color: brandColors.accent
                 },
                 {
                   icon: Heart,
                   title: "Humaniški sprendimai",
                   description: "Visi mūsų spąstai užtikrina saugų pagavimą ir lengvą gyvūno paleidimą",
-                  href: "/humane-traps",
+                  href: "/traps",
                   color: brandColors.success
                 }
               ].map((item, index) => (

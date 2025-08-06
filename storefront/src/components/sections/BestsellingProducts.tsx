@@ -1,9 +1,11 @@
 "use client"
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import { Star, Shield, ShoppingCart } from "lucide-react";
 import { brandColors } from "@/utils/colors";
 import { useCart } from "@/contexts/cart-context";
+import { getOptimizedImageUrl } from "@/utils/image";
 
 interface Product {
   id: string;
@@ -207,11 +209,12 @@ export default function BestsellingProducts() {
                     </div>
                     
                     {/* Product Image */}
-                    <div className="relative overflow-hidden bg-gray-50">
-                      <img 
-                        src={product.thumbnail || "/imagen5.jpg"} 
+                    <div className="relative overflow-hidden bg-gray-50 h-48">
+                      <Image 
+                        src={getOptimizedImageUrl(product.thumbnail) || "/imagen5.jpg"} 
                         alt={product.title}
-                        className="w-full h-48 object-cover group-hover:scale-102 transition-transform duration-200"
+                        fill
+                        className="object-cover group-hover:scale-102 transition-transform duration-200"
                       />
                     </div>
                     

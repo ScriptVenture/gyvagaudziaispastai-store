@@ -58,15 +58,31 @@ export async function POST(request: NextRequest) {
       })
     })
     
-    const paymentSessionData = await paymentSessionResponse.json()
-    
     if (!paymentSessionResponse.ok) {
-      console.error("Failed to create payment session:", paymentSessionData)
+      console.error("Response status:", paymentSessionResponse.status)
+      console.error("Response headers:", Object.fromEntries(paymentSessionResponse.headers))
+      
+      let paymentSessionData
+      try {
+        paymentSessionData = await paymentSessionResponse.json()
+        console.error("Failed to create payment session:", paymentSessionData)
+      } catch (e) {
+        const errorText = await paymentSessionResponse.text()
+        console.error("Raw error response (not JSON):", errorText)
+        paymentSessionData = { error: errorText }
+      }
+      
       return NextResponse.json(
-        { error: 'Failed to create payment session', details: paymentSessionData },
+        { 
+          error: 'Failed to create payment session', 
+          details: paymentSessionData,
+          status: paymentSessionResponse.status
+        },
         { status: 500 }
       )
     }
+
+    const paymentSessionData = await paymentSessionResponse.json()
 
     console.log("✅ Payment session created successfully")
 
