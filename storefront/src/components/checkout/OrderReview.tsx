@@ -85,8 +85,14 @@ export default function OrderReview({ cart, checkoutData, onBack }: OrderReviewP
     return acc + (item.unit_price || 0) * item.quantity
   }, 0)
 
-  const shippingAmount = checkoutData.shippingMethod?.amount || 0
-  const total = subtotal + shippingAmount / 100
+  // Handle different shipping method data structures
+  const shippingAmount = checkoutData.shippingMethod?.data?.amount || checkoutData.shippingMethod?.amount || 0
+  const total = subtotal + (shippingAmount / 100)
+
+  // Debug: Log shipping method structure
+  console.log('OrderReview - checkoutData.shippingMethod:', checkoutData.shippingMethod)
+  console.log('OrderReview - shippingAmount:', shippingAmount)
+  console.log('OrderReview - total:', total)
 
   return (
     <div>
@@ -133,7 +139,7 @@ export default function OrderReview({ cart, checkoutData, onBack }: OrderReviewP
             {checkoutData.shippingMethod?.description}
           </Text>
           <Text size="2" weight="medium">
-            €{(checkoutData.shippingMethod?.amount / 100).toFixed(2)}
+            €{(shippingAmount / 100).toFixed(2)}
           </Text>
         </Box>
       </Box>

@@ -46,14 +46,24 @@ class PayseraPaymentService extends AbstractPaymentProvider<PayseraConfig> {
         orderId: paymentId,
         amount: Math.round(Number(input.amount)), // Paysera expects cents
         currency: input.currency_code.toUpperCase(),
-        acceptUrl: `${process.env.FRONTEND_URL}/order/confirmation`,
-        cancelUrl: `${process.env.FRONTEND_URL}/checkout`,
-        callbackUrl: `${process.env.MEDUSA_BACKEND_URL}/paysera/callback`,
+        // Try common Paysera-friendly URLs that might already be whitelisted
+        acceptUrl: `${process.env.FRONTEND_URL}/success`,
+        cancelUrl: `${process.env.FRONTEND_URL}/cancel`,
+        callbackUrl: `${process.env.MEDUSA_BACKEND_URL}/api/paysera/callback`,
         test: this.config.test_mode ? 1 : 0
       };
 
       const encodedData = this.encodePaymentData(paymentData);
       const signature = this.generateSignature(encodedData);
+      
+      console.log('Paysera payment creation debug:', {
+        project_id: this.config.project_id,
+        amount: paymentData.amount,
+        currency: paymentData.currency,
+        test_mode: this.config.test_mode,
+        encoded_data: encodedData,
+        signature: signature
+      });
       
       const paymentUrl = `${this.config.base_url || "https://www.paysera.com/pay"}/?data=${encodedData}&sign=${signature}`;
 
@@ -178,7 +188,13 @@ class PayseraPaymentService extends AbstractPaymentProvider<PayseraConfig> {
       version: "1.6"
     };
 
-    const encoded = Buffer.from(JSON.stringify(params)).toString('base64');
+    // Convert to query string format
+    const queryString = Object.entries(params)
+      .map(([key, value]) => `${key}=${encodeURIComponent(String(value))}`)
+      .join('&');
+    
+    // Base64 encode with URL-safe characters
+    const encoded = Buffer.from(queryString).toString('base64');
     return encoded.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
   }
 
@@ -190,20 +206,31 @@ class PayseraPaymentService extends AbstractPaymentProvider<PayseraConfig> {
   }
 
   public validateCallback(callbackData: PayseraCallbackData): boolean {
-    const { key, ...params } = callbackData;
-    
-    // Build the string for signature verification
-    const sortedParams = Object.keys(params)
-      .sort()
-      .map(key => `${key}=${params[key]}`)
-      .join('&');
-    
-    const expectedSignature = crypto
-      .createHash('md5')
-      .update(sortedParams + this.config.sign_password)
-      .digest('hex');
-    
-    return key === expectedSignature;
+    try {
+      const { key, ...params } = callbackData;
+      
+      // Build the string for signature verification exactly as Paysera expects
+      const sortedParams = Object.keys(params)
+        .sort()
+        .map(paramKey => `${paramKey}=${params[paramKey]}`)
+        .join('&');
+      
+      const expectedSignature = crypto
+        .createHash('md5')
+        .update(sortedParams + this.config.sign_password)
+        .digest('hex');
+      
+      console.log('Callback validation:', {
+        received_key: key,
+        expected_key: expectedSignature,
+        params_string: sortedParams
+      });
+      
+      return key === expectedSignature;
+    } catch (error) {
+      console.error('Callback validation error:', error);
+      return false;
+    }
   }
 }
 

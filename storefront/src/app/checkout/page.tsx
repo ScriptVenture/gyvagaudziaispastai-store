@@ -64,7 +64,21 @@ export default function CheckoutPage() {
   }
 
   const handleUpdateData = (data: any) => {
-    setCheckoutData(prev => ({ ...prev, ...data }))
+    console.log('🔍 handleUpdateData called with:', data)
+    setCheckoutData(prev => {
+      const updated = { ...prev, ...data }
+      console.log('🔍 Updated checkoutData:', updated)
+      if (data.shippingMethod) {
+        console.log('🔍 Shipping method details:', data.shippingMethod)
+        console.log('🔍 Available amount fields:', {
+          calculated_amount: data.shippingMethod.calculated_amount,
+          'data.calculated_amount': data.shippingMethod.data?.calculated_amount,
+          'data.amount': data.shippingMethod.data?.amount,
+          amount: data.shippingMethod.amount
+        })
+      }
+      return updated
+    })
   }
 
   const subtotal = cart.items.reduce((acc, item) => {
@@ -166,11 +180,26 @@ export default function CheckoutPage() {
               
               <Flex justify="between">
                 <Text>Shipping</Text>
-                <Text color="gray">
-                  {checkoutData.shippingMethod 
-                    ? `€${(checkoutData.shippingMethod.amount / 100).toFixed(2)}`
-                    : "Calculated at next step"
-                  }
+                <Text weight="medium">
+                  {(() => {
+                    const shippingCost = checkoutData.shippingMethod 
+                      ? (
+                          checkoutData.shippingMethod.calculated_amount || 
+                          checkoutData.shippingMethod.data?.calculated_amount || 
+                          checkoutData.shippingMethod.data?.amount || 
+                          checkoutData.shippingMethod.amount || 
+                          0
+                        ) / 100
+                      : 0
+                    
+                    console.log('🔍 Order Summary shipping calculation:', {
+                      hasShippingMethod: !!checkoutData.shippingMethod,
+                      shippingMethod: checkoutData.shippingMethod,
+                      finalCost: shippingCost
+                    })
+                    
+                    return `€${shippingCost.toFixed(2)}`
+                  })()}
                 </Text>
               </Flex>
               
@@ -184,7 +213,13 @@ export default function CheckoutPage() {
               <Flex justify="between">
                 <Text size="4" weight="bold">Total</Text>
                 <Text size="4" weight="bold">
-                  €{(subtotal + (checkoutData.shippingMethod?.amount || 0) / 100).toFixed(2)}
+                  €{(subtotal + ((
+                    checkoutData.shippingMethod?.calculated_amount || 
+                    checkoutData.shippingMethod?.data?.calculated_amount || 
+                    checkoutData.shippingMethod?.data?.amount || 
+                    checkoutData.shippingMethod?.amount || 
+                    0
+                  ) / 100)).toFixed(2)}
                 </Text>
               </Flex>
             </Flex>

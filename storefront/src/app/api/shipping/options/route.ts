@@ -54,6 +54,24 @@ export async function GET(request: NextRequest) {
       full_response: data
     })
 
+    // Debug: Log the first shipping option structure to help identify price fields
+    if (data.shipping_options && data.shipping_options.length > 0) {
+      console.log("First shipping option structure:", JSON.stringify(data.shipping_options[0], null, 2))
+      
+      // Log all possible price fields to help identify the issue
+      const firstOption = data.shipping_options[0]
+      console.log("Price field analysis:", {
+        "option.amount": firstOption.amount,
+        "option.price": firstOption.price,
+        "option.calculated_amount": firstOption.calculated_amount,
+        "option.calculated_price": firstOption.calculated_price,
+        "option.cost": firstOption.cost,
+        "typeof amount": typeof firstOption.amount,
+        "isNaN amount": isNaN(firstOption.amount),
+        "option keys": Object.keys(firstOption)
+      })
+    }
+
     return NextResponse.json({ 
       shipping_options: data.shipping_options || []
     })

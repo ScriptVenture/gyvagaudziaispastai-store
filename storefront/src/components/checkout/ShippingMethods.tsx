@@ -43,6 +43,17 @@ export default function ShippingMethods({
 
       setShippingOptions(data.shipping_options || [])
       
+      // Debug: Log what we receive from the API
+      if (data.shipping_options?.length > 0) {
+        console.log("Frontend received shipping options:", data.shipping_options)
+        console.log("First option price fields:", {
+          amount: data.shipping_options[0].amount,
+          price: data.shipping_options[0].price,
+          calculated_price: data.shipping_options[0].calculated_price,
+          cost: data.shipping_options[0].cost
+        })
+      }
+      
       // Set first option as default if none selected
       if (data.shipping_options?.length > 0 && !selected) {
         setSelected(data.shipping_options[0].id)
@@ -81,7 +92,43 @@ export default function ShippingMethods({
         throw new Error(data.error || 'Failed to set shipping method')
       }
 
-      onUpdate({ shippingMethod: selectedOption })
+      // Fetch updated cart to get calculated shipping cost
+      const cartResponse = await fetch('/api/cart', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+
+      const cartData = await cartResponse.json()
+      
+      if (cartResponse.ok && cartData.cart) {
+        // Get the calculated shipping amount from the updated cart
+        const shippingMethods = cartData.cart.shipping_methods
+        const currentShippingMethod = shippingMethods?.[0]
+        
+        if (currentShippingMethod) {
+          // Create updated shipping method with calculated price
+          const updatedShippingMethod = {
+            ...selectedOption,
+            amount: currentShippingMethod.amount,
+            calculated_amount: currentShippingMethod.amount,
+            data: {
+              ...selectedOption.data,
+              amount: currentShippingMethod.amount,
+              calculated_amount: currentShippingMethod.amount
+            }
+          }
+          
+          console.log('Updated shipping method with calculated price:', updatedShippingMethod)
+          onUpdate({ shippingMethod: updatedShippingMethod })
+        } else {
+          onUpdate({ shippingMethod: selectedOption })
+        }
+      } else {
+        onUpdate({ shippingMethod: selectedOption })
+      }
+      
       onNext()
     } catch (err: any) {
       setError(err.message)
@@ -94,7 +141,18 @@ export default function ShippingMethods({
     const lowerName = name.toLowerCase()
     if (lowerName.includes('express') || lowerName.includes('fast')) return Zap
     if (lowerName.includes('priority') || lowerName.includes('next')) return Truck
+    if (lowerName.includes('venipak')) return Truck
     return Package
+  }
+
+  const getShippingDescription = (option: any) => {
+    if (option.data?.description) {
+      return option.data.description
+    }
+    if (option.data?.delivery_time) {
+      return `Delivery: ${option.data.delivery_time}`
+    }
+    return "Standard shipping"
   }
 
   if (loading) {
@@ -161,14 +219,19 @@ export default function ShippingMethods({
                             <Icon size={20} className="text-gray-600" />
                             <Text weight="medium">{option.name}</Text>
                           </Flex>
-                          {option.data?.description && (
-                            <Text size="2" color="gray">
-                              {option.data.description}
-                            </Text>
-                          )}
+                          <Text size="2" color="gray">
+                            {getShippingDescription(option)}
+                          </Text>
                         </Box>
                         <Text weight="bold" size="3">
-                          €{((option.amount || 0) / 100).toFixed(2)}
+                          €{(() => {
+                            // Handle different price field formats from Medusa API
+                            // For calculated prices, the amount is in option.data.amount
+                            const price = option.data?.amount || option.amount || option.calculated_price?.calculated_amount || option.price?.amount || option.price || 0
+                            const numPrice = Number(price)
+                            if (isNaN(numPrice)) return '0.00'
+                            return (numPrice / 100).toFixed(2)
+                          })()}
                         </Text>
                       </Flex>
                     </Box>

@@ -42,6 +42,17 @@ module.exports = defineConfig({
             resolve: "@medusajs/fulfillment-manual",
             id: "manual",
           },
+          {
+            resolve: "./src/modules/venipak",
+            id: "venipak",
+            options: {
+              api_key: process.env.VENIPAK_API_KEY || "",
+              username: process.env.VENIPAK_USERNAME || "",
+              password: process.env.VENIPAK_PASSWORD || "",
+              test_mode: process.env.NODE_ENV !== "production",
+              default_currency: "EUR"
+            },
+          },
         ],
       },
     },
