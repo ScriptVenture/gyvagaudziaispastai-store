@@ -218,8 +218,8 @@ main() {
     print_success "Domain update completed!"
     echo ""
     echo -e "${BOLD}Your demo platform is now accessible at:${NC}"
-    echo -e "🌐 Main Store: ${GREEN}http://$aws_domain${NC}"
-    echo -e "⚙️  Admin Panel: ${GREEN}http://$aws_domain/admin${NC}"
+    echo -e "🌐 Main Store: ${GREEN}https://$aws_domain${NC}"
+    echo -e "⚙️  Admin Panel: ${GREEN}https://$aws_domain/app${NC}"
     echo -e "📊 Monitoring: ${GREEN}http://$([ -f .deployment-config ] && source .deployment-config && echo $ELASTIC_IP || echo 'SERVER_IP'):3001${NC}"
     echo ""
 }

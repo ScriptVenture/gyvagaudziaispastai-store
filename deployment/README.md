@@ -52,8 +52,8 @@ This deployment creates a professional demonstration platform perfect for:
 ## 🌐 Access Your Demo
 
 After deployment, access at:
-- **Main Store**: `http://your-aws-public-dns.compute.amazonaws.com`
-- **Admin Panel**: `http://your-aws-public-dns.compute.amazonaws.com/admin`
+- **Main Store**: `https://your-aws-public-dns.compute.amazonaws.com`
+- **Admin Panel**: `https://your-aws-public-dns.compute.amazonaws.com/app`
 - **Monitoring**: `http://your-elastic-ip:3001` (Grafana)
 
 ## 💰 Cost

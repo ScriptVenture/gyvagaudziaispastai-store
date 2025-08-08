@@ -338,8 +338,15 @@ DOCKER_EOF
 systemctl enable docker
 systemctl restart docker
 
-# Install Nginx
+# Install Nginx and Certbot
 apt-get install -y nginx certbot python3-certbot-nginx
+
+# Create temporary self-signed certificate for initial setup
+mkdir -p /etc/letsencrypt/live/temp-cert
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+    -keyout /etc/letsencrypt/live/temp-cert/privkey.pem \
+    -out /etc/letsencrypt/live/temp-cert/fullchain.pem \
+    -subj "/C=US/ST=Demo/L=Demo/O=Demo/CN=demo.local"
 
 # Install Node.js 20
 curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
@@ -489,24 +496,42 @@ server {
     listen 80 default_server;
     server_name _;
     
-    # For demo purposes, serve HTTP (add SSL later if needed)
-    # Redirect HTTPS to HTTP for simplicity
-    if (\$scheme = https) {
-        return 301 http://\$server_name\$request_uri;
-    }
+    # Redirect HTTP to HTTPS for better security showcase
+    return 301 https://\$server_name\$request_uri;
+}
 
-    # Security headers (adapted for HTTP demo)
+server {
+    listen 443 ssl http2 default_server;
+    server_name _;
+    
+    # SSL configuration (will be set up with Let's Encrypt)
+    ssl_certificate /etc/letsencrypt/live/temp-cert/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/temp-cert/privkey.pem;
+    
+    # Modern SSL configuration
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA384;
+    ssl_prefer_server_ciphers on;
+    ssl_session_cache shared:SSL:10m;
+    ssl_session_timeout 10m;
+
+    # Security headers (enhanced for HTTPS demo)
     add_header X-Frame-Options DENY always;
     add_header X-Content-Type-Options nosniff always;
     add_header X-XSS-Protection "1; mode=block" always;
     add_header Referrer-Policy "strict-origin-when-cross-origin" always;
     add_header Permissions-Policy "geolocation=(), microphone=(), camera=()" always;
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
 
     # Hide server information
     server_tokens off;
     
     # Demo notice header
     add_header X-Demo-Platform "Gyvagaudziaispastai E-commerce Demo" always;
+    
+    # Enable OCSP stapling
+    ssl_stapling on;
+    ssl_stapling_verify on;
 
     # API routes with rate limiting
     location /api/ {
@@ -526,7 +551,7 @@ server {
     }
 
     # Admin routes (additional security)
-    location /admin {
+    location /app {
         limit_req zone=api burst=10 nodelay;
         
         # Optional: Restrict admin access by IP
@@ -575,7 +600,64 @@ rm -f /etc/nginx/sites-enabled/default
 # Test Nginx configuration
 nginx -t
 
-# Create startup script
+# Create admin user creation script on server
+mkdir -p /opt/gyvagaudziaispastai/deployment
+cat > /opt/gyvagaudziaispastai/deployment/create-admin-user.sh << 'ADMIN_SCRIPT_EOF'
+#!/bin/bash
+set -e
+
+# Simple admin user creation for demo
+echo "🔐 Creating admin user..."
+
+# Wait for backend to be ready
+sleep 30
+
+# Create admin user in Docker container
+cd /opt/gyvagaudziaispastai
+
+ADMIN_EMAIL="admin@gyvagaudziaispastai.com"
+ADMIN_PASSWORD="Demo123!Admin"
+ADMIN_FIRST_NAME="Demo"
+ADMIN_LAST_NAME="Admin"
+
+# Try to create admin user
+if docker-compose -f docker-compose.production.yml exec -T backend sh -c "echo -e '\$ADMIN_EMAIL\n\$ADMIN_PASSWORD\n\$ADMIN_FIRST_NAME\n\$ADMIN_LAST_NAME' | npx medusa user -c" 2>/dev/null; then
+    echo "✅ Admin user created successfully"
+    
+    # Save credentials
+    cat > admin-credentials.txt << CREDS_EOF
+# ================================================
+# MEDUSA ADMIN PANEL CREDENTIALS  
+# ================================================
+# Generated: \$(date)
+
+Admin Panel URL: https://\$(curl -s http://169.254.169.254/latest/meta-data/public-hostname)/app
+Email: \$ADMIN_EMAIL
+Password: \$ADMIN_PASSWORD
+
+# ================================================
+# DEMO SHOWCASE FEATURES
+# ================================================
+- Product management and catalog
+- Order management and fulfillment  
+- Customer management
+- Analytics and reports
+- Payment and shipping configuration
+CREDS_EOF
+    
+    chmod 600 admin-credentials.txt
+    chown ubuntu:ubuntu admin-credentials.txt
+    
+    echo "📝 Admin credentials saved to admin-credentials.txt"
+else
+    echo "⚠️ Admin user creation failed or user already exists"
+fi
+ADMIN_SCRIPT_EOF
+
+chmod +x /opt/gyvagaudziaispastai/deployment/create-admin-user.sh
+chown ubuntu:ubuntu /opt/gyvagaudziaispastai/deployment/create-admin-user.sh
+
+# Create startup script with SSL and admin user setup
 cat > /opt/gyvagaudziaispastai/start-secure.sh << 'START_EOF'
 #!/bin/bash
 set -e
@@ -603,7 +685,7 @@ docker-compose -f docker-compose.production.yml up -d
 
 # Wait for services to be ready
 echo "⏳ Waiting for services to be ready..."
-sleep 30
+sleep 60
 
 # Health check
 echo "🔍 Checking service health..."
@@ -619,11 +701,54 @@ else
     echo "⚠️ Storefront may not be ready yet"
 fi
 
+# Create admin user
+echo "👤 Setting up admin user..."
+if [ -f "deployment/create-admin-user.sh" ]; then
+    ./deployment/create-admin-user.sh --docker
+else
+    echo "⚠️ Admin user script not found, you'll need to create admin user manually"
+fi
+
 echo "🎉 Platform started successfully!"
 echo "📝 Check logs with: docker-compose -f docker-compose.production.yml logs -f"
+echo "👤 Admin credentials saved in admin-credentials.txt"
 START_EOF
 
 chmod +x /opt/gyvagaudziaispastai/start-secure.sh
+
+# Create SSL setup script
+cat > /opt/gyvagaudziaispastai/setup-ssl.sh << 'SSL_EOF'
+#!/bin/bash
+set -e
+
+echo "🔐 Setting up SSL certificate..."
+
+# Get public DNS name
+PUBLIC_DNS=\$(curl -s http://169.254.169.254/latest/meta-data/public-hostname)
+
+if [ -z "\$PUBLIC_DNS" ]; then
+    echo "❌ Could not get public DNS name"
+    exit 1
+fi
+
+echo "🌐 Public DNS: \$PUBLIC_DNS"
+
+# Update Nginx configuration with actual domain
+sed -i "s/temp-cert/\$PUBLIC_DNS/g" /etc/nginx/sites-available/gyvagaudziaispastai
+
+# Get SSL certificate from Let's Encrypt
+if certbot --nginx -d "\$PUBLIC_DNS" --agree-tos --no-eff-email --email demo@example.com --non-interactive; then
+    echo "✅ SSL certificate installed successfully"
+    systemctl reload nginx
+else
+    echo "⚠️ SSL certificate installation failed, using self-signed certificate"
+fi
+
+echo "🔐 SSL setup completed"
+SSL_EOF
+
+chmod +x /opt/gyvagaudziaispastai/setup-ssl.sh
+chown ubuntu:ubuntu /opt/gyvagaudziaispastai/setup-ssl.sh
 
 echo "✅ Secure server initialization completed"
 EOF
@@ -737,9 +862,9 @@ create_deployment_instructions() {
 
 ## 🌐 Access Your Demo Platform
 
-**Main Store**: http://$AWS_PUBLIC_DNS
-**Admin Panel**: http://$AWS_PUBLIC_DNS/admin
-**API Health**: http://$AWS_PUBLIC_DNS/api/health
+**Main Store**: https://$AWS_PUBLIC_DNS
+**Admin Panel**: https://$AWS_PUBLIC_DNS/app
+**API Health**: https://$AWS_PUBLIC_DNS/api/health
 
 ## Next Steps
 
@@ -779,6 +904,8 @@ docker build -t gyvagaudziaispastai/storefront:latest -f storefront/Dockerfile.p
 ./start-secure.sh
 \`\`\`
 
+*This will automatically create admin user and setup the platform*
+
 ### 5. Optional: Configure SSL (for production use)
 \`\`\`bash
 # For production deployment with custom domain:
@@ -788,11 +915,26 @@ docker build -t gyvagaudziaispastai/storefront:latest -f storefront/Dockerfile.p
 # SSL can be added later if moving to production
 \`\`\`
 
-### 6. Verify Demo Deployment
-- **Main Store**: http://$AWS_PUBLIC_DNS
-- **API Health**: http://$AWS_PUBLIC_DNS/api/health
-- **Admin Panel**: http://$AWS_PUBLIC_DNS/admin
+### 6. Setup SSL Certificate
+\`\`\`bash
+# SSH to server and setup SSL
+ssh -i ${KEY_NAME}.pem ubuntu@$ELASTIC_IP
+./setup-ssl.sh
+\`\`\`
+
+### 7. Verify Demo Deployment
+- **Main Store**: https://$AWS_PUBLIC_DNS
+- **API Health**: https://$AWS_PUBLIC_DNS/api/health
+- **Admin Panel**: https://$AWS_PUBLIC_DNS/app
 - **Monitoring**: http://$ELASTIC_IP:3001 (Grafana)
+
+## 🔑 **Admin Panel Credentials**
+
+- **URL**: https://$AWS_PUBLIC_DNS/app
+- **Email**: admin@gyvagaudziaispastai.com
+- **Password**: Demo123!Admin
+
+*Credentials are also saved in `admin-credentials.txt` on the server*
 
 ## Security Features Enabled
 
@@ -930,7 +1072,7 @@ main() {
     echo -e "${GREEN}  🎉 DEMO PLATFORM DEPLOYMENT COMPLETED!${NC}"
     echo -e "${GREEN}================================================${NC}"
     echo ""
-    echo -e "🌐 Demo URL: ${YELLOW}http://$AWS_PUBLIC_DNS${NC}"
+    echo -e "🌐 Demo URL: ${YELLOW}https://$AWS_PUBLIC_DNS${NC}"
     echo -e "💻 Server IP: ${YELLOW}$ELASTIC_IP${NC}"
     echo -e "🔑 SSH Key: ${YELLOW}${KEY_NAME}.pem${NC}"
     echo -e "📋 Instructions: ${YELLOW}DEPLOYMENT_COMPLETE.md${NC}"
@@ -938,8 +1080,8 @@ main() {
     echo -e "${BOLD}Next steps:${NC}"
     echo -e "1. Upload environment variables and application code"
     echo -e "2. Build and start the platform services"
-    echo -e "3. Share demo URL with customers: http://$AWS_PUBLIC_DNS"
-    echo -e "4. Showcase admin panel at: http://$AWS_PUBLIC_DNS/admin"
+    echo -e "3. Share demo URL with customers: https://$AWS_PUBLIC_DNS"
+    echo -e "4. Showcase admin panel at: https://$AWS_PUBLIC_DNS/app"
     echo ""
     echo -e "${GREEN}Your customer demo e-commerce platform is ready! 🚀${NC}"
 }

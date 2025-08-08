@@ -345,32 +345,38 @@ sudo systemctl enable docker
 # Replace YOUR_AWS_DNS with your actual AWS public DNS
 export AWS_DNS="your-ec2-public-dns.compute.amazonaws.com"
 
-# Test platform accessibility
-curl -I http://$AWS_DNS
+# Test platform accessibility (HTTPS)
+curl -I https://$AWS_DNS
 
 # Test security headers
-curl -I http://$AWS_DNS | grep -E "(X-Frame|X-Content|X-Demo)"
+curl -I https://$AWS_DNS | grep -E "(X-Frame|X-Content|X-Demo|Strict-Transport)"
 
 # Test API endpoints
-curl http://$AWS_DNS/api/health
-curl http://$AWS_DNS/api/products
+curl https://$AWS_DNS/api/health
+curl https://$AWS_DNS/api/products
 
 # Test admin access
-curl -I http://$AWS_DNS/admin
+curl -I https://$AWS_DNS/app
+
+# Test SSL certificate
+openssl s_client -connect $AWS_DNS:443 -servername $AWS_DNS < /dev/null 2>/dev/null | openssl x509 -noout -text | grep -A2 "Subject:"
 ```
 
 ### **8.2 Performance Testing**
 
 ```bash
-# Load test (install ab first: sudo apt install apache2-utils)
-ab -n 100 -c 10 http://$AWS_DNS/
+# Load test with HTTPS (install ab first: sudo apt install apache2-utils)
+ab -n 100 -c 10 https://$AWS_DNS/
 
 # Check response times
-curl -o /dev/null -s -w "Response time: %{time_total}s\n" http://$AWS_DNS/
+curl -o /dev/null -s -w "Response time: %{time_total}s\n" https://$AWS_DNS/
 
 # Test different pages
-curl -o /dev/null -s -w "Products page: %{time_total}s\n" http://$AWS_DNS/products
-curl -o /dev/null -s -w "Admin panel: %{time_total}s\n" http://$AWS_DNS/admin
+curl -o /dev/null -s -w "Products page: %{time_total}s\n" https://$AWS_DNS/products
+curl -o /dev/null -s -w "Admin panel: %{time_total}s\n" https://$AWS_DNS/app
+
+# Test admin login
+curl -X POST https://$AWS_DNS/admin/auth -H "Content-Type: application/json" -d '{"email":"admin@gyvagaudziaispastai.com","password":"Demo123!Admin"}'
 ```
 
 ### **8.3 Monitoring Validation**
@@ -497,12 +503,36 @@ Once all steps are complete, your customer showcase platform will be:
 
 ## 🆘 **Need Help?**
 
+## 🔑 **Admin Panel Access**
+
+Your demo platform includes a pre-configured admin user:
+
+- **URL**: `https://your-aws-dns.compute.amazonaws.com/app`
+- **Email**: `admin@gyvagaudziaispastai.com`
+- **Password**: `Demo123!Admin`
+
+**Admin credentials are also saved in `admin-credentials.txt` on the server.**
+
+### **Admin Panel Features to Showcase:**
+- ✅ Product management and catalog
+- ✅ Order management and fulfillment
+- ✅ Customer management
+- ✅ Analytics and reports
+- ✅ Payment and shipping configuration
+- ✅ User and role management
+
+---
+
+## 🆘 **Need Help?**
+
 If you encounter issues:
 1. Check the logs: `docker-compose logs`
 2. Verify environment variables: `printenv | grep -E "(JWT|DATABASE|PAYSERA)"`
-3. Test connectivity: `curl -I http://YOUR_AWS_DNS`
+3. Test connectivity: `curl -I https://YOUR_AWS_DNS`
 4. Verify AWS domain is correctly set: `grep -E "(DOMAIN|CORS)" .env.production`
-5. Review demo checklist above
+5. Check admin credentials: `cat admin-credentials.txt`
+6. Review demo checklist above
 
 **Update domain after deployment:** `./deployment/update-aws-domain.sh`
+**Setup SSL certificate:** `ssh -i key.pem ubuntu@IP './setup-ssl.sh'`
 **Emergency shutdown:** `sudo docker-compose down && sudo nginx -s stop`
