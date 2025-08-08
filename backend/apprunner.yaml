@@ -3,16 +3,8 @@ runtime: docker
 build:
   commands:
     build:
-      - echo Build started on `date`
       - docker build -t $IMAGE_URI -f Dockerfile.production .
-      - echo Build completed on `date`
 run:
-  command: npm run start
+  command: npm start
   network:
     port: 9000
-    env: PORT
-  env:
-    - name: PORT
-      value: "9000"
-    - name: NODE_ENV
-      value: "production"
