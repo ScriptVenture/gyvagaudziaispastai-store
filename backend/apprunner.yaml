@@ -7,7 +7,6 @@ build:
       - docker build -t $IMAGE_URI -f Dockerfile.production .
       - echo Build completed on `date`
 run:
-  runtime-version: latest
   command: npm run start
   network:
     port: 9000
