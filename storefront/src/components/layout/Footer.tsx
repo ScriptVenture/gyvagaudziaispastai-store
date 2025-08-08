@@ -243,7 +243,7 @@ export default function Footer() {
 
       {/* Bottom footer with enhanced lighting */}
       <div className="border-t border-white/10 relative">
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent pointer-events-none" />
         <Container size="4">
           <Flex 
             direction={{ initial: "column", md: "row" }} 
@@ -258,16 +258,19 @@ export default function Footer() {
               </Text>
             </Flex>
             
-            <Flex align="center" gap="6">
+            <Flex align="center" gap="6" className="relative z-10">
               {[
                 { label: 'Privatumo politika', href: '/privacy' },
                 { label: 'Sąlygos', href: '/terms' },
-                { label: 'Prieinamumas', href: '/accessibility' }
+                { label: 'Grąžinimai', href: '/returns' },
+                { label: 'BDAR', href: '/gdpr' },
+                { label: 'Slapukai', href: '/cookies' },
+                { label: 'Apie mus', href: '/about' }
               ].map((item) => (
                 <Link 
                   key={item.label} 
                   href={item.href} 
-                  className="text-white/70 hover:text-amber-300 transition-colors text-sm"
+                  className="text-white/70 hover:text-amber-300 transition-colors text-sm relative z-10 cursor-pointer"
                 >
                   {item.label}
                 </Link>
@@ -278,7 +281,7 @@ export default function Footer() {
       </div>
       
       {/* Subtle bottom glow effect */}
-      <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-amber-300/30 to-transparent" />
+      <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-amber-300/30 to-transparent pointer-events-none" />
     </footer>
   )
 }
