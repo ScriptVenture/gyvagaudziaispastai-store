@@ -1,0 +1,23 @@
+{
+  "name": "gyvagaudziaispastai-store",
+  "version": "1.0.0",
+  "description": "Modern e-commerce platform built with Medusa.js and Next.js, inspired by professional wildlife control solutions.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ScriptVenture/gyvagaudziaispastai-store.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ScriptVenture/gyvagaudziaispastai-store/issues"
+  },
+  "homepage": "https://github.com/ScriptVenture/gyvagaudziaispastai-store#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.54.2"
+  }
+}

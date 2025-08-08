@@ -1,0 +1,414 @@
+# =========================================
+# Automated Backup Workflow
+# =========================================
+# Daily backups and maintenance tasks
+
+name: 💾 Automated Backup & Maintenance
+
+on:
+  schedule:
+    # Run daily at 2:30 AM UTC
+    - cron: '30 2 * * *'
+  workflow_dispatch:  # Manual trigger
+
+env:
+  AWS_REGION: eu-central-1
+
+jobs:
+  # =====================================
+  # Database and System Backup
+  # =====================================
+  backup:
+    name: 💾 System Backup
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🔧 Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: 🔧 Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.AWS_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.AWS_EC2_HOST }} >> ~/.ssh/known_hosts
+
+      - name: 💾 Create database backup
+        run: |
+          ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.AWS_EC2_HOST }} << 'EOF'
+            set -e
+            cd /opt/gyvagaudziaispastai
+            
+            BACKUP_DATE=$(date +%Y%m%d_%H%M%S)
+            BACKUP_DIR="/opt/gyvagaudziaispastai/backups"
+            
+            echo "💾 Creating backup for $BACKUP_DATE..."
+            mkdir -p $BACKUP_DIR
+            
+            # Database backup
+            echo "🗄️ Backing up PostgreSQL database..."
+            docker exec gyvagaudziaispastai-postgres pg_dump -U medusa gyvagaudziaispastai | gzip > $BACKUP_DIR/db_backup_$BACKUP_DATE.sql.gz
+            
+            # Redis backup
+            echo "📝 Backing up Redis data..."
+            docker exec gyvagaudziaispastai-redis redis-cli BGSAVE
+            sleep 5  # Wait for background save to complete
+            docker cp gyvagaudziaispastai-redis:/data/dump.rdb $BACKUP_DIR/redis_backup_$BACKUP_DATE.rdb
+            
+            # Static files backup
+            echo "📁 Backing up static files..."
+            tar -czf $BACKUP_DIR/static_backup_$BACKUP_DATE.tar.gz backend/static/ || echo "No static files found"
+            
+            # Environment and configuration backup
+            echo "⚙️ Backing up configuration..."
+            cp .env $BACKUP_DIR/env_backup_$BACKUP_DATE.env || echo "No .env file found"
+            cp docker-compose.production.yml $BACKUP_DIR/compose_backup_$BACKUP_DATE.yml
+            
+            # System information
+            echo "💻 Saving system information..."
+            {
+              echo "Backup Date: $BACKUP_DATE"
+              echo "System Info: $(uname -a)"
+              echo "Docker Version: $(docker --version)"
+              echo "Disk Usage: $(df -h)"
+              echo "Memory Usage: $(free -h)"
+              echo "Container Status:"
+              docker ps
+            } > $BACKUP_DIR/system_info_$BACKUP_DATE.txt
+            
+            echo "✅ Local backup completed: $BACKUP_DATE"
+            ls -la $BACKUP_DIR/*$BACKUP_DATE*
+          EOF
+
+      - name: ☁️ Upload backup to S3
+        run: |
+          ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.AWS_EC2_HOST }} << 'EOF'
+            set -e
+            
+            BACKUP_DATE=$(date +%Y%m%d_%H%M%S)
+            BACKUP_DIR="/opt/gyvagaudziaispastai/backups"
+            S3_BUCKET="${{ secrets.BACKUP_S3_BUCKET }}"
+            
+            if [ -n "$S3_BUCKET" ]; then
+              echo "☁️ Uploading backups to S3..."
+              
+              # Install AWS CLI if not present
+              if ! command -v aws &> /dev/null; then
+                echo "Installing AWS CLI..."
+                curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+                unzip awscliv2.zip
+                sudo ./aws/install
+              fi
+              
+              # Upload today's backups
+              for file in $BACKUP_DIR/*$(date +%Y%m%d)*; do
+                if [ -f "$file" ]; then
+                  filename=$(basename "$file")
+                  aws s3 cp "$file" "s3://$S3_BUCKET/backups/$filename" \
+                    --storage-class STANDARD_IA \
+                    --metadata "backup-date=$(date +%Y-%m-%d),automated=true"
+                  echo "✅ Uploaded: $filename"
+                fi
+              done
+              
+              echo "✅ S3 upload completed"
+            else
+              echo "⚠️ No S3 bucket configured, skipping cloud backup"
+            fi
+          EOF
+
+      - name: 🧹 Cleanup old backups
+        run: |
+          ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.AWS_EC2_HOST }} << 'EOF'
+            set -e
+            
+            BACKUP_DIR="/opt/gyvagaudziaispastai/backups"
+            
+            echo "🧹 Cleaning up old local backups..."
+            
+            # Keep local backups for 7 days
+            find $BACKUP_DIR -type f -name "*backup*" -mtime +7 -delete || echo "No old backups to delete"
+            
+            echo "📊 Current backup storage:"
+            du -sh $BACKUP_DIR
+            ls -la $BACKUP_DIR | tail -10
+          EOF
+
+      - name: ☁️ S3 lifecycle management
+        run: |
+          aws s3api put-bucket-lifecycle-configuration \
+            --bucket ${{ secrets.BACKUP_S3_BUCKET }} \
+            --lifecycle-configuration '{
+              "Rules": [
+                {
+                  "ID": "backup-lifecycle",
+                  "Status": "Enabled",
+                  "Filter": {
+                    "Prefix": "backups/"
+                  },
+                  "Transitions": [
+                    {
+                      "Days": 30,
+                      "StorageClass": "GLACIER"
+                    },
+                    {
+                      "Days": 90,
+                      "StorageClass": "DEEP_ARCHIVE"
+                    }
+                  ],
+                  "Expiration": {
+                    "Days": 2555
+                  }
+                }
+              ]
+            }' || echo "S3 lifecycle configuration skipped"
+
+      - name: 🧹 Cleanup SSH
+        if: always()
+        run: rm -f ~/.ssh/id_rsa
+
+  # =====================================
+  # System Maintenance
+  # =====================================
+  maintenance:
+    name: 🔧 System Maintenance
+    runs-on: ubuntu-latest
+    needs: backup
+
+    steps:
+      - name: 🔧 Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.AWS_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.AWS_EC2_HOST }} >> ~/.ssh/known_hosts
+
+      - name: 🧹 System cleanup and optimization
+        run: |
+          ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.AWS_EC2_HOST }} << 'EOF'
+            set -e
+            
+            echo "🧹 Starting system maintenance..."
+            
+            # Update system packages
+            echo "📦 Updating system packages..."
+            sudo apt update && sudo apt upgrade -y
+            
+            # Clean up Docker
+            echo "🐳 Docker cleanup..."
+            docker system prune -f
+            docker image prune -af
+            docker volume prune -f || echo "No volumes to prune"
+            
+            # Clean up logs
+            echo "📝 Log cleanup..."
+            sudo journalctl --vacuum-time=7d
+            find /var/log -name "*.log" -type f -size +100M -exec truncate -s 50M {} \;
+            
+            # Clear package cache
+            echo "🗑️ Package cache cleanup..."
+            sudo apt autoremove -y
+            sudo apt autoclean
+            
+            # Optimize database (if needed)
+            echo "🗄️ Database maintenance..."
+            docker exec gyvagaudziaispastai-postgres psql -U medusa -d gyvagaudziaispastai -c "VACUUM ANALYZE;" || echo "Database optimization skipped"
+            
+            # System health check
+            echo "🏥 System health check..."
+            {
+              echo "=== System Health Report ==="
+              echo "Date: $(date)"
+              echo "Uptime: $(uptime)"
+              echo "Memory: $(free -h)"
+              echo "Disk: $(df -h /)"
+              echo "Load: $(cat /proc/loadavg)"
+              echo "=== Container Status ==="
+              docker ps
+              echo "=== Container Health ==="
+              docker stats --no-stream
+              echo "=== Recent Logs ==="
+              docker-compose logs --tail=20
+            } > /var/log/gyvagaudziaispastai-health-$(date +%Y%m%d).log
+            
+            echo "✅ System maintenance completed"
+          EOF
+
+      - name: 🧹 Cleanup SSH
+        if: always()
+        run: rm -f ~/.ssh/id_rsa
+
+  # =====================================
+  # Health Monitoring Report
+  # =====================================
+  health-report:
+    name: 📊 Health Report
+    runs-on: ubuntu-latest
+    needs: [backup, maintenance]
+
+    steps:
+      - name: 🔧 Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.AWS_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.AWS_EC2_HOST }} >> ~/.ssh/known_hosts
+
+      - name: 📊 Generate health report
+        run: |
+          ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.AWS_EC2_HOST }} << 'EOF' > health_report.txt
+            echo "📊 GYVAGAUDZIAISPASTAI HEALTH REPORT"
+            echo "Generated: $(date)"
+            echo "================================"
+            echo ""
+            
+            echo "🖥️ SYSTEM STATUS"
+            echo "Uptime: $(uptime -p)"
+            echo "Load: $(uptime | cut -d',' -f3-)"
+            echo ""
+            
+            echo "💾 STORAGE"
+            df -h | grep -E "/$|/opt"
+            echo ""
+            
+            echo "🧠 MEMORY"
+            free -h
+            echo ""
+            
+            echo "🐳 CONTAINERS"
+            docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+            echo ""
+            
+            echo "🌐 SERVICE HEALTH"
+            curl -s http://localhost:9000/health && echo " - Backend: ✅ Healthy" || echo " - Backend: ❌ Unhealthy"
+            curl -s http://localhost:3000 > /dev/null && echo " - Storefront: ✅ Healthy" || echo " - Storefront: ❌ Unhealthy"
+            echo ""
+            
+            echo "📈 RECENT PERFORMANCE"
+            echo "Database connections: $(docker exec gyvagaudziaispastai-postgres psql -U medusa -d gyvagaudziaispastai -t -c "SELECT count(*) FROM pg_stat_activity WHERE state = 'active';" 2>/dev/null || echo "N/A")"
+            echo "Redis memory usage: $(docker exec gyvagaudziaispastai-redis redis-cli info memory | grep used_memory_human | cut -d: -f2 || echo "N/A")"
+            echo ""
+            
+            echo "📝 RECENT ERRORS"
+            docker-compose logs --tail=50 | grep -i error | tail -5 || echo "No recent errors found"
+            echo ""
+            
+            echo "💾 BACKUP STATUS"
+            ls -la /opt/gyvagaudziaispastai/backups/ | tail -3
+          EOF
+
+      - name: 📧 Send health report
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ secrets.SMTP_SERVER }}
+          server_port: 587
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          subject: '📊 Daily Health Report - Gyvagaudziaispastai'
+          body: file://health_report.txt
+          from: 'system@gyvagaudziaispastai.com'
+          to: '${{ secrets.NOTIFICATION_EMAIL }}'
+
+      - name: 🧹 Cleanup
+        if: always()
+        run: |
+          rm -f ~/.ssh/id_rsa
+          rm -f health_report.txt
+
+  # =====================================
+  # Backup Verification
+  # =====================================
+  verify-backup:
+    name: ✅ Backup Verification
+    runs-on: ubuntu-latest
+    needs: backup
+
+    steps:
+      - name: 🔧 Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: ✅ Verify S3 backup integrity
+        run: |
+          if [ -n "${{ secrets.BACKUP_S3_BUCKET }}" ]; then
+            echo "✅ Verifying today's backups in S3..."
+            
+            TODAY=$(date +%Y%m%d)
+            
+            # List today's backups
+            echo "📋 Today's backups:"
+            aws s3 ls s3://${{ secrets.BACKUP_S3_BUCKET }}/backups/ | grep $TODAY
+            
+            # Check backup sizes
+            echo "📊 Backup verification:"
+            BACKUP_COUNT=$(aws s3 ls s3://${{ secrets.BACKUP_S3_BUCKET }}/backups/ | grep $TODAY | wc -l)
+            
+            if [ $BACKUP_COUNT -ge 3 ]; then
+              echo "✅ Expected backups found ($BACKUP_COUNT files)"
+            else
+              echo "❌ Missing backups (found only $BACKUP_COUNT files)"
+              exit 1
+            fi
+            
+            echo "✅ Backup verification completed"
+          else
+            echo "⚠️ No S3 bucket configured for backup verification"
+          fi
+
+  # =====================================
+  # Notification
+  # =====================================
+  notify-completion:
+    name: 📢 Completion Notification
+    runs-on: ubuntu-latest
+    needs: [backup, maintenance, health-report, verify-backup]
+    if: always()
+
+    steps:
+      - name: 📱 Send completion notification
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          custom_payload: |
+            {
+              "text": "💾 Daily Maintenance Complete - Gyvagaudziaispastai",
+              "attachments": [
+                {
+                  "color": "${{ contains(needs.*.result, 'failure') && 'danger' || 'good' }}",
+                  "fields": [
+                    {
+                      "title": "Backup Status",
+                      "value": "${{ needs.backup.result == 'success' && '✅ Success' || '❌ Failed' }}",
+                      "short": true
+                    },
+                    {
+                      "title": "Maintenance Status",
+                      "value": "${{ needs.maintenance.result == 'success' && '✅ Success' || '❌ Failed' }}",
+                      "short": true
+                    },
+                    {
+                      "title": "Health Report",
+                      "value": "${{ needs.health-report.result == 'success' && '✅ Sent' || '❌ Failed' }}",
+                      "short": true
+                    },
+                    {
+                      "title": "Backup Verification",
+                      "value": "${{ needs.verify-backup.result == 'success' && '✅ Success' || '❌ Failed' }}",
+                      "short": true
+                    }
+                  ]
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

@@ -1,0 +1,179 @@
+# ============================================
+# Prometheus Alerting Rules
+# ============================================
+
+groups:
+  # =====================================
+  # System Health Alerts
+  # =====================================
+  - name: system_health
+    rules:
+      - alert: HighCPUUsage
+        expr: 100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[2m])) * 100) > 80
+        for: 5m
+        labels:
+          severity: warning
+          service: system
+        annotations:
+          summary: "High CPU usage detected"
+          description: "CPU usage is above 80% for more than 5 minutes on {{ $labels.instance }}"
+
+      - alert: HighMemoryUsage
+        expr: (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+          service: system
+        annotations:
+          summary: "High memory usage detected"
+          description: "Memory usage is above 85% for more than 5 minutes on {{ $labels.instance }}"
+
+      - alert: DiskSpaceWarning
+        expr: (node_filesystem_avail_bytes / node_filesystem_size_bytes) * 100 < 20
+        for: 2m
+        labels:
+          severity: warning
+          service: system
+        annotations:
+          summary: "Low disk space warning"
+          description: "Disk space is below 20% on {{ $labels.instance }} ({{ $labels.mountpoint }})"
+
+      - alert: DiskSpaceCritical
+        expr: (node_filesystem_avail_bytes / node_filesystem_size_bytes) * 100 < 10
+        for: 1m
+        labels:
+          severity: critical
+          service: system
+        annotations:
+          summary: "Critical disk space alert"
+          description: "Disk space is below 10% on {{ $labels.instance }} ({{ $labels.mountpoint }})"
+
+  # =====================================
+  # Application Health Alerts
+  # =====================================
+  - name: application_health
+    rules:
+      - alert: BackendDown
+        expr: up{job="backend-health"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          service: backend
+        annotations:
+          summary: "Backend service is down"
+          description: "Backend service has been unreachable for more than 2 minutes"
+
+      - alert: StorefrontDown
+        expr: up{job="storefront-health"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          service: storefront
+        annotations:
+          summary: "Storefront service is down"
+          description: "Storefront service has been unreachable for more than 2 minutes"
+
+      - alert: HighResponseTime
+        expr: avg_over_time(up{job=~"backend-health|storefront-health"}[5m]) < 0.95
+        for: 5m
+        labels:
+          severity: warning
+          service: application
+        annotations:
+          summary: "High response time detected"
+          description: "Application response time degraded for {{ $labels.job }}"
+
+  # =====================================
+  # Container Health Alerts
+  # =====================================
+  - name: container_health
+    rules:
+      - alert: ContainerHighCPU
+        expr: rate(container_cpu_usage_seconds_total[5m]) * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+          service: docker
+        annotations:
+          summary: "Container high CPU usage"
+          description: "Container {{ $labels.name }} is using more than 80% CPU"
+
+      - alert: ContainerHighMemory
+        expr: (container_memory_usage_bytes / container_spec_memory_limit_bytes) * 100 > 90
+        for: 5m
+        labels:
+          severity: warning
+          service: docker
+        annotations:
+          summary: "Container high memory usage"
+          description: "Container {{ $labels.name }} is using more than 90% of allocated memory"
+
+      - alert: ContainerRestarting
+        expr: rate(container_start_time_seconds[10m]) > 0
+        for: 5m
+        labels:
+          severity: warning
+          service: docker
+        annotations:
+          summary: "Container restarting frequently"
+          description: "Container {{ $labels.name }} has been restarting frequently"
+
+  # =====================================
+  # Database Health Alerts
+  # =====================================
+  - name: database_health
+    rules:
+      - alert: PostgreSQLDown
+        expr: up{job="postgres-exporter"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: database
+        annotations:
+          summary: "PostgreSQL is down"
+          description: "PostgreSQL database has been unreachable for more than 1 minute"
+
+      - alert: RedisDown
+        expr: up{job="redis-exporter"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: cache
+        annotations:
+          summary: "Redis is down"
+          description: "Redis cache has been unreachable for more than 1 minute"
+
+      - alert: HighDatabaseConnections
+        expr: pg_stat_database_numbackends > 80
+        for: 5m
+        labels:
+          severity: warning
+          service: database
+        annotations:
+          summary: "High database connections"
+          description: "PostgreSQL has more than 80 active connections"
+
+  # =====================================
+  # Business Logic Alerts
+  # =====================================
+  - name: business_metrics
+    rules:
+      - alert: NoOrdersIn24Hours
+        expr: absent_over_time(increase(orders_total[24h]))
+        for: 30m
+        labels:
+          severity: warning
+          service: business
+        annotations:
+          summary: "No orders in 24 hours"
+          description: "No new orders have been placed in the last 24 hours"
+
+      - alert: HighErrorRate
+        expr: rate(http_requests_total{status=~"5.."}[5m]) / rate(http_requests_total[5m]) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+          service: application
+        annotations:
+          summary: "High error rate detected"
+          description: "HTTP error rate is above 5% for the last 5 minutes"

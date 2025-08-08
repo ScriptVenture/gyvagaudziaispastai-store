@@ -1,0 +1,12 @@
+# Deployment Configuration
+USE_AWS_DOMAIN=true
+AWS_REGION=eu-central-1
+INSTANCE_TYPE=t3.small
+KEY_NAME=gyvagaudziaispastai-demo-20250808-202652-key
+SECURITY_GROUP=gyvagaudziaispastai-demo-20250808-202652-sg
+DEPLOYMENT_ID=gyvagaudziaispastai-demo-20250808-202652
+SECURITY_GROUP_ID=sg-07fe51e718c71b756
+AMI_ID=ami-0857b63eb9da0783d
+INSTANCE_ID=i-0d36ae0fdfffb0f0f
+PUBLIC_IP=35.159.23.78
+ELASTIC_IP=3.127.240.32

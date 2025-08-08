@@ -1,0 +1,75 @@
+# ===============================================
+# Multi-stage production Dockerfile for Next.js Storefront
+# ===============================================
+
+# Stage 1: Base image with security updates
+FROM node:20-slim AS base
+
+# Install security updates and required packages
+RUN apt-get update && apt-get upgrade -y \
+    && apt-get install -y --no-install-recommends \
+        ca-certificates \
+        curl \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean
+
+# Create non-root user for security
+RUN groupadd --gid 1001 nextjs \
+    && useradd --uid 1001 --gid nextjs --shell /bin/bash --create-home nextjs
+
+# Stage 2: Dependencies installation
+FROM base AS dependencies
+
+WORKDIR /app
+COPY package*.json ./
+
+# Install dependencies (production only)
+RUN npm ci --only=production && npm cache clean --force
+
+# Stage 3: Build stage
+FROM base AS build
+
+WORKDIR /app
+COPY package*.json ./
+
+# Install all dependencies including dev dependencies
+RUN npm ci
+
+# Copy source code
+COPY --chown=nextjs:nextjs . .
+
+# Build the application
+ENV NEXT_TELEMETRY_DISABLED=1
+RUN npm run build
+
+# Stage 4: Production runtime
+FROM base AS production
+
+WORKDIR /app
+
+# Copy production dependencies from dependencies stage
+COPY --from=dependencies --chown=nextjs:nextjs /app/node_modules ./node_modules
+
+# Copy built application from build stage
+COPY --from=build --chown=nextjs:nextjs /app/.next ./.next
+COPY --from=build --chown=nextjs:nextjs /app/public ./public
+COPY --from=build --chown=nextjs:nextjs /app/package*.json ./
+COPY --from=build --chown=nextjs:nextjs /app/next.config.ts ./
+
+# Switch to non-root user
+USER nextjs
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+    CMD curl -f http://localhost:3000/health || curl -f http://localhost:3000 || exit 1
+
+# Expose port
+EXPOSE 3000
+
+# Production environment
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV PORT=3000
+
+# Production start command
+CMD ["npm", "run", "start"]

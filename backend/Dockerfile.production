@@ -1,0 +1,77 @@
+# ===============================================
+# Multi-stage production Dockerfile for Medusa Backend
+# ===============================================
+
+# Stage 1: Base image with security updates
+FROM node:20-slim AS base
+
+# Install security updates and required packages
+RUN apt-get update && apt-get upgrade -y \
+    && apt-get install -y --no-install-recommends \
+        ca-certificates \
+        wget \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean
+
+# Create non-root user for security
+RUN groupadd --gid 1001 medusa \
+    && useradd --uid 1001 --gid medusa --shell /bin/bash --create-home medusa
+
+# Stage 2: Dependencies installation
+FROM base AS dependencies
+
+WORKDIR /server
+COPY package*.json ./
+COPY yarn.lock ./
+
+# Install dependencies (production only)
+RUN npm ci --only=production && npm cache clean --force
+
+# Stage 3: Build stage
+FROM base AS build
+
+WORKDIR /server
+COPY package*.json ./
+COPY yarn.lock ./
+
+# Install all dependencies including dev dependencies
+RUN npm ci
+
+# Copy source code
+COPY --chown=medusa:medusa . .
+
+# Set environment to skip validation during build
+ENV SKIP_ENV_VALIDATION=true
+
+# Build the application
+RUN npm run build
+
+# Stage 4: Production runtime
+FROM base AS production
+
+WORKDIR /server
+
+# Copy ALL dependencies from build stage (including dev dependencies for TypeScript support)
+COPY --from=build --chown=medusa:medusa /server/node_modules ./node_modules
+
+# Copy built application from build stage
+COPY --from=build --chown=medusa:medusa /server/.medusa ./.medusa
+COPY --from=build --chown=medusa:medusa /server/src ./src
+COPY --from=build --chown=medusa:medusa /server/medusa-config.ts ./
+COPY --from=build --chown=medusa:medusa /server/instrumentation.ts ./
+COPY --from=build --chown=medusa:medusa /server/tsconfig.json ./
+COPY --from=build --chown=medusa:medusa /server/package*.json ./
+COPY --from=build --chown=medusa:medusa /server/static ./static
+
+# Switch to non-root user
+USER medusa
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+    CMD wget --no-verbose --tries=1 --spider http://localhost:9000/health || exit 1
+
+# Expose port
+EXPOSE 9000
+
+# Production start command
+CMD ["npm", "run", "start"]

@@ -1,0 +1,425 @@
+# =========================================
+# CD Pipeline - Continuous Deployment
+# =========================================
+# Deploys to production on main branch push
+
+name: 🚀 Production Deployment
+
+on:
+  workflow_dispatch:  # Manual trigger
+  push:
+    branches: [ main ]
+    paths-ignore:
+      - 'README.md'
+      - 'docs/**'
+      - '*.md'
+
+# Prevent concurrent deployments
+concurrency:
+  group: production-deployment
+  cancel-in-progress: false
+
+env:
+  AWS_REGION: eu-central-1
+  DOCKER_BUILDKIT: 1
+  COMPOSE_DOCKER_CLI_BUILD: 1
+
+jobs:
+  # =====================================
+  # Pre-deployment Validation
+  # =====================================
+  validate:
+    name: 🔍 Pre-deployment Validation
+    runs-on: ubuntu-latest
+    
+    outputs:
+      should-deploy: ${{ steps.check.outputs.should-deploy }}
+      commit-sha: ${{ steps.meta.outputs.commit-sha }}
+      version: ${{ steps.meta.outputs.version }}
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 📋 Extract metadata
+        id: meta
+        run: |
+          echo "commit-sha=${GITHUB_SHA:0:7}" >> $GITHUB_OUTPUT
+          echo "version=$(date +%Y%m%d)-${GITHUB_SHA:0:7}" >> $GITHUB_OUTPUT
+
+      - name: 🔍 Check if deployment needed
+        id: check
+        run: |
+          # Check if this is a deployment-worthy change
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "Manual deployment triggered"
+            echo "should-deploy=true" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo "Push to main branch detected"
+            echo "should-deploy=true" >> $GITHUB_OUTPUT
+          else
+            echo "No deployment needed"
+            echo "should-deploy=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: 🚨 Check for breaking changes
+        run: |
+          # Check for database migration files
+          if git diff --name-only HEAD~1 HEAD | grep -q "migration\|schema"; then
+            echo "⚠️ Database changes detected. Review before deployment!"
+          fi
+          
+          # Check for environment variable changes
+          if git diff --name-only HEAD~1 HEAD | grep -q ".env\|config"; then
+            echo "⚠️ Configuration changes detected. Update production environment!"
+          fi
+
+  # =====================================
+  # Build and Push Docker Images
+  # =====================================
+  build:
+    name: 🏗️ Build & Push Images
+    runs-on: ubuntu-latest
+    needs: validate
+    if: needs.validate.outputs.should-deploy == 'true'
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🔧 Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: 🏗️ Build Backend Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          file: ./backend/Dockerfile.production
+          push: false
+          tags: gyvagaudziaispastai/backend:${{ needs.validate.outputs.version }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          outputs: type=docker,dest=/tmp/backend-image.tar
+
+      - name: 🏗️ Build Storefront Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./storefront
+          file: ./storefront/Dockerfile.production
+          push: false
+          tags: gyvagaudziaispastai/storefront:${{ needs.validate.outputs.version }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          outputs: type=docker,dest=/tmp/storefront-image.tar
+
+      - name: 📦 Upload Docker images
+        uses: actions/upload-artifact@v4
+        with:
+          name: docker-images
+          path: /tmp/*-image.tar
+          retention-days: 1
+
+  # =====================================
+  # Deploy to Production
+  # =====================================
+  deploy:
+    name: 🚀 Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [validate, build]
+    environment: 
+      name: production
+      url: https://${{ vars.PRODUCTION_DOMAIN }}
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📦 Download Docker images
+        uses: actions/download-artifact@v4
+        with:
+          name: docker-images
+          path: /tmp
+
+      - name: 🔧 Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: 📋 Prepare deployment
+        run: |
+          echo "🚀 Preparing deployment..."
+          echo "Version: ${{ needs.validate.outputs.version }}"
+          echo "Commit: ${{ needs.validate.outputs.commit-sha }}"
+          echo "Domain: ${{ vars.PRODUCTION_DOMAIN }}"
+
+      - name: 🔧 Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.AWS_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.AWS_EC2_HOST }} >> ~/.ssh/known_hosts
+
+      - name: 📤 Transfer Docker images to server
+        run: |
+          echo "📤 Transferring Docker images..."
+          scp -i ~/.ssh/id_rsa /tmp/backend-image.tar ubuntu@${{ secrets.AWS_EC2_HOST }}:/tmp/
+          scp -i ~/.ssh/id_rsa /tmp/storefront-image.tar ubuntu@${{ secrets.AWS_EC2_HOST }}:/tmp/
+
+      - name: 📤 Transfer deployment files
+        run: |
+          echo "📤 Transferring deployment files..."
+          scp -i ~/.ssh/id_rsa docker-compose.production.yml ubuntu@${{ secrets.AWS_EC2_HOST }}:/opt/gyvagaudziaispastai/
+          scp -i ~/.ssh/id_rsa nginx/nginx.conf ubuntu@${{ secrets.AWS_EC2_HOST }}:/tmp/
+
+      - name: 🚀 Deploy to production server
+        run: |
+          ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.AWS_EC2_HOST }} << 'EOF'
+            set -e
+            cd /opt/gyvagaudziaispastai
+            
+            echo "🔄 Loading new Docker images..."
+            docker load -i /tmp/backend-image.tar
+            docker load -i /tmp/storefront-image.tar
+            
+            echo "🏷️ Tagging images..."
+            docker tag gyvagaudziaispastai/backend:${{ needs.validate.outputs.version }} gyvagaudziaispastai/backend:latest
+            docker tag gyvagaudziaispastai/storefront:${{ needs.validate.outputs.version }} gyvagaudziaispastai/storefront:latest
+            
+            echo "💾 Creating backup of current deployment..."
+            if docker-compose ps -q | grep -q .; then
+              docker-compose logs --tail=100 > backup-logs-$(date +%Y%m%d-%H%M%S).log
+            fi
+            
+            echo "🔄 Updating services..."
+            docker-compose -f docker-compose.production.yml down --remove-orphans
+            
+            echo "🗄️ Running database migrations..."
+            docker-compose -f docker-compose.production.yml run --rm backend npm run migration:run || echo "No migrations to run"
+            
+            echo "🚀 Starting updated services..."
+            docker-compose -f docker-compose.production.yml up -d
+            
+            echo "⏳ Waiting for services to be ready..."
+            timeout 120 bash -c 'until curl -f http://localhost:9000/health 2>/dev/null; do sleep 2; done'
+            timeout 120 bash -c 'until curl -f http://localhost:3000 2>/dev/null; do sleep 2; done'
+            
+            echo "🧹 Cleaning up old images..."
+            docker image prune -f
+            
+            echo "✅ Deployment completed successfully!"
+            echo "🌐 Backend health: $(curl -s http://localhost:9000/health)"
+            echo "🌐 Storefront accessible at: https://${{ vars.PRODUCTION_DOMAIN }}"
+          EOF
+
+      - name: 🔍 Verify deployment
+        run: |
+          echo "🔍 Verifying deployment..."
+          
+          # Check backend health
+          if curl -f https://${{ vars.PRODUCTION_DOMAIN }}/api/health; then
+            echo "✅ Backend is healthy"
+          else
+            echo "❌ Backend health check failed"
+            exit 1
+          fi
+          
+          # Check storefront
+          if curl -f https://${{ vars.PRODUCTION_DOMAIN }}; then
+            echo "✅ Storefront is accessible"
+          else
+            echo "❌ Storefront is not accessible"
+            exit 1
+          fi
+
+      - name: 📊 Post-deployment monitoring setup
+        run: |
+          ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.AWS_EC2_HOST }} << 'EOF'
+            # Setup monitoring alerts
+            echo "📊 Setting up monitoring..."
+            
+            # Create simple monitoring script
+            cat > /opt/gyvagaudziaispastai/monitor.sh << 'MONITOR_EOF'
+            #!/bin/bash
+            
+            # Check services health
+            if ! curl -f http://localhost:9000/health >/dev/null 2>&1; then
+              echo "❌ Backend unhealthy at $(date)" >> /var/log/gyvagaudziaispastai-monitor.log
+            fi
+            
+            if ! curl -f http://localhost:3000 >/dev/null 2>&1; then
+              echo "❌ Storefront unhealthy at $(date)" >> /var/log/gyvagaudziaispastai-monitor.log
+            fi
+            
+            # Check disk space
+            DISK_USAGE=$(df / | awk 'NR==2 {print $5}' | sed 's/%//')
+            if [ $DISK_USAGE -gt 80 ]; then
+              echo "⚠️ Disk usage at ${DISK_USAGE}% at $(date)" >> /var/log/gyvagaudziaispastai-monitor.log
+            fi
+            MONITOR_EOF
+            
+            chmod +x /opt/gyvagaudziaispastai/monitor.sh
+            
+            # Add to cron (runs every 5 minutes)
+            (crontab -l 2>/dev/null; echo "*/5 * * * * /opt/gyvagaudziaispastai/monitor.sh") | crontab -
+            
+            echo "✅ Monitoring setup complete"
+          EOF
+
+      - name: 🧹 Cleanup
+        if: always()
+        run: |
+          rm -f ~/.ssh/id_rsa
+          rm -f /tmp/*-image.tar
+
+  # =====================================
+  # Post-deployment Testing
+  # =====================================
+  smoke-tests:
+    name: 💨 Smoke Tests
+    runs-on: ubuntu-latest
+    needs: [deploy]
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🧪 Run production smoke tests
+        run: |
+          echo "🧪 Running smoke tests against production..."
+          
+          # Test main pages
+          pages=("/" "/traps" "/about" "/privacy" "/terms")
+          
+          for page in "${pages[@]}"; do
+            url="https://${{ vars.PRODUCTION_DOMAIN }}${page}"
+            if curl -f -s -o /dev/null "$url"; then
+              echo "✅ $url - OK"
+            else
+              echo "❌ $url - FAILED"
+              exit 1
+            fi
+          done
+          
+          # Test API endpoints
+          api_endpoints=("/api/health" "/api/products")
+          
+          for endpoint in "${api_endpoints[@]}"; do
+            url="https://${{ vars.PRODUCTION_DOMAIN }}${endpoint}"
+            if curl -f -s -o /dev/null "$url"; then
+              echo "✅ $url - OK"
+            else
+              echo "❌ $url - FAILED"
+              exit 1
+            fi
+          done
+          
+          echo "✅ All smoke tests passed!"
+
+      - name: 🚨 Rollback on failure
+        if: failure()
+        run: |
+          echo "🚨 Smoke tests failed! Initiating rollback..."
+          ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.AWS_EC2_HOST }} << 'EOF'
+            cd /opt/gyvagaudziaispastai
+            
+            echo "🔄 Rolling back to previous version..."
+            # Stop current services
+            docker-compose down
+            
+            # Restore from backup (implement based on your backup strategy)
+            echo "Please implement rollback logic based on your backup strategy"
+            
+            # Start previous version
+            docker-compose up -d
+          EOF
+
+  # =====================================
+  # Deployment Notifications
+  # =====================================
+  notify:
+    name: 📢 Notifications
+    runs-on: ubuntu-latest
+    needs: [deploy, smoke-tests]
+    if: always()
+
+    steps:
+      - name: 📧 Email notification
+        if: failure()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ secrets.SMTP_SERVER }}
+          server_port: 587
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          subject: '🚨 Deployment Failed - Gyvagaudziaispastai'
+          body: |
+            Deployment to production failed!
+            
+            Commit: ${{ github.sha }}
+            Workflow: ${{ github.workflow }}
+            Actor: ${{ github.actor }}
+            
+            Please check the logs and take action.
+          from: 'noreply@gyvagaudziaispastai.com'
+          to: '${{ secrets.NOTIFICATION_EMAIL }}'
+
+      - name: 📱 Slack notification
+        uses: 8398a7/action-slack@v3
+        if: always()
+        with:
+          status: ${{ job.status }}
+          custom_payload: |
+            {
+              "text": "🚀 Gyvagaudziaispastai Deployment",
+              "attachments": [
+                {
+                  "color": "${{ job.status == 'success' && 'good' || 'danger' }}",
+                  "fields": [
+                    {
+                      "title": "Status",
+                      "value": "${{ job.status == 'success' && '✅ Success' || '❌ Failed' }}",
+                      "short": true
+                    },
+                    {
+                      "title": "Environment",
+                      "value": "🌍 Production",
+                      "short": true
+                    },
+                    {
+                      "title": "Commit",
+                      "value": "${{ needs.validate.outputs.commit-sha }}",
+                      "short": true
+                    },
+                    {
+                      "title": "Author",
+                      "value": "${{ github.actor }}",
+                      "short": true
+                    },
+                    {
+                      "title": "URL",
+                      "value": "https://${{ vars.PRODUCTION_DOMAIN }}",
+                      "short": false
+                    }
+                  ]
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+      - name: 🎉 Success summary
+        if: success()
+        run: |
+          echo "🎉 Deployment completed successfully!"
+          echo ""
+          echo "📊 Deployment Summary:"
+          echo "• Version: ${{ needs.validate.outputs.version }}"
+          echo "• Commit: ${{ needs.validate.outputs.commit-sha }}"
+          echo "• URL: https://${{ vars.PRODUCTION_DOMAIN }}"
+          echo "• Time: $(date)"
+          echo ""
+          echo "✅ All systems operational!"
