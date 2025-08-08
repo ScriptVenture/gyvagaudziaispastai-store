@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { Button, TextField, Select, Checkbox, Text, Flex, Box, Heading } from "@radix-ui/themes"
 import { Mail, User, MapPin, Building, Phone } from "lucide-react"
+import { useTranslation } from "@/hooks/useTranslation"
 
 interface AddressFormProps {
   onNext: () => void
@@ -11,6 +12,8 @@ interface AddressFormProps {
 }
 
 export default function AddressForm({ onNext, onUpdate, initialData }: AddressFormProps) {
+  const { t } = useTranslation();
+  
   const [formData, setFormData] = useState({
     email: initialData.email || "",
     shippingAddress: {
@@ -32,13 +35,13 @@ export default function AddressForm({ onNext, onUpdate, initialData }: AddressFo
   const validateForm = () => {
     const newErrors: any = {}
 
-    if (!formData.email) newErrors.email = "Email is required"
-    if (!formData.shippingAddress.firstName) newErrors.firstName = "First name is required"
-    if (!formData.shippingAddress.lastName) newErrors.lastName = "Last name is required"
-    if (!formData.shippingAddress.address1) newErrors.address1 = "Address is required"
-    if (!formData.shippingAddress.city) newErrors.city = "City is required"
-    if (!formData.shippingAddress.postalCode) newErrors.postalCode = "Postal code is required"
-    if (!formData.shippingAddress.phone) newErrors.phone = "Phone is required"
+    if (!formData.email) newErrors.email = t('checkout.address.emailRequired')
+    if (!formData.shippingAddress.firstName) newErrors.firstName = t('checkout.address.firstNameRequired')
+    if (!formData.shippingAddress.lastName) newErrors.lastName = t('checkout.address.lastNameRequired')
+    if (!formData.shippingAddress.address1) newErrors.address1 = t('checkout.address.addressRequired')
+    if (!formData.shippingAddress.city) newErrors.city = t('checkout.address.cityRequired')
+    if (!formData.shippingAddress.postalCode) newErrors.postalCode = t('checkout.address.postalCodeRequired')
+    if (!formData.shippingAddress.phone) newErrors.phone = t('checkout.address.phoneRequired')
 
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
@@ -66,7 +69,7 @@ export default function AddressForm({ onNext, onUpdate, initialData }: AddressFo
       const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to update addresses')
+        throw new Error(data.error || t('checkout.errors.addressValidation'))
       }
 
       onUpdate({
@@ -101,15 +104,15 @@ export default function AddressForm({ onNext, onUpdate, initialData }: AddressFo
 
   return (
     <form onSubmit={handleSubmit}>
-      <Heading size="6" className="mb-6">Shipping Information</Heading>
+      <Heading size="6" className="mb-6">{t('checkout.address.title')}</Heading>
 
       {/* Email */}
       <Box className="mb-6">
         <Text size="2" weight="medium" className="block mb-2">
-          Contact Information
+          {t('checkout.address.email')}
         </Text>
         <TextField.Root
-          placeholder="Email address"
+          placeholder={t('checkout.address.email')}
           type="email"
           size="3"
           value={formData.email}
@@ -124,13 +127,13 @@ export default function AddressForm({ onNext, onUpdate, initialData }: AddressFo
 
       {/* Shipping Address */}
       <Text size="2" weight="medium" className="block mb-4">
-        Shipping Address
+        {t('checkout.steps.shipping')}
       </Text>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
         <Box>
           <TextField.Root
-            placeholder="First name"
+            placeholder={t('checkout.address.firstName')}
             size="3"
             value={formData.shippingAddress.firstName}
             onChange={(e) => updateField('shippingAddress.firstName', e.target.value)}
@@ -144,7 +147,7 @@ export default function AddressForm({ onNext, onUpdate, initialData }: AddressFo
 
         <Box>
           <TextField.Root
-            placeholder="Last name"
+            placeholder={t('checkout.address.lastName')}
             size="3"
             value={formData.shippingAddress.lastName}
             onChange={(e) => updateField('shippingAddress.lastName', e.target.value)}
@@ -155,7 +158,7 @@ export default function AddressForm({ onNext, onUpdate, initialData }: AddressFo
 
       <Box className="mb-4">
         <TextField.Root
-          placeholder="Company (optional)"
+          placeholder={t('checkout.address.company')}
           size="3"
           value={formData.shippingAddress.company}
           onChange={(e) => updateField('shippingAddress.company', e.target.value)}
@@ -168,7 +171,7 @@ export default function AddressForm({ onNext, onUpdate, initialData }: AddressFo
 
       <Box className="mb-4">
         <TextField.Root
-          placeholder="Address"
+          placeholder={t('checkout.address.address1')}
           size="3"
           value={formData.shippingAddress.address1}
           onChange={(e) => updateField('shippingAddress.address1', e.target.value)}
@@ -182,7 +185,7 @@ export default function AddressForm({ onNext, onUpdate, initialData }: AddressFo
 
       <Box className="mb-4">
         <TextField.Root
-          placeholder="Apartment, suite, etc. (optional)"
+          placeholder={t('checkout.address.address2')}
           size="3"
           value={formData.shippingAddress.address2}
           onChange={(e) => updateField('shippingAddress.address2', e.target.value)}
@@ -192,7 +195,7 @@ export default function AddressForm({ onNext, onUpdate, initialData }: AddressFo
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
         <Box className="md:col-span-1">
           <TextField.Root
-            placeholder="City"
+            placeholder={t('checkout.address.city')}
             size="3"
             value={formData.shippingAddress.city}
             onChange={(e) => updateField('shippingAddress.city', e.target.value)}
@@ -205,20 +208,20 @@ export default function AddressForm({ onNext, onUpdate, initialData }: AddressFo
             value={formData.shippingAddress.countryCode}
             onValueChange={(value) => updateField('shippingAddress.countryCode', value)}
           >
-            <Select.Trigger placeholder="Country" />
+            <Select.Trigger placeholder={t('checkout.address.country')} />
             <Select.Content>
-              <Select.Item value="LT">Lithuania</Select.Item>
-              <Select.Item value="LV">Latvia</Select.Item>
-              <Select.Item value="EE">Estonia</Select.Item>
-              <Select.Item value="PL">Poland</Select.Item>
-              <Select.Item value="DE">Germany</Select.Item>
+              <Select.Item value="LT">Lietuva</Select.Item>
+              <Select.Item value="LV">Latvija</Select.Item>
+              <Select.Item value="EE">Estija</Select.Item>
+              <Select.Item value="PL">Lenkija</Select.Item>
+              <Select.Item value="DE">Vokietija</Select.Item>
             </Select.Content>
           </Select.Root>
         </Box>
 
         <Box>
           <TextField.Root
-            placeholder="Postal code"
+            placeholder={t('checkout.address.postalCode')}
             size="3"
             value={formData.shippingAddress.postalCode}
             onChange={(e) => updateField('shippingAddress.postalCode', e.target.value)}
@@ -229,7 +232,7 @@ export default function AddressForm({ onNext, onUpdate, initialData }: AddressFo
 
       <Box className="mb-6">
         <TextField.Root
-          placeholder="Phone number"
+          placeholder={t('checkout.address.phone')}
           size="3"
           type="tel"
           value={formData.shippingAddress.phone}
@@ -248,7 +251,7 @@ export default function AddressForm({ onNext, onUpdate, initialData }: AddressFo
           checked={formData.sameAsBilling}
           onCheckedChange={(checked) => setFormData(prev => ({ ...prev, sameAsBilling: checked as boolean }))}
         />
-        <Text size="2">Billing address same as shipping</Text>
+        <Text size="2">Sąskaitų siuntimo adresas toks pat kaip pristatymo</Text>
       </Flex>
 
       {/* Error Message */}
@@ -261,7 +264,7 @@ export default function AddressForm({ onNext, onUpdate, initialData }: AddressFo
       {/* Submit Button */}
       <Flex justify="end">
         <Button size="3" type="submit">
-          Continue to Shipping
+          {t('checkout.steps.shippingMethod')}
         </Button>
       </Flex>
     </form>

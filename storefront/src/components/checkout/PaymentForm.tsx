@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { Button, Text, Flex, Box, Heading, RadioGroup } from "@radix-ui/themes"
 import { CreditCard, Banknote, Wallet, AlertCircle } from "lucide-react"
 import { HttpTypes } from "@medusajs/types"
+import { useTranslation } from "@/hooks/useTranslation"
 
 interface PaymentFormProps {
   cart: HttpTypes.StoreCart
@@ -28,6 +29,7 @@ export default function PaymentForm({
   onUpdate,
   checkoutData 
 }: PaymentFormProps) {
+  const { t } = useTranslation()
   const [selected, setSelected] = useState("")
   const [loading, setLoading] = useState(false)
   const [paymentProviders, setPaymentProviders] = useState<any[]>([])
@@ -51,7 +53,7 @@ export default function PaymentForm({
 
       const provider = paymentProviders.find(p => p.id === selected)
       if (!provider) {
-        setError("Please select a payment method")
+        setError(t('checkout.payment.pleaseSelectPayment'))
         return
       }
 
@@ -94,15 +96,15 @@ export default function PaymentForm({
   const getProviderName = (providerId: string) => {
     switch (providerId) {
       case "pp_stripe_stripe":
-        return "Credit/Debit Card (Stripe)"
+        return t('checkout.payment.creditCardPayment')
       case "pp_paysera_paysera":
-        return "Paysera Payment"
+        return t('checkout.payment.payseraPayment')
       case "paysera":
-        return "Paysera Payment"
+        return t('checkout.payment.payseraPayment')
       case "pp_system_default":
-        return "Manual Payment"
+        return t('checkout.payment.manualPayment')
       case "pp_manual_manual":
-        return "Manual Payment"
+        return t('checkout.payment.manualPayment')
       default:
         return (providerId?.replace("pp_", "")?.replace("_", " ") || providerId)?.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
     }
@@ -111,26 +113,26 @@ export default function PaymentForm({
   const getProviderDescription = (providerId: string) => {
     switch (providerId) {
       case "pp_stripe_stripe":
-        return "Pay securely with Visa, Mastercard, or American Express"
+        return t('checkout.payment.creditCardDescription')
       case "pp_paysera_paysera":
-        return "Pay with Paysera - Bank transfer, cards, and e-wallets"
+        return t('checkout.payment.payseraDescription')
       case "paysera":
-        return "Pay with Paysera - Bank transfer, cards, and e-wallets"
+        return t('checkout.payment.payseraDescription')
       case "pp_system_default":
-        return "Manual payment processing"
+        return t('checkout.payment.manualPaymentDescription')
       case "pp_manual_manual":
-        return "Manual payment processing - Order will be processed manually"
+        return t('checkout.payment.manualPaymentFull')
       default:
-        return "Secure payment processing"
+        return t('checkout.payment.securePayment')
     }
   }
 
   if (loading) {
     return (
       <div>
-        <Heading size="6" className="mb-6">Payment Method</Heading>
+        <Heading size="6" className="mb-6">{t('checkout.payment.title')}</Heading>
         <Box className="p-8 text-center">
-          <Text>Loading payment options...</Text>
+          <Text>{t('checkout.payment.loadingPaymentOptions')}</Text>
         </Box>
       </div>
     )
@@ -138,11 +140,11 @@ export default function PaymentForm({
 
   return (
     <div>
-      <Heading size="6" className="mb-6">Payment Method</Heading>
+      <Heading size="6" className="mb-6">{t('checkout.payment.title')}</Heading>
 
       {paymentProviders.length === 0 ? (
         <Box className="p-4 bg-gray-50 rounded-lg mb-6">
-          <Text color="gray">No payment providers available</Text>
+          <Text color="gray">{t('checkout.payment.noPaymentProviders')}</Text>
         </Box>
       ) : (
         <RadioGroup.Root value={selected} onValueChange={setSelected}>
@@ -188,14 +190,14 @@ export default function PaymentForm({
 
       <Flex justify="between" className="mt-8">
         <Button size="3" variant="outline" onClick={onBack} disabled={loading}>
-          Back
+          {t('back')}
         </Button>
         <Button 
           size="3" 
           onClick={handleSubmit} 
           disabled={!selected || loading || paymentProviders.length === 0}
         >
-          {loading ? "Setting up..." : "Review Order"}
+          {loading ? t('checkout.payment.settingUp') : t('checkout.payment.reviewOrder')}
         </Button>
       </Flex>
     </div>

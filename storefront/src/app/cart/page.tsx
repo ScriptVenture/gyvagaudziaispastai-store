@@ -6,8 +6,10 @@ import { Container, Heading, Text, Button, Flex, Box } from "@radix-ui/themes"
 import { Trash2, Plus, Minus } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
+import { useTranslation } from "@/hooks/useTranslation"
 
 export default function CartPage() {
+  const { t } = useTranslation()
   const { cart, isLoading } = useCart()
   const { updateItem, deleteItem, isUpdating, isDeleting } = useCartActions()
 
@@ -15,7 +17,7 @@ export default function CartPage() {
     return (
       <Container size="3" className="py-16">
         <Flex direction="column" align="center" gap="4">
-          <Text>Loading cart...</Text>
+          <Text>{t('loading')}</Text>
         </Flex>
       </Container>
     )
@@ -25,10 +27,10 @@ export default function CartPage() {
     return (
       <Container size="3" className="py-16">
         <Flex direction="column" align="center" gap="4">
-          <Heading size="8">Your cart is empty</Heading>
-          <Text size="5" color="gray">Add some items to get started</Text>
+          <Heading size="8">{t('cart.empty')}</Heading>
+          <Text size="5" color="gray">{t('cart.emptyMessage')}</Text>
           <Link href="/">
-            <Button size="3">Continue Shopping</Button>
+            <Button size="3">{t('cart.backToShopping')}</Button>
           </Link>
         </Flex>
       </Container>
@@ -41,7 +43,7 @@ export default function CartPage() {
 
   return (
     <Container size="4" className="py-8">
-      <Heading size="8" className="mb-8">Shopping Cart</Heading>
+      <Heading size="8" className="mb-8">{t('cart.title')}</Heading>
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2">
@@ -114,27 +116,27 @@ export default function CartPage() {
         
         <div>
           <Box className="border rounded-lg p-6 sticky top-4">
-            <Heading size="5" className="mb-4">Order Summary</Heading>
+            <Heading size="5" className="mb-4">{t('checkout.review.orderSummary')}</Heading>
             
             <Flex direction="column" gap="3">
               <Flex justify="between">
-                <Text>Subtotal</Text>
+                <Text>{t('cart.subtotal')}</Text>
                 <Text weight="medium">€{subtotal.toFixed(2)}</Text>
               </Flex>
               
               <Flex justify="between">
-                <Text>Shipping</Text>
-                <Text color="gray">Calculated at checkout</Text>
+                <Text>{t('cart.shipping')}</Text>
+                <Text color="gray">{t('cart.calculatedAtCheckout')}</Text>
               </Flex>
               
               <Flex justify="between">
-                <Text>Tax</Text>
-                <Text color="gray">Calculated at checkout</Text>
+                <Text>{t('cart.tax')}</Text>
+                <Text color="gray">{t('cart.calculatedAtCheckout')}</Text>
               </Flex>
               
               <Box className="border-t pt-3">
                 <Flex justify="between">
-                  <Text size="4" weight="bold">Total</Text>
+                  <Text size="4" weight="bold">{t('cart.total')}</Text>
                   <Text size="4" weight="bold">
                     €{subtotal.toFixed(2)}
                   </Text>
@@ -143,13 +145,13 @@ export default function CartPage() {
               
               <Link href="/checkout" className="w-full">
                 <Button size="3" className="w-full">
-                  Proceed to Checkout
+                  {t('cart.proceedToCheckout')}
                 </Button>
               </Link>
               
               <Link href="/" className="w-full">
                 <Button size="3" variant="outline" className="w-full">
-                  Continue Shopping
+                  {t('cart.backToShopping')}
                 </Button>
               </Link>
             </Flex>

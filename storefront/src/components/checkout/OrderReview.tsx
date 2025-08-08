@@ -5,6 +5,7 @@ import { Button, Text, Flex, Box, Heading, Separator } from "@radix-ui/themes"
 import { MapPin, Truck, CreditCard, AlertCircle } from "lucide-react"
 import { HttpTypes } from "@medusajs/types"
 import { useRouter } from "next/navigation"
+import { useTranslation } from "@/hooks/useTranslation"
 
 interface OrderReviewProps {
   cart: HttpTypes.StoreCart
@@ -13,6 +14,7 @@ interface OrderReviewProps {
 }
 
 export default function OrderReview({ cart, checkoutData, onBack }: OrderReviewProps) {
+  const { t } = useTranslation()
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -96,13 +98,13 @@ export default function OrderReview({ cart, checkoutData, onBack }: OrderReviewP
 
   return (
     <div>
-      <Heading size="6" className="mb-6">Review Your Order</Heading>
+      <Heading size="6" className="mb-6">{t('checkout.review.reviewYourOrder')}</Heading>
 
       {/* Shipping Address */}
       <Box className="mb-6">
         <Flex align="center" gap="2" className="mb-3">
           <MapPin size={20} className="text-gray-600" />
-          <Text weight="medium">Shipping Address</Text>
+          <Text weight="medium">{t('checkout.review.shippingAddress')}</Text>
         </Flex>
         <Box className="pl-7">
           <Text size="2">
@@ -131,7 +133,7 @@ export default function OrderReview({ cart, checkoutData, onBack }: OrderReviewP
       <Box className="mb-6">
         <Flex align="center" gap="2" className="mb-3">
           <Truck size={20} className="text-gray-600" />
-          <Text weight="medium">Shipping Method</Text>
+          <Text weight="medium">{t('checkout.review.shippingMethod')}</Text>
         </Flex>
         <Box className="pl-7">
           <Text size="2">{checkoutData.shippingMethod?.name}</Text>
@@ -150,7 +152,7 @@ export default function OrderReview({ cart, checkoutData, onBack }: OrderReviewP
       <Box className="mb-6">
         <Flex align="center" gap="2" className="mb-3">
           <CreditCard size={20} className="text-gray-600" />
-          <Text weight="medium">Payment Method</Text>
+          <Text weight="medium">{t('checkout.review.paymentMethod')}</Text>
         </Flex>
         <Box className="pl-7">
           <Text size="2">{checkoutData.paymentMethod?.name}</Text>
@@ -164,13 +166,13 @@ export default function OrderReview({ cart, checkoutData, onBack }: OrderReviewP
 
       {/* Order Items */}
       <Box className="mb-6">
-        <Text weight="medium" className="mb-3">Order Items</Text>
+        <Text weight="medium" className="mb-3">{t('checkout.review.orderItems')}</Text>
         <Box className="space-y-3">
           {cart.items.map((item) => (
             <Flex key={item.id} justify="between" align="start">
               <Box>
                 <Text size="2">{item.product?.title}</Text>
-                <Text size="1" color="gray">Quantity: {item.quantity}</Text>
+                <Text size="1" color="gray">{t('cart.quantity')}: {item.quantity}</Text>
               </Box>
               <Text size="2" weight="medium">
                 €{((item.unit_price || 0) * item.quantity).toFixed(2)}
@@ -185,20 +187,20 @@ export default function OrderReview({ cart, checkoutData, onBack }: OrderReviewP
       {/* Order Total */}
       <Box className="mb-6">
         <Flex justify="between" className="mb-2">
-          <Text>Subtotal</Text>
+          <Text>{t('cart.subtotal')}</Text>
           <Text>€{subtotal.toFixed(2)}</Text>
         </Flex>
         <Flex justify="between" className="mb-2">
-          <Text>Shipping</Text>
+          <Text>{t('cart.shipping')}</Text>
           <Text>€{(shippingAmount / 100).toFixed(2)}</Text>
         </Flex>
         <Flex justify="between" className="mb-2">
-          <Text>Tax</Text>
-          <Text color="gray">Included</Text>
+          <Text>{t('cart.tax')}</Text>
+          <Text color="gray">{t('checkout.review.taxIncluded')}</Text>
         </Flex>
         <Separator size="4" className="my-3" />
         <Flex justify="between">
-          <Text size="4" weight="bold">Total</Text>
+          <Text size="4" weight="bold">{t('cart.total')}</Text>
           <Text size="4" weight="bold">€{total.toFixed(2)}</Text>
         </Flex>
       </Box>
@@ -212,15 +214,15 @@ export default function OrderReview({ cart, checkoutData, onBack }: OrderReviewP
 
       <Flex justify="between">
         <Button size="3" variant="outline" onClick={onBack} disabled={loading}>
-          Back
+          {t('back')}
         </Button>
       
-<Button 
+        <Button 
           size="3" 
           onClick={handlePlaceOrder} 
           disabled={loading}
         >
-          {loading ? "Processing..." : "Place Order"}
+          {loading ? t('checkout.review.processing') : t('checkout.review.placeOrder')}
         </Button>
       </Flex>
     </div>

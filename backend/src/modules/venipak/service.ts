@@ -18,7 +18,11 @@ import {
   VenipakShipmentRequest,
   VenipakShipmentResponse,
   VenipakTrackingInfo,
-  VenipakServiceType 
+  VenipakServiceType,
+  VenipakPickupPoint,
+  VenipakPickupPointsRequest,
+  VenipakPickupPointsResponse,
+  VenipakPostOffice
 } from "./types";
 import https from "https";
 import http from "http";
@@ -28,7 +32,7 @@ export default class VenipakFulfillmentProvider implements IFulfillmentProvider 
   
   private options_: VenipakConfig;
 
-  constructor(_, options: VenipakConfig) {
+  constructor(_: any, options: VenipakConfig) {
     console.log("🚀 VenipakFulfillmentProvider constructor called with options:", options);
     this.options_ = {
       api_key: options.api_key || "",
@@ -653,6 +657,17 @@ export default class VenipakFulfillmentProvider implements IFulfillmentProvider 
           max_dimensions: { length: 40, width: 30, height: 30 },
           base_price: 249
         });
+        
+        services.push({
+          code: "POST_OFFICE",
+          name: "POST Office Pickup",
+          type: "post_office",
+          delivery_time: "2-4 business days",
+          description: "Delivery to POST office for pickup",
+          max_weight: 30,
+          max_dimensions: { length: 60, width: 40, height: 40 },
+          base_price: 329
+        });
       }
 
       console.log(`Loaded ${services.length} Venipak services (pickup points available: ${hasPickupPoints})`);
@@ -666,8 +681,8 @@ export default class VenipakFulfillmentProvider implements IFulfillmentProvider 
   // Check if pickup points are available via API
   private async hasPickupPointsAvailable(): Promise<boolean> {
     try {
-      const pickupPoints = await this.getPickupPoints();
-      return pickupPoints.length > 0;
+      const pickupPointsResponse = await this.getPickupPoints();
+      return pickupPointsResponse.success && (pickupPointsResponse.pickup_points?.length || 0) > 0;
     } catch (error: any) {
       console.error("Error checking pickup points availability:", error);
       return false;
@@ -704,35 +719,161 @@ export default class VenipakFulfillmentProvider implements IFulfillmentProvider 
     }
   }
 
-  // Get pickup points from Venipak API
-  async getPickupPoints(): Promise<any[]> {
+  // Enhanced pickup points API with filtering and POST office support
+  async getPickupPoints(request?: VenipakPickupPointsRequest): Promise<VenipakPickupPointsResponse> {
     try {
-      console.log("Fetching Venipak pickup points from API...");
+      console.log("Fetching Venipak pickup points from API with filters:", request);
       
-      const response = await this.callVenipakAPI("/get_pickup_points", "GET");
+      // Build query parameters for filtering
+      const queryParams: Record<string, string> = {};
+      if (request?.country) queryParams.country = request.country;
+      if (request?.city) queryParams.city = request.city;
+      if (request?.postal_code) queryParams.postal_code = request.postal_code;
+      if (request?.type && request.type !== 'all') queryParams.type = request.type;
+      if (request?.limit) queryParams.limit = request.limit.toString();
+      if (request?.radius) queryParams.radius = request.radius.toString();
       
-      console.log("Venipak pickup points API response:", response);
+      // Try multiple endpoints based on the request type
+      const endpoints = this.getPickupPointEndpoints(request?.type);
+      let allPickupPoints: VenipakPickupPoint[] = [];
       
-      if (response && Array.isArray(response)) {
-        console.log(`Found ${response.length} pickup points from Venipak API`);
-        return response.map((point: any) => ({
-          id: point.id,
-          name: point.name,
-          address: point.address,
-          city: point.city,
-          country: point.country,
-          zip: point.zip,
-          code: point.code,
-          coordinates: point.coordinates || { lat: point.lat, lng: point.lng }
-        }));
+      for (const endpoint of endpoints) {
+        try {
+          const response = await this.callVenipakAPI(endpoint, "GET", queryParams);
+          
+          if (response && Array.isArray(response)) {
+            const mappedPoints = this.mapPickupPointsResponse(response, endpoint);
+            allPickupPoints = [...allPickupPoints, ...mappedPoints];
+            console.log(`Found ${mappedPoints.length} points from ${endpoint}`);
+          }
+        } catch (endpointError: any) {
+          console.warn(`Error fetching from ${endpoint}:`, endpointError.message);
+          // Continue with other endpoints
+        }
       }
-
-      console.log("No pickup points returned or invalid response format");
-      return [];
+      
+      // Apply client-side filtering if needed
+      let filteredPoints = this.applyClientSideFiltering(allPickupPoints, request);
+      
+      // Sort by distance if coordinates provided
+      if (request?.postal_code || request?.address) {
+        filteredPoints = await this.sortByDistance(filteredPoints, request);
+      }
+      
+      console.log(`Total ${filteredPoints.length} pickup points after filtering`);
+      
+      return {
+        success: true,
+        pickup_points: filteredPoints,
+        total_count: filteredPoints.length
+      };
     } catch (error: any) {
       console.error("Error fetching Venipak pickup points:", error);
-      return [];
+      return {
+        success: false,
+        error: error.message
+      };
     }
+  }
+  
+  // Get specific endpoints based on pickup point type
+  private getPickupPointEndpoints(type?: string): string[] {
+    switch (type) {
+      case 'pickup_point':
+        return ['/get_pickup_points'];
+      case 'locker':
+        return ['/get_lockers'];
+      case 'post_office':
+        return ['/get_post_offices', '/get_pickup_points?type=post'];
+      case 'all':
+      default:
+        return [
+          '/get_pickup_points',
+          '/get_lockers', 
+          '/get_post_offices'
+        ];
+    }
+  }
+  
+  // Map API response to our pickup point format
+  private mapPickupPointsResponse(response: any[], endpoint: string): VenipakPickupPoint[] {
+    return response.map((point: any) => {
+      // Determine type based on endpoint and data
+      let type: 'pickup_point' | 'locker' | 'post_office' = 'pickup_point';
+      if (endpoint.includes('locker')) {
+        type = 'locker';
+      } else if (endpoint.includes('post') || point.type === 'post_office') {
+        type = 'post_office';
+      }
+      
+      const mappedPoint: VenipakPickupPoint = {
+        id: point.id || point.code,
+        name: point.name || point.title,
+        address: point.address || point.street,
+        city: point.city,
+        country: point.country || 'LT',
+        zip: point.zip || point.postal_code,
+        code: point.code || point.id,
+        coordinates: point.coordinates || (point.lat && point.lng ? { lat: point.lat, lng: point.lng } : undefined),
+        type,
+        available: point.available !== false, // Default to true if not specified
+        max_weight: point.max_weight || (type === 'locker' ? 20 : 30),
+        max_dimensions: point.max_dimensions || this.getDefaultDimensions(type)
+      };
+      
+      // Add working hours if available
+      if (point.working_hours || point.hours) {
+        mappedPoint.working_hours = point.working_hours || point.hours;
+      }
+      
+      return mappedPoint;
+    });
+  }
+  
+  // Get default dimensions based on pickup point type
+  private getDefaultDimensions(type: 'pickup_point' | 'locker' | 'post_office') {
+    switch (type) {
+      case 'locker':
+        return { length: 40, width: 30, height: 30 };
+      case 'post_office':
+      case 'pickup_point':
+      default:
+        return { length: 60, width: 40, height: 40 };
+    }
+  }
+  
+  // Apply client-side filtering
+  private applyClientSideFiltering(points: VenipakPickupPoint[], request?: VenipakPickupPointsRequest): VenipakPickupPoint[] {
+    let filtered = [...points];
+    
+    // Remove duplicates based on ID
+    const uniquePoints = new Map();
+    filtered.forEach(point => {
+      if (!uniquePoints.has(point.id) || uniquePoints.get(point.id).type === 'pickup_point') {
+        uniquePoints.set(point.id, point);
+      }
+    });
+    filtered = Array.from(uniquePoints.values());
+    
+    // Filter by availability
+    filtered = filtered.filter(point => point.available);
+    
+    // Apply limit if specified
+    if (request?.limit && request.limit > 0) {
+      filtered = filtered.slice(0, request.limit);
+    }
+    
+    return filtered;
+  }
+  
+  // Sort pickup points by distance (mock implementation - would need geocoding service)
+  private async sortByDistance(points: VenipakPickupPoint[], request?: VenipakPickupPointsRequest): Promise<VenipakPickupPoint[]> {
+    // For now, return as-is. In production, you'd:
+    // 1. Geocode the user's address/postal code
+    // 2. Calculate distances to each pickup point
+    // 3. Sort by distance
+    console.log("Distance sorting requested but not implemented - returning unsorted points");
+    return points;
   }
 
   // Calculate shipping rate (Venipak uses fixed pricing based on weight and dimensions)

@@ -11,18 +11,15 @@ import AddressForm from "@/components/checkout/AddressForm"
 import ShippingMethods from "@/components/checkout/ShippingMethods"
 import PaymentForm from "@/components/checkout/PaymentForm"
 import OrderReview from "@/components/checkout/OrderReview"
+import { useTranslation } from "@/hooks/useTranslation"
 
-const CHECKOUT_STEPS = [
-  { id: "address", label: "Shipping Address", number: 1 },
-  { id: "shipping", label: "Shipping Method", number: 2 },
-  { id: "payment", label: "Payment", number: 3 },
-  { id: "review", label: "Review Order", number: 4 }
-]
+// Steps are now defined in CheckoutSteps component with Lithuanian translations
 
 export default function CheckoutPage() {
+  const { t } = useTranslation();
   const { cart, isLoading } = useCart()
   const router = useRouter()
-  const [currentStep, setCurrentStep] = useState(0)
+  const [currentStep, setCurrentStep] = useState(1)
   const [checkoutData, setCheckoutData] = useState({
     email: "",
     shippingAddress: null,
@@ -41,7 +38,7 @@ export default function CheckoutPage() {
     return (
       <Container size="3" className="py-16">
         <Flex direction="column" align="center" gap="4">
-          <Text>Loading checkout...</Text>
+          <Text>{t('loading')}</Text>
         </Flex>
       </Container>
     )
@@ -52,13 +49,13 @@ export default function CheckoutPage() {
   }
 
   const handleNextStep = () => {
-    if (currentStep < CHECKOUT_STEPS.length - 1) {
+    if (currentStep < 4) { // 4 total steps
       setCurrentStep(currentStep + 1)
     }
   }
 
   const handlePreviousStep = () => {
-    if (currentStep > 0) {
+    if (currentStep > 1) { // Minimum step is 1
       setCurrentStep(currentStep - 1)
     }
   }
@@ -91,23 +88,22 @@ export default function CheckoutPage() {
         <Link href="/cart">
           <Button variant="ghost" size="2">
             <ChevronLeft size={16} />
-            Back to cart
+            {t('cart.backToShopping')}
           </Button>
         </Link>
       </Flex>
 
-      <Heading size="8" className="mb-8">Checkout</Heading>
+      <Heading size="8" className="mb-8">{t('checkout.title')}</Heading>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2">
           <CheckoutSteps 
-            steps={CHECKOUT_STEPS} 
             currentStep={currentStep} 
             onStepClick={setCurrentStep}
           />
 
           <Box className="mt-8">
-            {currentStep === 0 && (
+            {currentStep === 1 && (
               <AddressForm 
                 onNext={handleNextStep}
                 onUpdate={handleUpdateData}
@@ -115,7 +111,7 @@ export default function CheckoutPage() {
               />
             )}
 
-            {currentStep === 1 && (
+            {currentStep === 2 && (
               <ShippingMethods
                 cart={cart}
                 onNext={handleNextStep}
@@ -125,7 +121,7 @@ export default function CheckoutPage() {
               />
             )}
 
-            {currentStep === 2 && (
+            {currentStep === 3 && (
               <PaymentForm
                 cart={cart}
                 onNext={handleNextStep}
@@ -135,7 +131,7 @@ export default function CheckoutPage() {
               />
             )}
 
-            {currentStep === 3 && (
+            {currentStep === 4 && (
               <OrderReview
                 cart={cart}
                 checkoutData={checkoutData}
@@ -148,7 +144,7 @@ export default function CheckoutPage() {
         {/* Order Summary Sidebar */}
         <div>
           <Box className="border rounded-lg p-6 sticky top-4">
-            <Heading size="5" className="mb-4">Order Summary</Heading>
+            <Heading size="5" className="mb-4">{t('checkout.review.orderSummary')}</Heading>
             
             <Flex direction="column" gap="3">
               {/* Cart Items */}
@@ -157,10 +153,10 @@ export default function CheckoutPage() {
                   <Flex key={item.id} justify="between" align="start" gap="3">
                     <Box className="flex-1">
                       <Text size="2" weight="medium">
-                        {item.product?.title || "Product"}
+                        {item.product?.title || "Prekė"}
                       </Text>
                       <Text size="1" color="gray">
-                        Qty: {item.quantity}
+                        {t('cart.quantity')}: {item.quantity}
                       </Text>
                     </Box>
                     <Text size="2" weight="medium">
@@ -174,44 +170,40 @@ export default function CheckoutPage() {
 
               {/* Totals */}
               <Flex justify="between">
-                <Text>Subtotal</Text>
+                <Text>{t('cart.subtotal')}</Text>
                 <Text weight="medium">€{subtotal.toFixed(2)}</Text>
               </Flex>
               
               <Flex justify="between">
-                <Text>Shipping</Text>
+                <Text>{t('cart.shipping')}</Text>
                 <Text weight="medium">
                   {(() => {
-                    const shippingCost = checkoutData.shippingMethod 
-                      ? (
-                          checkoutData.shippingMethod.calculated_amount || 
-                          checkoutData.shippingMethod.data?.calculated_amount || 
-                          checkoutData.shippingMethod.data?.amount || 
-                          checkoutData.shippingMethod.amount || 
-                          0
-                        ) / 100
-                      : 0
+                    if (!checkoutData.shippingMethod) {
+                      return <Text color="gray">{t('cart.calculatedAtCheckout')}</Text>;
+                    }
                     
-                    console.log('🔍 Order Summary shipping calculation:', {
-                      hasShippingMethod: !!checkoutData.shippingMethod,
-                      shippingMethod: checkoutData.shippingMethod,
-                      finalCost: shippingCost
-                    })
+                    const shippingCost = (
+                      checkoutData.shippingMethod.calculated_amount || 
+                      checkoutData.shippingMethod.data?.calculated_amount || 
+                      checkoutData.shippingMethod.data?.amount || 
+                      checkoutData.shippingMethod.amount || 
+                      0
+                    ) / 100;
                     
-                    return `€${shippingCost.toFixed(2)}`
+                    return `€${shippingCost.toFixed(2)}`;
                   })()}
                 </Text>
               </Flex>
               
               <Flex justify="between">
-                <Text>Tax</Text>
-                <Text color="gray">Calculated at payment</Text>
+                <Text>{t('cart.tax')}</Text>
+                <Text color="gray">{t('cart.calculatedAtPayment')}</Text>
               </Flex>
               
               <Separator size="4" />
               
               <Flex justify="between">
-                <Text size="4" weight="bold">Total</Text>
+                <Text size="4" weight="bold">{t('cart.total')}</Text>
                 <Text size="4" weight="bold">
                   €{(subtotal + ((
                     checkoutData.shippingMethod?.calculated_amount || 

@@ -140,3 +140,61 @@ export enum VenipakDeliveryStatus {
   RETURNED = 'returned',
   CANCELLED = 'cancelled'
 }
+
+// Pickup point types and structures
+export interface VenipakPickupPoint {
+  id: string
+  name: string
+  address: string
+  city: string
+  country: string
+  zip: string
+  code: string
+  coordinates?: {
+    lat: number
+    lng: number
+  }
+  type: 'pickup_point' | 'locker' | 'post_office'
+  working_hours?: {
+    monday?: string
+    tuesday?: string
+    wednesday?: string
+    thursday?: string
+    friday?: string
+    saturday?: string
+    sunday?: string
+  }
+  max_weight?: number
+  max_dimensions?: {
+    length: number
+    width: number
+    height: number
+  }
+  available: boolean
+  distance?: number
+}
+
+export interface VenipakPickupPointsRequest {
+  country?: string
+  city?: string
+  postal_code?: string
+  address?: string
+  type?: 'all' | 'pickup_point' | 'locker' | 'post_office'
+  limit?: number
+  radius?: number // in km
+}
+
+export interface VenipakPickupPointsResponse {
+  success: boolean
+  pickup_points?: VenipakPickupPoint[]
+  total_count?: number
+  error?: string
+}
+
+// POST office specific types
+export interface VenipakPostOffice extends VenipakPickupPoint {
+  type: 'post_office'
+  post_office_code: string
+  services: string[]
+  payment_methods?: string[]
+}
