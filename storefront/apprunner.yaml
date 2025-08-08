@@ -1,0 +1,21 @@
+version: 1.0
+runtime: docker
+build:
+  commands:
+    build:
+      - echo Build started on `date`
+      - docker build -t $IMAGE_URI -f Dockerfile.production .
+      - echo Build completed on `date`
+run:
+  runtime-version: latest
+  command: npm run start
+  network:
+    port: 3000
+    env: PORT
+  env:
+    - name: PORT
+      value: "3000"
+    - name: NODE_ENV
+      value: "production"
+    - name: NEXT_TELEMETRY_DISABLED
+      value: "1"
