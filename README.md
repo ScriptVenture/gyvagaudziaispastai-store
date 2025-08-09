@@ -86,3 +86,6 @@ gyvagaudziaispastai-store/
 2. Changes are automatically reflected via Docker volumes
 3. Hot reload is enabled for both services
 4. Database and Redis data persists between container restarts
+
+
+// AWS
