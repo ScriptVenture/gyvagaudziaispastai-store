@@ -4,10 +4,11 @@ const MEDUSA_BACKEND_URL = process.env.MEDUSA_BACKEND_URL || "http://backend:900
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { path: string[] } }
+  { params }: { params: Promise<{ path: string[] }> }
 ) {
   try {
-    const imagePath = params.path.join('/')
+    const { path } = await params
+    const imagePath = path.join('/')
     const imageUrl = `${MEDUSA_BACKEND_URL}/static/${imagePath}`
     
     console.log('Proxying image request:', imageUrl)
