@@ -51,6 +51,7 @@ services:
       - .env
     environment:
       - NODE_ENV=production
+    command: ["sh", "-c", "npm run build && npx medusa db:migrate && npm run start"]
     ports:
       - "9000:9000"
     volumes:
@@ -93,6 +94,7 @@ services:
     environment:
       - NODE_ENV=production
       - MEDUSA_BACKEND_URL=http://backend:9000
+    command: ["sh", "-c", "npm run build && npm run start"]
     ports:
       - "3000:3000"
     networks:

@@ -10,21 +10,24 @@ case "$1" in
     case "$ENV" in
       development|dev)
         echo "🚀 Starting gyvagaudziaispastai-store DEVELOPMENT environment..."
-        cp .env.development .env 2>/dev/null || echo "⚠️  No .env.development found, using defaults"
+        if [ ! -f .env ]; then
+          echo "❌ .env file not found! Please create your .env file."
+          exit 1
+        fi
         docker compose up --build
         ;;
       staging)
         echo "🚀 Starting gyvagaudziaispastai-store STAGING environment..."
-        if [ ! -f .env.staging ]; then
-          echo "❌ .env.staging file not found! Copy .env.staging.example and configure it."
+        if [ ! -f .env ]; then
+          echo "❌ .env file not found! Please create your .env file."
           exit 1
         fi
-        docker compose -f docker-compose.yml -f docker-compose.staging.yml --env-file .env.staging up --build
+        docker compose -f docker-compose.yml -f docker-compose.staging.yml up --build
         ;;
       production|prod)
         echo "🚀 Starting gyvagaudziaispastai-store PRODUCTION environment..."
         if [ ! -f .env ]; then
-          echo "❌ .env file not found! Please create your production .env file."
+          echo "❌ .env file not found! Please create your .env file."
           exit 1
         fi
         docker compose -f docker-compose.production.yml up --build
@@ -180,11 +183,10 @@ EOF
     echo "  ./dev.sh up production"
     echo ""
     echo "Environment files:"
-    echo "  .env.development      - Development settings (committed)"
+    echo "  .env                  - Environment settings (configure per server)"
+    echo "  .env.development      - Development template (committed)"
     echo "  .env.staging.example  - Staging template (committed)"
-    echo "  .env.staging          - Staging settings (not committed)"
-    echo "  .env.production.example - Production template (committed)"
-    echo "  .env.production       - Production settings (not committed)"
+    echo "  .env.production       - Production template (committed)"
     ;;
   *)
     echo "📖 Usage: $0 {up|down|restart|logs|shell|setup|env} [environment]"
