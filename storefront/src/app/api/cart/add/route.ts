@@ -52,17 +52,25 @@ export async function POST(request: NextRequest) {
       const createCartData = await createCartResponse.json()
       cartId = createCartData.cart.id
       
-      // Set cookie with proper options
-      cookieStore.set('medusa_cart_id', cartId, {
-        expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
-        httpOnly: false,
-        sameSite: 'lax',
-        path: '/'
-      })
-      console.log("New cart created with ID:", cartId)
+      // Set cookie with proper options - ensure cartId is not undefined
+      if (cartId) {
+        cookieStore.set('medusa_cart_id', cartId, {
+          expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+          httpOnly: false,
+          sameSite: 'lax',
+          path: '/'
+        })
+        console.log("New cart created with ID:", cartId)
+      } else {
+        throw new Error("Failed to create cart - no cart ID returned")
+      }
     }
 
     // Add item to cart using direct API call
+    if (!cartId) {
+      throw new Error("No cart ID available")
+    }
+    
     console.log("Adding item to cart:", { cartId, variantId, quantity })
     await fetch(`${MEDUSA_BACKEND_URL}/store/carts/${cartId}/line-items`, {
       method: 'POST',
