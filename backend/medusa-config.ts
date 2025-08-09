@@ -11,6 +11,18 @@ module.exports = defineConfig({
       } : false),
     },
     redisUrl: process.env.REDIS_URL,
+    sessionOptions: {
+      secret: process.env.COOKIE_SECRET || "supersecret",
+      resave: false,
+      saveUninitialized: false,
+      rolling: false,
+      cookie: {
+        secure: false, // Set to false for HTTP
+        httpOnly: true,
+        maxAge: 24 * 60 * 60 * 1000, // 24 hours
+        sameSite: 'lax'
+      }
+    },
     http: {
       storeCors: process.env.STORE_CORS!,
       adminCors: process.env.ADMIN_CORS!,
