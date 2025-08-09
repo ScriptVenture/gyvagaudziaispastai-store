@@ -51,7 +51,7 @@ services:
       - .env
     environment:
       - NODE_ENV=production
-    command: ["sh", "-c", "ls -la .medusa/ || echo 'No .medusa dir' && ls -la .medusa/server/ || echo 'No .medusa/server dir' && ls -la .medusa/server/public/ || echo 'No .medusa/server/public dir' && NODE_OPTIONS='--max-old-space-size=3072' npx medusa build && npx medusa db:migrate && NODE_OPTIONS='--max-old-space-size=1536' npm run start"]
+    command: ["sh", "-c", "NODE_OPTIONS='--max-old-space-size=3072' npx medusa build && cd .medusa/server && npm ci --omit=dev && cp /server/.env . && NODE_OPTIONS='--max-old-space-size=1536' npx medusa db:migrate && npx medusa start"]
     ports:
       - "9000:9000"
     volumes:
