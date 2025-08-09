@@ -5,10 +5,11 @@ const MEDUSA_PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY ||
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { tracking_number: string } }
+  { params }: { params: Promise<{ tracking_number: string }> }
 ) {
   try {
-    const trackingNumber = params.tracking_number
+    const { tracking_number } = await params
+    const trackingNumber = tracking_number
 
     if (!trackingNumber) {
       return NextResponse.json(
