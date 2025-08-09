@@ -29,7 +29,7 @@ export default function CheckoutPage() {
   })
 
   useEffect(() => {
-    if (!isLoading && (!cart || cart.items.length === 0)) {
+    if (!isLoading && (!cart || !cart.items || cart.items.length === 0)) {
       router.push("/cart")
     }
   }, [cart, isLoading, router])
@@ -44,7 +44,7 @@ export default function CheckoutPage() {
     )
   }
 
-  if (!cart || cart.items.length === 0) {
+  if (!cart || !cart.items || cart.items.length === 0) {
     return null
   }
 
@@ -78,9 +78,9 @@ export default function CheckoutPage() {
     })
   }
 
-  const subtotal = cart.items.reduce((acc, item) => {
+  const subtotal = cart.items?.reduce((acc, item) => {
     return acc + (item.unit_price || 0) * item.quantity
-  }, 0)
+  }, 0) || 0
 
   return (
     <Container size="4" className="py-8">
@@ -149,7 +149,7 @@ export default function CheckoutPage() {
             <Flex direction="column" gap="3">
               {/* Cart Items */}
               <Box className="space-y-3 max-h-64 overflow-y-auto">
-                {cart.items.map((item) => (
+                {cart.items?.map((item) => (
                   <Flex key={item.id} justify="between" align="start" gap="3">
                     <Box className="flex-1">
                       <Text size="2" weight="medium">
