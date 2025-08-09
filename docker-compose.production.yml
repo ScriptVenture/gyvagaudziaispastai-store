@@ -87,14 +87,13 @@ services:
       dockerfile: Dockerfile.production
     container_name: gyvagaudziaispastai-storefront-prod
     depends_on:
-      backend:
-        condition: service_healthy
+      - backend
     env_file:
       - .env
     environment:
       - NODE_ENV=production
       - MEDUSA_BACKEND_URL=http://backend:9000
-    command: ["sh", "-c", "NODE_OPTIONS='--max-old-space-size=1536' npm run build && NODE_OPTIONS='--max-old-space-size=1024' npm run start"]
+    command: ["sh", "-c", "NODE_OPTIONS='--max-old-space-size=2048' npm run build && NODE_OPTIONS='--max-old-space-size=1024' npm run start"]
     ports:
       - "3000:3000"
     networks:
