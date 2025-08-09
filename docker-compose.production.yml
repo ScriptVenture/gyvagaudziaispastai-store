@@ -51,7 +51,8 @@ services:
       - .env
     environment:
       - NODE_ENV=production
-    command: ["sh", "-c", "NODE_OPTIONS='--max-old-space-size=3072' npm run build && NODE_OPTIONS='--max-old-space-size=3072' npx medusa build && npx medusa db:migrate && NODE_OPTIONS='--max-old-space-size=1536' npm run start"]
+      - DISABLE_MEDUSA_ADMIN=true
+    command: ["sh", "-c", "NODE_OPTIONS='--max-old-space-size=3072' npm run build && npx medusa db:migrate && NODE_OPTIONS='--max-old-space-size=1536' npm run start"]
     ports:
       - "9000:9000"
     volumes:
