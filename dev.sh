@@ -27,7 +27,7 @@ case "$1" in
           echo "❌ .env.production file not found! Copy .env.production.example and configure it."
           exit 1
         fi
-        docker compose -f docker-compose.yml -f docker-compose.production.yml --env-file .env.production up --build
+        docker compose -f docker-compose.production.yml --env-file .env.production up --build
         ;;
       *)
         echo "❌ Invalid environment: $ENV. Use: development, staging, or production"
