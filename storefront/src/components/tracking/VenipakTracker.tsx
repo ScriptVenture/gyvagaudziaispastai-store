@@ -93,12 +93,14 @@ export default function VenipakTracker() {
       <Box className="mb-6">
         <Flex gap="3">
           <TextField.Root className="flex-1">
-            <TextField.Input
+            <TextField.Slot>
+              <input
               placeholder="Enter tracking number (e.g. VP1234567890ABC)"
               value={trackingNumber}
               onChange={(e) => setTrackingNumber(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleTrack()}
-            />
+              />
+            </TextField.Slot>
           </TextField.Root>
           <Button 
             onClick={handleTrack} 

@@ -26,9 +26,9 @@ export async function POST(request: NextRequest) {
       
       const regionsData = await regionsResponse.json()
       const regions = regionsData.regions
-      console.log("Available regions:", regions.map(r => ({ id: r.id, name: r.name })))
+      console.log("Available regions:", regions.map((r: any) => ({ id: r.id, name: r.name })))
       
-      const europeRegion = regions.find(r => r.name === "Europe")
+      const europeRegion = regions.find((r: any) => r.name === "Europe")
       
       if (!europeRegion) {
         console.error("Available regions:", regions)
