@@ -42,7 +42,7 @@ export default function SearchPage() {
   const [priceRange, setPriceRange] = useState('all')
   const [category, setCategory] = useState('all')
   
-  const { addToCart, isLoading: cartLoading } = useCart()
+  const { refreshCart, isLoading: cartLoading } = useCart()
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -100,7 +100,23 @@ export default function SearchPage() {
 
   const handleAddToCart = async (variantId: string) => {
     try {
-      await addToCart(variantId, 1)
+      const response = await fetch('/api/cart/add', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          variantId,
+          quantity: 1
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to add to cart')
+      }
+
+      // Refresh cart after successful addition
+      await refreshCart()
     } catch (error) {
       console.error('Error adding to cart:', error)
     }

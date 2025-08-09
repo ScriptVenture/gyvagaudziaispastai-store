@@ -215,7 +215,8 @@ export default function Footer() {
                         background: 'rgba(255, 255, 255, 0.1)',
                         backdropFilter: 'blur(10px)',
                         color: brandColors.white,
-                        focusRingColor: brandColors.secondary
+                        outline: `2px solid ${brandColors.secondary}`,
+                        outlineOffset: '2px'
                       }}
                     />
                   </div>
@@ -225,7 +226,6 @@ export default function Footer() {
                     style={{ 
                       background: `linear-gradient(135deg, ${brandColors.secondary} 0%, ${brandColors.warning} 100%)`,
                       color: brandColors.white,
-                      focusRingColor: brandColors.secondary
                     }}
                   >
                     Prenumeruoti nemokamus patarimus

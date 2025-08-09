@@ -83,9 +83,9 @@ export default function OrderReview({ cart, checkoutData, onBack }: OrderReviewP
     }
   }
 
-  const subtotal = cart.items.reduce((acc, item) => {
+  const subtotal = cart.items?.reduce((acc, item) => {
     return acc + (item.unit_price || 0) * item.quantity
-  }, 0)
+  }, 0) || 0
 
   // Handle different shipping method data structures
   const shippingAmount = checkoutData.shippingMethod?.data?.amount || checkoutData.shippingMethod?.amount || 0
@@ -168,7 +168,7 @@ export default function OrderReview({ cart, checkoutData, onBack }: OrderReviewP
       <Box className="mb-6">
         <Text weight="medium" className="mb-3">{t('checkout.review.orderItems')}</Text>
         <Box className="space-y-3">
-          {cart.items.map((item) => (
+          {cart.items?.map((item) => (
             <Flex key={item.id} justify="between" align="start">
               <Box>
                 <Text size="2">{item.product?.title}</Text>
