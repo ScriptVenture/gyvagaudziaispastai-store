@@ -6,10 +6,9 @@ module.exports = defineConfig({
   projectConfig: {
     databaseUrl: process.env.DATABASE_URL,
     databaseDriverOptions: {
-      ssl: process.env.NODE_ENV === "production" ? {
-        rejectUnauthorized: false,
-        sslmode: 'require'
-      } : false,
+      ssl: process.env.DATABASE_SSL === "false" ? false : (process.env.NODE_ENV === "production" ? {
+        rejectUnauthorized: false
+      } : false),
     },
     redisUrl: process.env.REDIS_URL,
     http: {
