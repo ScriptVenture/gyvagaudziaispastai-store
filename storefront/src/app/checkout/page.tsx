@@ -183,10 +183,10 @@ export default function CheckoutPage() {
                     }
                     
                     const shippingCost = (
-                      checkoutData.shippingMethod.calculated_amount || 
-                      checkoutData.shippingMethod.data?.calculated_amount || 
-                      checkoutData.shippingMethod.data?.amount || 
-                      checkoutData.shippingMethod.amount || 
+                      (checkoutData.shippingMethod as any)?.calculated_amount || 
+                      (checkoutData.shippingMethod as any)?.data?.calculated_amount || 
+                      (checkoutData.shippingMethod as any)?.data?.amount || 
+                      (checkoutData.shippingMethod as any)?.amount || 
                       0
                     ) / 100;
                     
@@ -206,10 +206,10 @@ export default function CheckoutPage() {
                 <Text size="4" weight="bold">{t('cart.total')}</Text>
                 <Text size="4" weight="bold">
                   €{(subtotal + ((
-                    checkoutData.shippingMethod?.calculated_amount || 
-                    checkoutData.shippingMethod?.data?.calculated_amount || 
-                    checkoutData.shippingMethod?.data?.amount || 
-                    checkoutData.shippingMethod?.amount || 
+                    (checkoutData.shippingMethod as any)?.calculated_amount || 
+                    (checkoutData.shippingMethod as any)?.data?.calculated_amount || 
+                    (checkoutData.shippingMethod as any)?.data?.amount || 
+                    (checkoutData.shippingMethod as any)?.amount || 
                     0
                   ) / 100)).toFixed(2)}
                 </Text>
