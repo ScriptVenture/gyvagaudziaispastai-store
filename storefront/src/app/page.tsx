@@ -170,7 +170,7 @@ export default function Home() {
                       alt="Professional Trap Setup & Installation"
                       className="w-full h-full object-cover object-center hover:scale-105 transition-transform duration-500 select-none"
                       style={{ 
-                        imageRendering: 'high-quality',
+                        imageRendering: 'auto',
                         filter: 'contrast(1.06) saturate(1.08) brightness(1.01)'
                       }}
                       loading="lazy"
@@ -193,7 +193,7 @@ export default function Home() {
                       alt="Expert Wildlife Control Techniques"
                       className="w-full h-full object-cover object-center hover:scale-105 transition-transform duration-500 select-none"
                       style={{ 
-                        imageRendering: 'high-quality',
+                        imageRendering: 'auto',
                         filter: 'contrast(1.06) saturate(1.08) brightness(1.01)'
                       }}
                       loading="lazy"
