@@ -51,6 +51,8 @@ services:
       - .env
     environment:
       - NODE_ENV=production
+    ports:
+      - "9000:9000"
     volumes:
       # Static files volume (for AWS EFS or S3 sync)
       - static-files:/server/static:ro
@@ -91,6 +93,8 @@ services:
     environment:
       - NODE_ENV=production
       - MEDUSA_BACKEND_URL=http://backend:9000
+    ports:
+      - "3000:3000"
     networks:
       - production-network
     restart: unless-stopped
