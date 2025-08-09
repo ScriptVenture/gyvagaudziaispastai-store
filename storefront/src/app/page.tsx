@@ -127,9 +127,8 @@ export default function Home() {
                         alt="Professional Live Animal Trap - Premium Quality"
                         className="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105 select-none"
                         style={{ 
-                          imageRendering: 'high-quality',
-                          filter: 'contrast(1.08) saturate(1.15) brightness(1.03)',
-                          imageResolution: 'from-image'
+                          imageRendering: 'auto',
+                          filter: 'contrast(1.08) saturate(1.15) brightness(1.03)'
                         }}
                         loading="eager"
                         fetchPriority="high"
