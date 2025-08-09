@@ -19,7 +19,24 @@ module.exports = defineConfig({
       cookieSecret: process.env.COOKIE_SECRET || "supersecret",
     }
   },
+  admin: {
+    backendUrl: process.env.MEDUSA_BACKEND_URL,
+  },
   modules: [
+    {
+      resolve: "@medusajs/auth",
+      options: {
+        providers: [
+          {
+            resolve: "@medusajs/auth-emailpass",
+            id: "emailpass",
+          },
+        ],
+      },
+    },
+    {
+      resolve: "@medusajs/user",
+    },
     {
       resolve: "@medusajs/payment",
       options: {
