@@ -165,12 +165,14 @@ export async function POST(request: NextRequest) {
           
           // Update cart ID
           cartId = newCartId
-          cookieStore.set('medusa_cart_id', cartId, {
-            expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-            httpOnly: false,
-            sameSite: 'lax',
-            path: '/'
-          })
+          if (cartId) {
+            cookieStore.set('medusa_cart_id', cartId, {
+              expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+              httpOnly: false,
+              sameSite: 'lax',
+              path: '/'
+            })
+          }
           
           console.log("✅ New cart created without customer reference:", newCartId)
           
@@ -296,12 +298,14 @@ export async function POST(request: NextRequest) {
           
           // Update cart ID
           cartId = newCartId
-          cookieStore.set('medusa_cart_id', cartId, {
-            expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-            httpOnly: false,
-            sameSite: 'lax',
-            path: '/'
-          })
+          if (cartId) {
+            cookieStore.set('medusa_cart_id', cartId, {
+              expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+              httpOnly: false,
+              sameSite: 'lax',
+              path: '/'
+            })
+          }
           
           console.log("✅ New cart created with ID:", newCartId)
           
