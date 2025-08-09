@@ -51,7 +51,7 @@ services:
       - .env
     environment:
       - NODE_ENV=production
-    command: ["sh", "-c", "NODE_OPTIONS='--max-old-space-size=2048' npm run build && npx medusa db:migrate && npm run start"]
+    command: ["sh", "-c", "NODE_OPTIONS='--max-old-space-size=3072' npm run build && npx medusa db:migrate && NODE_OPTIONS='--max-old-space-size=1536' npm run start"]
     ports:
       - "9000:9000"
     volumes:
@@ -74,11 +74,11 @@ services:
     deploy:
       resources:
         limits:
+          memory: 4G
+          cpus: '1.5'
+        reservations:
           memory: 1G
           cpus: '0.5'
-        reservations:
-          memory: 512M
-          cpus: '0.25'
 
   # Next.js Storefront Service
   storefront:
@@ -94,7 +94,7 @@ services:
     environment:
       - NODE_ENV=production
       - MEDUSA_BACKEND_URL=http://backend:9000
-    command: ["sh", "-c", "npm run build && npm run start"]
+    command: ["sh", "-c", "NODE_OPTIONS='--max-old-space-size=1536' npm run build && NODE_OPTIONS='--max-old-space-size=1024' npm run start"]
     ports:
       - "3000:3000"
     networks:
@@ -109,8 +109,8 @@ services:
     deploy:
       resources:
         limits:
-          memory: 1G
-          cpus: '0.5'
+          memory: 2G
+          cpus: '1.0'
         reservations:
           memory: 512M
           cpus: '0.25'
