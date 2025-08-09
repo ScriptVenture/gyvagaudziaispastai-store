@@ -41,6 +41,9 @@ module.exports = defineConfig({
     },
     {
       resolve: "@medusajs/user",
+      options: {
+        jwt_secret: process.env.JWT_SECRET || "supersecret",
+      },
     },
     {
       resolve: "@medusajs/payment",
