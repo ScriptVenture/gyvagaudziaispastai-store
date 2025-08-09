@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
       has_payment_collection: !!cartCheckData.cart?.payment_collection,
       payment_collection_id: cartCheckData.cart?.payment_collection?.id,
       payment_sessions_count: cartCheckData.cart?.payment_collection?.payment_sessions?.length || 0,
-      payment_sessions: cartCheckData.cart?.payment_collection?.payment_sessions?.map(ps => ({
+      payment_sessions: cartCheckData.cart?.payment_collection?.payment_sessions?.map((ps: any) => ({
         id: ps.id,
         provider_id: ps.provider_id,
         status: ps.status,
