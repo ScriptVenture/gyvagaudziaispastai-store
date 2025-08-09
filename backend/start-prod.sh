@@ -1,8 +1,12 @@
-#!/bin/bash
+#!/bin/sh
 
 echo "🚀 Starting Medusa backend in production..."
 
-# Run database migrations
+# Build the application first
+echo "🔧 Building application..."
+npm run build
+
+# Run database migrations (this will also test connection)
 echo "🔄 Running database migrations..."
 npx medusa db:migrate
 

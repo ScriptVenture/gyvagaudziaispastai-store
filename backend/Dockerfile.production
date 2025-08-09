@@ -62,6 +62,10 @@ COPY --from=build --chown=medusa:medusa /server/instrumentation.ts ./
 COPY --from=build --chown=medusa:medusa /server/tsconfig.json ./
 COPY --from=build --chown=medusa:medusa /server/package*.json ./
 COPY --from=build --chown=medusa:medusa /server/static ./static
+COPY --from=build --chown=medusa:medusa /server/start-prod.sh ./
+
+# Make script executable
+RUN chmod +x start-prod.sh
 
 # Switch to non-root user
 USER medusa
