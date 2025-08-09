@@ -114,28 +114,26 @@ services:
           memory: 512M
           cpus: '0.25'
 
-  # Nginx Reverse Proxy (Disabled temporarily due to SSL certificate issues)
-  # nginx:
-  #   image: nginx:stable-alpine
-  #   container_name: gyvagaudziaispastai-nginx-prod
-  #   depends_on:
-  #     - backend
-  #     - storefront
-  #   ports:
-  #     - "80:80"
-  #     - "443:443"
-  #   volumes:
-  #     - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-  #     - ./nginx/ssl:/etc/nginx/ssl:ro
-  #     - static-files:/var/www/static:ro
-  #   networks:
-  #     - production-network
-  #   restart: unless-stopped
-  #   healthcheck:
-  #     test: ["CMD", "nginx", "-t"]
-  #     interval: 30s
-  #     timeout: 10s
-  #     retries: 3
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:stable-alpine
+    container_name: gyvagaudziaispastai-nginx-prod
+    depends_on:
+      - backend
+      - storefront
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - static-files:/var/www/static:ro
+    networks:
+      - production-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "nginx", "-t"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
 volumes:
   postgres-data:
