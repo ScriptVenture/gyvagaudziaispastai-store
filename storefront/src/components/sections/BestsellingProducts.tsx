@@ -211,7 +211,7 @@ export default function BestsellingProducts() {
                     {/* Product Image */}
                     <div className="relative overflow-hidden bg-gray-50 h-48">
                       <Image 
-                        src={getOptimizedImageUrl(product.thumbnail) || "/imagen5.jpg"} 
+                        src={getOptimizedImageUrl(product.thumbnail ?? undefined) ?? "/imagen5.jpg"} 
                         alt={product.title}
                         fill
                         className="object-cover group-hover:scale-102 transition-transform duration-200"
