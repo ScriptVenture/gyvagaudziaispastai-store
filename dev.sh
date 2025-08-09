@@ -23,11 +23,11 @@ case "$1" in
         ;;
       production|prod)
         echo "🚀 Starting gyvagaudziaispastai-store PRODUCTION environment..."
-        if [ ! -f .env.production ]; then
-          echo "❌ .env.production file not found! Copy .env.production.example and configure it."
+        if [ ! -f .env ]; then
+          echo "❌ .env file not found! Please create your production .env file."
           exit 1
         fi
-        docker compose -f docker-compose.production.yml --env-file .env.production up --build
+        docker compose -f docker-compose.production.yml up --build
         ;;
       *)
         echo "❌ Invalid environment: $ENV. Use: development, staging, or production"
