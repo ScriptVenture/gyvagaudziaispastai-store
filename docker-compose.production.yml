@@ -55,8 +55,8 @@ services:
     ports:
       - "9000:9000"
     volumes:
-      # Static files volume (for AWS EFS or S3 sync)
-      - static-files:/server/static:ro
+      # Static files volume - writable for uploads
+      - static-files:/server/static
     networks:
       - production-network
     restart: unless-stopped
