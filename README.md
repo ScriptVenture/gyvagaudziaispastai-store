@@ -93,3 +93,6 @@ gyvagaudziaispastai-store/
 Implemetation
 
 containers
+
+fixed medusa files
+
