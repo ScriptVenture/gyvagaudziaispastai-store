@@ -29,12 +29,6 @@ module.exports = defineConfig({
   },
   modules: [
     {
-      resolve: "@medusajs/api-key",
-    },
-    {
-      resolve: "@medusajs/store",
-    },
-    {
       resolve: "@medusajs/auth",
       options: {
         providers: [
