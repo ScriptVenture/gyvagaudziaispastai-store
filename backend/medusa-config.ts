@@ -37,7 +37,7 @@ module.exports = defineConfig({
             id: "local",
             options: {
               upload_dir: "static",
-              backend_url: "https://gyva.appiolabs.com",
+              backend_url: process.env.MEDUSA_BACKEND_URL || "https://gyva.appiolabs.com",
             },
           },
         ],

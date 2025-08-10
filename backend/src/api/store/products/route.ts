@@ -11,7 +11,7 @@ export const GET = async (
     // Query products from the database using the query builder
     const query = req.scope.resolve("query")
     
-    const { data: products, count } = await query.graph({
+    const { data: products, metadata } = await query.graph({
       entity: "product",
       fields: [
         "id",
@@ -36,7 +36,7 @@ export const GET = async (
 
     return res.json({
       products,
-      count,
+      count: metadata?.count || products.length,
       offset: Number(offset),
       limit: Number(limit)
     })
