@@ -29,11 +29,11 @@ module.exports = defineConfig({
   },
   modules: [
     {
-      resolve: "@medusajs/medusa/file",
+      resolve: "@medusajs/file",
       options: {
         providers: [
           {
-            resolve: "@medusajs/medusa/file-local",
+            resolve: "@medusajs/file-local",
             id: "local",
             options: {
               upload_dir: "static",
