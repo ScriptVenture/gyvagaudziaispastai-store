@@ -85,6 +85,9 @@ services:
     build:
       context: ./storefront
       dockerfile: Dockerfile.production
+      args:
+        NEXT_PUBLIC_MEDUSA_BACKEND_URL: ${NEXT_PUBLIC_MEDUSA_BACKEND_URL}
+        NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY: ${NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY}
     container_name: gyvagaudziaispastai-storefront-prod
     depends_on:
       - backend
@@ -93,6 +96,8 @@ services:
     environment:
       - NODE_ENV=production
       - MEDUSA_BACKEND_URL=http://backend:9000
+      - NEXT_PUBLIC_MEDUSA_BACKEND_URL=${NEXT_PUBLIC_MEDUSA_BACKEND_URL}
+      - NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY=${NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY}
     command: ["npm", "run", "start"]
     ports:
       - "3000:3000"

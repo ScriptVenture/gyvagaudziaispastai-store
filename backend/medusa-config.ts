@@ -12,9 +12,9 @@ module.exports = defineConfig({
     },
     redisUrl: process.env.REDIS_URL,
     http: {
-      storeCors: process.env.STORE_CORS!,
-      adminCors: process.env.ADMIN_CORS!,
-      authCors: process.env.AUTH_CORS!,
+      storeCors: process.env.STORE_CORS || "https://gyva.appiolabs.com",
+      adminCors: process.env.ADMIN_CORS || "https://gyva.appiolabs.com",
+      authCors: process.env.AUTH_CORS || "https://gyva.appiolabs.com",
       jwtSecret: process.env.JWT_SECRET || "supersecret",
       cookieSecret: process.env.COOKIE_SECRET || "supersecret",
       authMethodsPerActor: {
@@ -36,7 +36,7 @@ module.exports = defineConfig({
             resolve: "@medusajs/file-local",
             id: "local",
             options: {
-              upload_dir: "static",
+              upload_dir: "/server/static",
               backend_url: process.env.MEDUSA_BACKEND_URL || "https://gyva.appiolabs.com",
             },
           },

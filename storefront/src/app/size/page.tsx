@@ -2,11 +2,13 @@
 
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
-import { Box, Heading, Text, Button, Flex, Card, Badge, Tabs } from '@radix-ui/themes'
+import Link from 'next/link'
+import { Box, Heading, Text, Button, Flex, Card, Badge, Tabs, Container } from '@radix-ui/themes'
 import { ShoppingCart, Info, Ruler, Zap } from 'lucide-react'
 import { useCart } from '@/contexts/cart-context'
 import { brandColors } from '@/utils/colors'
 import { getOptimizedImageUrl } from '@/utils/image'
+import { STORE_API_URL, CART_API_URL, MEDUSA_PUBLISHABLE_KEY } from '@/lib/config'
 
 // Use any type to match the actual Medusa response structure
 interface Product {
@@ -14,6 +16,11 @@ interface Product {
   title: string
   description?: string
   thumbnail?: string
+  images?: Array<{
+    id: string
+    url: string
+    rank: number
+  }>
   variants?: any[]
   metadata?: any
   [key: string]: any
@@ -55,7 +62,12 @@ export default function SizePage() {
     const fetchProducts = async () => {
       try {
         setLoading(true)
-        const response = await fetch('/api/products')
+        const response = await fetch(`${STORE_API_URL}/products?fields=*,images.*`, {
+          headers: {
+            'x-publishable-api-key': MEDUSA_PUBLISHABLE_KEY,
+            'Content-Type': 'application/json',
+          },
+        })
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`)
         }
@@ -85,7 +97,7 @@ export default function SizePage() {
 
   const handleAddToCart = async (variantId: string) => {
     try {
-      const response = await fetch('/api/cart/add', {
+      const response = await fetch(`${CART_API_URL}/add`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -117,191 +129,151 @@ export default function SizePage() {
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-center">
+      <Box className="container mx-auto" p="4" py="8">
+        <Box className="text-center">
           <Text>Kraunami produktai...</Text>
-        </div>
-      </div>
+        </Box>
+      </Box>
     )
   }
 
   if (error) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-center">
+      <Box className="container mx-auto" p="4" py="8">
+        <Box className="text-center">
           <Text color="red">Klaida: {error}</Text>
-        </div>
-      </div>
+        </Box>
+      </Box>
     )
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      {/* Header */}
-      <div className="mb-8 text-center">
+    <Container size="4" className="py-8">
+      {/* Header Section */}
+      <Box className="text-center mb-8">
         <Heading size="8" className="mb-4" style={{ color: brandColors.primary }}>
-          Spąstai pagal gyvūno dydį
+          Parinkite spąstą pagal gyvūno dydį
         </Heading>
-        <Text size="4" color="gray" className="mb-6 max-w-2xl mx-auto">
-          Parinkite tinkamą spąstą pagal gyvūno dydį. Kiekvienas spąstas specialiai sukurtas tam tikro dydžio gyvūnams.
+        <Text className="text-lg max-w-3xl mx-auto mb-6">
+          Humaniški gyvūnų spąstai skirtingų dydžių gyvūnams. 
+          Pasirinkite tinkamą kategoriją ir raskite idealų sprendimą.
         </Text>
-      </div>
+        
+        <div className="flex flex-wrap justify-center gap-2">
+          <Badge size="2" style={{ backgroundColor: `${brandColors.primary}20`, color: brandColors.primary }}>
+            100% Humaniška
+          </Badge>
+          <Badge size="2" style={{ backgroundColor: "#10B98120", color: "#10B981" }}>
+            Efektyvu ir saugu
+          </Badge>
+          <Badge size="2" style={{ backgroundColor: "#F59E0B20", color: "#F59E0B" }}>
+            Profesionalus sprendimas
+          </Badge>
+        </div>
+      </Box>
 
-      {/* Size Categories */}
-      <Tabs.Root value={activeTab} onValueChange={setActiveTab} className="mb-8">
-        <Tabs.List className="grid w-full grid-cols-3 gap-4 mb-8">
+      {/* Size Categories Tabs */}
+      <Box className="mb-8">
+        <Tabs.Root value={activeTab} onValueChange={setActiveTab}>
+          <Tabs.List className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+            {Object.entries(animalSizeCategories).map(([key, category]) => (
+              <Tabs.Trigger 
+                key={key} 
+                value={key} 
+                className="text-center border rounded-lg hover:shadow-md transition-all p-4 bg-white"
+              >
+                <Box className="text-3xl mb-2">{category.icon}</Box>
+                <Heading size="4" className="mb-2" style={{ color: category.color }}>
+                  {category.title}
+                </Heading>
+                <Text size="2" color="gray" className="mb-3">
+                  {category.description}
+                </Text>
+                <Box className="flex flex-wrap justify-center gap-1">
+                  {category.examples.slice(0, 3).map((example, i) => (
+                    <Badge key={i} size="1" style={{ backgroundColor: `${category.color}20`, color: category.color }}>
+                      {example}
+                    </Badge>
+                  ))}
+                </Box>
+              </Tabs.Trigger>
+            ))}
+          </Tabs.List>
+
           {Object.entries(animalSizeCategories).map(([key, category]) => (
-            <Tabs.Trigger key={key} value={key} className="p-6 text-center border rounded-lg hover:shadow-md transition-all">
-              <div className="text-4xl mb-3">{category.icon}</div>
-              <Heading size="4" className="mb-2" style={{ color: category.color }}>
-                {category.title}
-              </Heading>
-              <Text size="2" color="gray" className="mb-3">
-                {category.description}
-              </Text>
-              <div className="flex flex-wrap justify-center gap-1">
-                {category.examples.slice(0, 3).map((example, i) => (
-                  <Badge key={i} size="1" style={{ backgroundColor: `${category.color}20`, color: category.color }}>
-                    {example}
-                  </Badge>
+            <Tabs.Content key={key} value={key}>
+              {/* Category Header */}
+              <Box className="mb-6 p-6 rounded-xl" style={{ backgroundColor: `${category.color}10` }}>
+                <Flex align="center" gap="4" className="mb-4">
+                  <Box className="text-4xl">{category.icon}</Box>
+                  <Box>
+                    <Heading size="6" className="mb-2" style={{ color: category.color }}>
+                      {category.title}
+                    </Heading>
+                    <Text size="3" color="gray">
+                      Idealūs spąstai: {category.description}
+                    </Text>
+                  </Box>
+                </Flex>
+                
+                <Flex wrap="wrap" gap="2">
+                  <Text size="2" weight="medium" color="gray">Tinka šiems gyvūnams:</Text>
+                  {category.examples.map((example, i) => (
+                    <Badge key={i} size="2" style={{ backgroundColor: `${category.color}20`, color: category.color }}>
+                      {example}
+                    </Badge>
+                  ))}
+                </Flex>
+              </Box>
+
+                {/* Products Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {products.slice(0, 6).map((product) => (
+                  <Card key={product.id} size="2" className="p-4 hover:shadow-lg transition-shadow">
+                    <Link href={`/products/${product.handle}`}>
+                      <Flex direction="column" gap="3">
+                        <div className="relative aspect-square bg-gray-50 rounded-lg overflow-hidden">
+                          {product.thumbnail ? (
+                            <Image
+                              src={product.thumbnail}
+                              alt={product.title}
+                              fill
+                              className="object-cover"
+                            />
+                          ) : (
+                            <Flex align="center" justify="center" className="h-full">
+                              <Text color="gray">Nuotrauka neprieinama</Text>
+                            </Flex>
+                          )}
+                        </div>
+                        
+                        <Box>
+                          <Heading size="4" weight="medium" className="mb-2">
+                            {product.title}
+                          </Heading>
+                          
+                          <Text size="2" color="gray" className="mb-3 line-clamp-2">
+                            {product.description}
+                          </Text>
+                          
+                          <Flex justify="between" align="center">
+                            <Text size="3" weight="bold" style={{ color: category.color }}>
+                              €{(product.variants?.[0]?.prices?.[0]?.amount / 100).toFixed(2)}
+                            </Text>
+                            <Button size="2" style={{ backgroundColor: category.color }}>
+                              Peržiūrėti
+                            </Button>
+                          </Flex>
+                        </Box>
+                      </Flex>
+                    </Link>
+                  </Card>
                 ))}
               </div>
-            </Tabs.Trigger>
+            </Tabs.Content>
           ))}
-        </Tabs.List>
-
-        {Object.entries(animalSizeCategories).map(([key, category]) => (
-          <Tabs.Content key={key} value={key}>
-            {/* Category Header */}
-            <div className="mb-6 p-6 rounded-xl" style={{ backgroundColor: `${category.color}10` }}>
-              <Flex align="center" gap="4" className="mb-4">
-                <div className="text-5xl">{category.icon}</div>
-                <div>
-                  <Heading size="6" className="mb-2" style={{ color: category.color }}>
-                    {category.title}
-                  </Heading>
-                  <Text size="3" color="gray">
-                    Idealūs spąstai: {category.description}
-                  </Text>
-                </div>
-              </Flex>
-              
-              <div className="flex flex-wrap gap-2">
-                <Text size="2" weight="medium" color="gray">Tinka šiems gyvūnams:</Text>
-                {category.examples.map((example, i) => (
-                  <Badge key={i} size="2" style={{ backgroundColor: `${category.color}20`, color: category.color }}>
-                    {example}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-
-            {/* Products Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {filterProductsBySize(key).map((product) => {
-                const mainVariant = product.variants?.[0];
-                
-                // Use the same price calculation as main page
-                let price = 0;
-                if (mainVariant?.calculated_price?.calculated_amount) {
-                  price = mainVariant.calculated_price.calculated_amount;
-                } else if (mainVariant?.prices && mainVariant.prices.length > 0) {
-                  const eurPrice = mainVariant.prices.find((p: any) => 
-                    p.currency_code === 'eur' || p.currency_code === 'EUR'
-                  );
-                  price = eurPrice?.amount || mainVariant.prices[0]?.amount || 0;
-                }
-                
-                const formattedPrice = price > 1000 ? `€${(price / 100).toFixed(2)}` : `€${price.toFixed(2)}`;
-
-                return (
-                <div key={product.id} className="group hover:shadow-lg transition-all duration-300 bg-white rounded-lg border border-gray-200 overflow-hidden">
-                  <div>
-                    {/* Product Image */}
-                    <div className="aspect-square bg-gray-100 overflow-hidden relative">
-                      {product.thumbnail ? (
-                        <Image
-                          src={getOptimizedImageUrl(product.thumbnail)}
-                          alt={product.title}
-                          fill
-                          className="object-cover group-hover:scale-105 transition-transform duration-300"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-gray-400">
-                          <ShoppingCart className="w-12 h-12" />
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Product Content */}
-                    <div className="p-4">
-                      {/* Product Title */}
-                      <h3 className="text-lg font-medium leading-tight mb-2 line-clamp-2" style={{ color: brandColors.primary }}>
-                        {product.title}
-                      </h3>
-                    
-                      {product.description && (
-                        <div className="text-sm text-gray-600 mb-3 line-clamp-2">
-                          {product.description}
-                        </div>
-                      )}
-
-                      {/* Product Specs */}
-                      <div className="mb-4 space-y-2">
-                        <div className="flex items-center gap-2">
-                          <Ruler className="w-4 h-4 text-gray-500" />
-                          <span className="text-sm text-gray-600">
-                            Tinkamas {category.description.toLowerCase()}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Zap className="w-4 h-4 text-gray-500" />
-                          <span className="text-sm text-gray-600">
-                            Humaniška konstrukcija
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Category Badge */}
-                      <span 
-                        className="inline-block px-2 py-1 text-xs rounded mb-3" 
-                        style={{ backgroundColor: `${category.color}20`, color: category.color }}
-                      >
-                        {category.title}
-                      </span>
-
-                      {/* Price and Add to Cart */}
-                      <div className="flex justify-between items-center">
-                        <span className="text-xl font-bold" style={{ color: brandColors.primary }}>
-                          {formattedPrice}
-                        </span>
-                        <button
-                          onClick={() => mainVariant && handleAddToCart(mainVariant.id)}
-                          disabled={cartLoading || !mainVariant}
-                          className="px-4 py-2 rounded-lg text-white font-medium flex items-center gap-2 hover:opacity-90 disabled:opacity-50"
-                          style={{ backgroundColor: category.color }}
-                        >
-                          <ShoppingCart className="w-4 h-4" />
-                          Į krepšelį
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                );
-              })}
-            </div>
-
-            {filterProductsBySize(key).length === 0 && (
-              <div className="text-center py-12">
-                <div className="text-xl text-gray-500">
-                  Šiai kategorijai produktų kol kas nėra
-                </div>
-              </div>
-            )}
-          </Tabs.Content>
-        ))}
-      </Tabs.Root>
-    </div>
-  )
+        </Tabs.Root>
+      </Box>
+    </Container>
+  );
 }

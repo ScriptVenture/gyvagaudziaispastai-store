@@ -8,6 +8,8 @@ import { Search, Filter, Grid, List, ShoppingCart, X, TrendingUp } from 'lucide-
 import { useCart } from '@/contexts/cart-context'
 import { brandColors } from '@/utils/colors'
 import { getOptimizedImageUrl } from '@/utils/image'
+import { STORE_API_URL, CART_API_URL, MEDUSA_PUBLISHABLE_KEY } from '@/lib/config'
+
 
 interface Product {
   id: string
@@ -48,7 +50,12 @@ function SearchContent() {
     const fetchProducts = async () => {
       try {
         setLoading(true)
-        const response = await fetch('/api/products')
+        const response = await fetch(`${STORE_API_URL}/products`, {
+          headers: {
+            'x-publishable-api-key': MEDUSA_PUBLISHABLE_KEY,
+            'Content-Type': 'application/json',
+          },
+        })
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`)
         }
@@ -100,7 +107,7 @@ function SearchContent() {
 
   const handleAddToCart = async (variantId: string) => {
     try {
-      const response = await fetch('/api/cart/add', {
+      const response = await fetch(`${CART_API_URL}/add`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

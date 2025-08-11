@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react"
 import { HttpTypes } from "@medusajs/types"
+import { CART_API_URL, MEDUSA_PUBLISHABLE_KEY } from "@/lib/config"
 
 interface CartContextType {
   cart: HttpTypes.StoreCart | null
@@ -18,7 +19,12 @@ async function fetchCart() {
   }
   
   try {
-    const response = await fetch('/api/cart')
+    const response = await fetch(CART_API_URL, {
+      headers: {
+        'x-publishable-api-key': MEDUSA_PUBLISHABLE_KEY,
+        'Content-Type': 'application/json',
+      },
+    })
     if (!response.ok) return null
     const data = await response.json()
     return data.cart

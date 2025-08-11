@@ -6,6 +6,7 @@ import { Truck, Package, Zap, AlertCircle, MapPin } from "lucide-react"
 import { HttpTypes } from "@medusajs/types"
 import PickupPointSelector from "./PickupPointSelector"
 import { useTranslation } from "@/hooks/useTranslation"
+import { CART_API_URL } from "@/lib/config"
 
 interface ShippingMethodsProps {
   cart: HttpTypes.StoreCart
@@ -107,7 +108,7 @@ export default function ShippingMethods({
       }
 
       // Fetch updated cart to get calculated shipping cost
-      const cartResponse = await fetch('/api/cart', {
+      const cartResponse = await fetch(`${CART_API_URL}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',

@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { useCart } from "@/contexts/cart-context"
+import { CART_API_URL, MEDUSA_PUBLISHABLE_KEY } from "@/lib/config"
 
 export function useCartActions() {
   const { refreshCart } = useCart()
@@ -15,9 +16,10 @@ export function useCartActions() {
     try {
       setIsAdding(true)
       
-      const response = await fetch('/api/cart/add', {
+      const response = await fetch(`${CART_API_URL}/add`, {
         method: 'POST',
         headers: {
+          'x-publishable-api-key': MEDUSA_PUBLISHABLE_KEY,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ variantId, quantity }),
@@ -45,9 +47,10 @@ export function useCartActions() {
     try {
       setIsUpdating(true)
       
-      const response = await fetch('/api/cart/update', {
+      const response = await fetch(`${CART_API_URL}/update`, {
         method: 'POST',
         headers: {
+          'x-publishable-api-key': MEDUSA_PUBLISHABLE_KEY,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ lineId, quantity }),
@@ -73,9 +76,10 @@ export function useCartActions() {
     try {
       setIsDeleting(true)
       
-      const response = await fetch('/api/cart/delete', {
+      const response = await fetch(`${CART_API_URL}/delete`, {
         method: 'POST',
         headers: {
+          'x-publishable-api-key': MEDUSA_PUBLISHABLE_KEY,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ lineId }),

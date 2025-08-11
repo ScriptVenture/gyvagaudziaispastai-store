@@ -4,6 +4,7 @@ import { useState } from "react"
 import { Button, TextField, Select, Checkbox, Text, Flex, Box, Heading } from "@radix-ui/themes"
 import { Mail, User, MapPin, Building, Phone } from "lucide-react"
 import { useTranslation } from "@/hooks/useTranslation"
+import { CART_API_URL } from "@/lib/config"
 
 interface AddressFormProps {
   onNext: () => void
@@ -54,7 +55,7 @@ export default function AddressForm({ onNext, onUpdate, initialData }: AddressFo
 
     try {
       // Update cart with addresses via API
-      const response = await fetch('/api/cart/addresses', {
+      const response = await fetch(`${CART_API_URL}/addresses`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -20,6 +20,11 @@ export function getImageUrl(imageUrl: string | undefined): string {
 export function getOptimizedImageUrl(imageUrl: string | undefined): string {
   if (!imageUrl) return ''
   
+  // If it's already a full URL pointing to our domain, return as is
+  if (imageUrl.startsWith('https://gyva.appiolabs.com/') && !imageUrl.includes('/static/')) {
+    return imageUrl
+  }
+  
   // Convert Medusa backend URLs to use our proxy API route
   if (imageUrl.includes('/static/')) {
     // Extract the filename from the URL

@@ -1,7 +1,6 @@
 import Link from 'next/link'
 import { Facebook, Twitter, Instagram, Youtube, Mail, Phone, MapPin, Heart, Shield, Award, Truck } from 'lucide-react'
 import TrapLogo from '@/components/ui/TrapLogo'
-import { Button, Text, Heading, Flex, Grid, Section, Container } from '@radix-ui/themes'
 import { brandColors, componentStyles } from '@/utils/colors'
 
 export default function Footer() {
@@ -15,70 +14,70 @@ export default function Footer() {
       
       {/* Trust indicators bar */}
       <div className="border-b border-white/10 py-6 sm:py-8">
-        <Container size="4">
-          <Grid columns={{ initial: "1", sm: "2", lg: "4" }} gap={{ initial: "4", sm: "6" }}>
-            <Flex align="center" gap="3" className="text-center sm:text-left" justify={{ initial: "center", sm: "start" }}>
-              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center" style={{ 
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-6xl">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+            <div className="flex items-center gap-3 text-center sm:text-left justify-center sm:justify-start">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center flex-shrink-0" style={{ 
                 background: 'rgba(255, 255, 255, 0.1)',
                 backdropFilter: 'blur(10px)'
               }}>
                 <Shield className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
-              <div>
-                <Text size={{ initial: "2", sm: "3" }} weight="bold" className="block">30 dienų garantija</Text>
-                <Text size={{ initial: "1", sm: "2" }} className="opacity-80">Saugus grąžinimas</Text>
+              <div className="text-left">
+                <div className="text-sm sm:text-base font-bold">30 dienų garantija</div>
+                <div className="text-xs sm:text-sm opacity-80">Saugus grąžinimas</div>
               </div>
-            </Flex>
+            </div>
             
-            <Flex align="center" gap="3" className="text-center sm:text-left" justify={{ initial: "center", sm: "start" }}>
-              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center" style={{ 
+            <div className="flex items-center gap-3 text-center sm:text-left justify-center sm:justify-start">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center flex-shrink-0" style={{ 
                 background: 'rgba(255, 255, 255, 0.1)',
                 backdropFilter: 'blur(10px)'
               }}>
                 <Truck className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
-              <div>
-                <Text size={{ initial: "2", sm: "3" }} weight="bold" className="block">Nemokamas pristatymas</Text>
-                <Text size={{ initial: "1", sm: "2" }} className="opacity-80">Užsakymams nuo €75</Text>
+              <div className="text-left">
+                <div className="text-sm sm:text-base font-bold">Nemokamas pristatymas</div>
+                <div className="text-xs sm:text-sm opacity-80">Užsakymams nuo €75</div>
               </div>
-            </Flex>
+            </div>
             
-            <Flex align="center" gap="3" className="text-center sm:text-left" justify={{ initial: "center", sm: "start" }}>
-              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center" style={{ 
+            <div className="flex items-center gap-3 text-center sm:text-left justify-center sm:justify-start">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center flex-shrink-0" style={{ 
                 background: 'rgba(255, 255, 255, 0.1)',
                 backdropFilter: 'blur(10px)'
               }}>
                 <Award className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
-              <div>
-                <Text size={{ initial: "2", sm: "3" }} weight="bold" className="block">Ekspertų pagalba</Text>
-                <Text size={{ initial: "1", sm: "2" }} className="opacity-80">Profesionalūs patarimai</Text>
+              <div className="text-left">
+                <div className="text-sm sm:text-base font-bold">Ekspertų pagalba</div>
+                <div className="text-xs sm:text-sm opacity-80">Profesionalūs patarimai</div>
               </div>
-            </Flex>
+            </div>
             
-            <Flex align="center" gap="3" className="text-center sm:text-left" justify={{ initial: "center", sm: "start" }}>
-              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center" style={{ 
+            <div className="flex items-center gap-3 text-center sm:text-left justify-center sm:justify-start">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center flex-shrink-0" style={{ 
                 background: 'rgba(255, 255, 255, 0.1)',
                 backdropFilter: 'blur(10px)'
               }}>
                 <TrapLogo className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
-              <div>
-                <Text size={{ initial: "2", sm: "3" }} weight="bold" className="block">Humaniški sprendimai</Text>
-                <Text size={{ initial: "1", sm: "2" }} className="opacity-80">Draugiški gyvūnams</Text>
+              <div className="text-left">
+                <div className="text-sm sm:text-base font-bold">Humaniški sprendimai</div>
+                <div className="text-xs sm:text-sm opacity-80">Draugiški gyvūnams</div>
               </div>
-            </Flex>
-          </Grid>
-        </Container>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Main footer content */}
-      <Section size="3">
-        <Container size="4">
-          <Grid columns={{ initial: "1", sm: "2", lg: "4" }} gap={{ initial: "6", sm: "8" }}>
+      <div className="py-12 sm:py-16">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-6xl">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
             {/* Company Info */}
-            <div className="text-center sm:text-left">
-              <Flex align="center" gap="3" className="mb-4 sm:mb-6" justify={{ initial: "center", sm: "start" }}>
+            <div className="text-center md:text-left col-span-1 lg:col-span-1">
+              <div className="flex items-center gap-3 mb-4 sm:mb-6 justify-center md:justify-start">
                 <div className="relative">
                   <div 
                     className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center text-white shadow-lg"
@@ -92,17 +91,17 @@ export default function Footer() {
                   <div className="absolute -top-1 -right-1 w-2.5 h-2.5 sm:w-3 sm:h-3 bg-amber-400 rounded-full" />
                 </div>
                 <div>
-                  <Heading size={{ initial: "3", sm: "4" }} className="font-bold">Gyvagaudziaispastai</Heading>
-                  <Text size="1" className="opacity-80">Humaniški gyvūnų spąstai</Text>
+                  <h3 className="text-lg sm:text-xl font-bold">Gyvagaudziaispastai</h3>
+                  <div className="text-xs opacity-80">Humaniški gyvūnų spąstai</div>
                 </div>
-              </Flex>
+              </div>
               
-              <Text size={{ initial: "1", sm: "2" }} className="mb-4 sm:mb-6 opacity-90 leading-relaxed">
+              <p className="text-xs sm:text-sm mb-4 sm:mb-6 opacity-90 leading-relaxed">
                 Patikimi profesionalų ir namų savininkų visame pasaulyje dėl efektyvių,
                 humaniškų gyvūnų spąstų. Saugus pagavimas ir perkėlimas.
-              </Text>
+              </p>
               
-              <Flex gap="2 sm:gap-3" justify={{ initial: "center", sm: "start" }}>
+              <div className="flex gap-2 sm:gap-3 justify-center md:justify-start">
                 {[Facebook, Twitter, Instagram, Youtube].map((Icon, index) => (
                   <Link key={index} href="#" className="group">
                     <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center transition-all duration-300 group-hover:scale-110" style={{ 
@@ -113,13 +112,13 @@ export default function Footer() {
                     </div>
                   </Link>
                 ))}
-              </Flex>
+              </div>
             </div>
 
             {/* Products & Solutions */}
-            <div className="text-center sm:text-left">
-              <Heading size={{ initial: "3", sm: "4" }} className="mb-3 sm:mb-4 font-semibold">Gyvūnų spąstai</Heading>
-              <Flex direction="column" gap="1.5 sm:gap-2">
+            <div className="text-center md:text-left">
+              <h3 className="text-lg sm:text-xl mb-3 sm:mb-4 font-semibold">Gyvūnų spąstai</h3>
+              <div className="flex flex-col gap-1.5 sm:gap-2">
                 {[
                   'Mažų gyvūnų spąstai',
                   'Vidutinių gyvūnų spąstai', 
@@ -132,13 +131,13 @@ export default function Footer() {
                     {item}
                   </Link>
                 ))}
-              </Flex>
+              </div>
             </div>
 
             {/* Support & Resources */}
-            <div className="text-center sm:text-left">
-              <Heading size={{ initial: "3", sm: "4" }} className="mb-3 sm:mb-4 font-semibold">Pagalba ir ištekliai</Heading>
-              <Flex direction="column" gap="1.5 sm:gap-2">
+            <div className="text-center md:text-left">
+              <h3 className="text-lg sm:text-xl mb-3 sm:mb-4 font-semibold">Pagalba ir ištekliai</h3>
+              <div className="flex flex-col gap-1.5 sm:gap-2">
                 {[
                   'Spąstų įrengimo gidas',
                   'Gyvūnų identifikavimas',
@@ -151,56 +150,56 @@ export default function Footer() {
                     {item}
                   </Link>
                 ))}
-              </Flex>
+              </div>
             </div>
 
             {/* Contact & Newsletter */}
-            <div className="text-center sm:text-left">
-              <Heading size={{ initial: "3", sm: "4" }} className="mb-3 sm:mb-4 font-semibold">Susisiekite</Heading>
+            <div className="text-center md:text-left">
+              <h3 className="text-lg sm:text-xl mb-3 sm:mb-4 font-semibold">Susisiekite</h3>
               
               {/* Contact Info */}
-              <Flex direction="column" gap="2 sm:gap-3" className="mb-4 sm:mb-6">
-                <Flex align="center" gap="2 sm:gap-3" justify={{ initial: "center", sm: "start" }}>
+              <div className="flex flex-col gap-2 sm:gap-3 mb-4 sm:mb-6">
+                <div className="flex items-center gap-2 sm:gap-3 justify-center md:justify-start">
                   <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center" style={{ 
                     background: 'rgba(255, 255, 255, 0.1)',
                     backdropFilter: 'blur(10px)'
                   }}>
                     <Phone className="w-3 h-3 sm:w-4 sm:h-4 text-amber-300" />
                   </div>
-                  <Text size={{ initial: "1", sm: "2" }} className="opacity-90">+370 5 123 4567</Text>
-                </Flex>
+                  <div className="text-xs sm:text-sm opacity-90">+370 5 123 4567</div>
+                </div>
                 
-                <Flex align="center" gap="2 sm:gap-3" justify={{ initial: "center", sm: "start" }}>
+                <div className="flex items-center gap-2 sm:gap-3 justify-center md:justify-start">
                   <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center" style={{ 
                     background: 'rgba(255, 255, 255, 0.1)',
                     backdropFilter: 'blur(10px)'
                   }}>
                     <Mail className="w-3 h-3 sm:w-4 sm:h-4 text-amber-300" />
                   </div>
-                  <Text size={{ initial: "1", sm: "2" }} className="opacity-90 break-all sm:break-normal">info@gyvagaudziaispastai.lt</Text>
-                </Flex>
+                  <div className="text-xs sm:text-sm opacity-90 break-words">info@gyvagaudziaispastai.lt</div>
+                </div>
                 
-                <Flex align="start" gap="2 sm:gap-3" justify={{ initial: "center", sm: "start" }}>
+                <div className="flex items-start gap-2 sm:gap-3 justify-center md:justify-start">
                   <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center" style={{ 
                     background: 'rgba(255, 255, 255, 0.1)',
                     backdropFilter: 'blur(10px)'
                   }}>
                     <MapPin className="w-3 h-3 sm:w-4 sm:h-4 text-amber-300" />
                   </div>
-                  <Text size={{ initial: "1", sm: "2" }} className="opacity-90 leading-relaxed">
+                  <div className="text-xs sm:text-sm opacity-90 leading-relaxed">
                     Profesionalūs gyvūnų kontrolės<br />
                     sprendimai Lietuvoje
-                  </Text>
-                </Flex>
-              </Flex>
+                  </div>
+                </div>
+              </div>
 
               {/* Newsletter */}
               <div>
                 <div className="mb-3 sm:mb-4">
-                  <h3 className="text-base sm:text-lg font-semibold text-white mb-1 sm:mb-2">
+                  <h4 className="text-sm sm:text-base font-semibold text-white mb-1 sm:mb-2">
                     Gaukite patarimus ir pasiūlymus
-                  </h3>
-                  <p className="text-xs sm:text-sm opacity-80 text-white">
+                  </h4>
+                  <p className="text-xs opacity-80 text-white">
                     Ekspertų patarimai ir išskirtiniai pasiūlymai kas savaitę
                   </p>
                 </div>
@@ -210,7 +209,7 @@ export default function Footer() {
                     <input
                       type="email"
                       placeholder="Įveskite savo el. pašto adresą"
-                      className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm rounded-lg border border-white/20 focus:outline-none focus:ring-2 focus:border-transparent transition-all placeholder:text-white/60"
+                      className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm rounded-lg border border-white/20 focus:outline-none focus:ring-2 focus:border-transparent transition-all placeholder:text-white/60"
                       style={{ 
                         background: 'rgba(255, 255, 255, 0.1)',
                         backdropFilter: 'blur(10px)',
@@ -222,7 +221,7 @@ export default function Footer() {
                   </div>
                   
                   <button 
-                    className="w-full py-2 sm:py-3 text-sm font-medium rounded-lg transition-all hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2"
+                    className="w-full py-2.5 sm:py-3 text-sm font-medium rounded-lg transition-all hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2"
                     style={{ 
                       background: `linear-gradient(135deg, ${brandColors.secondary} 0%, ${brandColors.warning} 100%)`,
                       color: brandColors.white,
@@ -237,47 +236,45 @@ export default function Footer() {
                 </div>
               </div>
             </div>
-          </Grid>
-        </Container>
-      </Section>
+          </div>
+        </div>
+      </div>
 
       {/* Bottom footer with enhanced lighting */}
       <div className="border-t border-white/10 relative">
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent pointer-events-none" />
-        <Container size="4">
-          <Flex 
-            direction={{ initial: "column", md: "row" }} 
-            justify="between" 
-            align="center" 
-            gap="4"
-            className="py-6"
-          >
-            <Flex align="center" gap="4">
-              <Text size="2" className="opacity-80">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-6xl">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4 sm:gap-6 py-6">
+            {/* Copyright */}
+            <div className="flex items-center justify-center md:justify-start w-full md:w-auto">
+              <div className="text-sm opacity-80 text-center md:text-left">
                 © 2024 Gyvagaudziaispastai. Visos teisės saugomos.
-              </Text>
-            </Flex>
+              </div>
+            </div>
             
-            <Flex align="center" gap="6" className="relative z-10">
-              {[
-                { label: 'Privatumo politika', href: '/privacy' },
-                { label: 'Sąlygos', href: '/terms' },
-                { label: 'Grąžinimai', href: '/returns' },
-                { label: 'BDAR', href: '/gdpr' },
-                { label: 'Slapukai', href: '/cookies' },
-                { label: 'Apie mus', href: '/about' }
-              ].map((item) => (
-                <Link 
-                  key={item.label} 
-                  href={item.href} 
-                  className="text-white/70 hover:text-amber-300 transition-colors text-sm relative z-10 cursor-pointer"
-                >
-                  {item.label}
-                </Link>
-              ))}
-            </Flex>
-          </Flex>
-        </Container>
+            {/* Policy Links */}
+            <div className="w-full md:w-auto">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:flex md:items-center gap-3 sm:gap-4 md:gap-6 relative z-10">
+                {[
+                  { label: 'Privatumo politika', href: '/privacy' },
+                  { label: 'Sąlygos', href: '/terms' },
+                  { label: 'Grąžinimai', href: '/returns' },
+                  { label: 'BDAR', href: '/gdpr' },
+                  { label: 'Slapukai', href: '/cookies' },
+                  { label: 'Apie mus', href: '/about' }
+                ].map((item) => (
+                  <Link 
+                    key={item.label} 
+                    href={item.href} 
+                    className="text-white/70 hover:text-amber-300 transition-colors text-xs sm:text-sm relative z-10 cursor-pointer text-center md:text-left"
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
       
       {/* Subtle bottom glow effect */}

@@ -6,6 +6,7 @@ import { Star, Shield, ShoppingCart } from "lucide-react";
 import { brandColors } from "@/utils/colors";
 import { useCart } from "@/contexts/cart-context";
 import { getOptimizedImageUrl } from "@/utils/image";
+import { STORE_API_URL, CART_API_URL, MEDUSA_PUBLISHABLE_KEY } from "@/lib/config";
 
 interface Product {
   id: string;
@@ -13,6 +14,11 @@ interface Product {
   handle: string;
   description: string | null;
   thumbnail: string | null;
+  images?: Array<{
+    id: string;
+    url: string;
+    rank: number;
+  }>;
   variants: Array<{
     id: string;
     title: string;
@@ -31,9 +37,16 @@ async function fetchProducts() {
   try {
     if (typeof window !== 'undefined') {
       console.log('Fetching products from API...');
+      console.log('STORE_API_URL:', STORE_API_URL);
+      console.log('MEDUSA_PUBLISHABLE_KEY:', MEDUSA_PUBLISHABLE_KEY ? 'Present' : 'Missing');
+      console.log('Full URL:', `${STORE_API_URL}/products`);
     }
-    const response = await fetch('/api/products', {
+    const response = await fetch(`${STORE_API_URL}/products?fields=*,images.*`, {
       cache: 'no-store', // Ensure fresh data
+      headers: {
+        'x-publishable-api-key': MEDUSA_PUBLISHABLE_KEY,
+        'Content-Type': 'application/json',
+      },
     });
     
     if (typeof window !== 'undefined') {
@@ -87,7 +100,7 @@ export default function BestsellingProducts() {
     
     try {
       const mainVariant = product.variants[0];
-      const response = await fetch('/api/cart/add', {
+      const response = await fetch(`${CART_API_URL}/add`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -210,12 +223,29 @@ export default function BestsellingProducts() {
                     
                     {/* Product Image */}
                     <div className="relative overflow-hidden bg-gray-50 h-48">
-                      <Image 
-                        src={getOptimizedImageUrl(product.thumbnail ?? undefined) ?? "/imagen5.jpg"} 
-                        alt={product.title}
-                        fill
-                        className="object-cover group-hover:scale-102 transition-transform duration-200"
-                      />
+                      {(() => {
+                        // Use thumbnail if available, otherwise use first image, otherwise fallback
+                        let imageUrl = product.thumbnail;
+                        
+                        // If no thumbnail but images exist, use the first image
+                        if (!imageUrl && product.images && product.images.length > 0) {
+                          // Sort images by rank and get the first one
+                          const sortedImages = [...product.images].sort((a, b) => a.rank - b.rank);
+                          imageUrl = sortedImages[0].url;
+                        }
+                        
+                        // Convert the URL to use our image optimization if needed
+                        const optimizedImageUrl = imageUrl ? getOptimizedImageUrl(imageUrl) : "/imagen5.jpg";
+                        
+                        return (
+                          <Image 
+                            src={optimizedImageUrl} 
+                            alt={product.title}
+                            fill
+                            className="object-cover group-hover:scale-102 transition-transform duration-200"
+                          />
+                        );
+                      })()}
                     </div>
                     
                     {/* Product Content */}

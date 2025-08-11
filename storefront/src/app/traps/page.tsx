@@ -7,6 +7,7 @@ import { ShoppingCart, Grid, List } from 'lucide-react'
 import { useCart } from '@/contexts/cart-context'
 import { brandColors } from '@/utils/colors'
 import { getOptimizedImageUrl } from '@/utils/image'
+import { STORE_API_URL, CART_API_URL, MEDUSA_PUBLISHABLE_KEY } from '@/lib/config'
 
 // Use any type to match the actual Medusa response structure
 interface Product {
@@ -14,6 +15,11 @@ interface Product {
   title: string
   description?: string
   thumbnail?: string
+  images?: Array<{
+    id: string
+    url: string
+    rank: number
+  }>
   variants?: any[]
   categories?: any[]
   [key: string]: any
@@ -31,7 +37,12 @@ export default function TrapsPage() {
     const fetchProducts = async () => {
       try {
         setLoading(true)
-        const response = await fetch('/api/products')
+        const response = await fetch(`${STORE_API_URL}/products?fields=*,images.*`, {
+          headers: {
+            'x-publishable-api-key': MEDUSA_PUBLISHABLE_KEY,
+            'Content-Type': 'application/json',
+          },
+        })
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`)
         }
@@ -61,7 +72,7 @@ export default function TrapsPage() {
 
   const handleAddToCart = async (variantId: string) => {
     try {
-      const response = await fetch('/api/cart/add', {
+      const response = await fetch(`${CART_API_URL}/add`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -192,18 +203,34 @@ export default function TrapsPage() {
                 <div>
                   {/* Product Image */}
                   <div className="aspect-square bg-gray-100 overflow-hidden relative">
-                    {product.thumbnail ? (
-                      <Image
-                        src={getOptimizedImageUrl(product.thumbnail)}
-                        alt={product.title}
-                        fill
-                        className="object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-gray-400">
-                        <ShoppingCart className="w-12 h-12" />
-                      </div>
-                    )}
+                    {(() => {
+                      // Use thumbnail if available, otherwise use first image, otherwise fallback
+                      let imageUrl = product.thumbnail;
+                      
+                      // If no thumbnail but images exist, use the first image
+                      if (!imageUrl && product.images && product.images.length > 0) {
+                        // Sort images by rank and get the first one
+                        const sortedImages = [...product.images].sort((a, b) => a.rank - b.rank);
+                        imageUrl = sortedImages[0].url;
+                      }
+                      
+                      if (imageUrl) {
+                        return (
+                          <Image
+                            src={getOptimizedImageUrl(imageUrl)}
+                            alt={product.title}
+                            fill
+                            className="object-cover group-hover:scale-105 transition-transform duration-300"
+                          />
+                        );
+                      } else {
+                        return (
+                          <div className="w-full h-full flex items-center justify-center text-gray-400">
+                            <ShoppingCart className="w-12 h-12" />
+                          </div>
+                        );
+                      }
+                    })()}
                   </div>
 
                   {/* Product Content */}
@@ -251,18 +278,34 @@ export default function TrapsPage() {
                 /* List View */
                 <div className="flex p-4 gap-4">
                   <div className="w-24 h-24 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0 relative">
-                    {product.thumbnail ? (
-                      <Image
-                        src={getOptimizedImageUrl(product.thumbnail)}
-                        alt={product.title}
-                        fill
-                        className="object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-gray-400">
-                        <ShoppingCart className="w-8 h-8" />
-                      </div>
-                    )}
+                    {(() => {
+                      // Use thumbnail if available, otherwise use first image, otherwise fallback
+                      let imageUrl = product.thumbnail;
+                      
+                      // If no thumbnail but images exist, use the first image
+                      if (!imageUrl && product.images && product.images.length > 0) {
+                        // Sort images by rank and get the first one
+                        const sortedImages = [...product.images].sort((a, b) => a.rank - b.rank);
+                        imageUrl = sortedImages[0].url;
+                      }
+                      
+                      if (imageUrl) {
+                        return (
+                          <Image
+                            src={getOptimizedImageUrl(imageUrl)}
+                            alt={product.title}
+                            fill
+                            className="object-cover"
+                          />
+                        );
+                      } else {
+                        return (
+                          <div className="w-full h-full flex items-center justify-center text-gray-400">
+                            <ShoppingCart className="w-8 h-8" />
+                          </div>
+                        );
+                      }
+                    })()}
                   </div>
                   
                   <div className="flex-1">
