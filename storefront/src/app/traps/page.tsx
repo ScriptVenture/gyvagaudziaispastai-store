@@ -3,19 +3,8 @@
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Box, Heading, Text, Button, Flex, Card, Badge, Select, Separator, ScrollArea } from '@radix-ui/themes'
-import { ShoppingCart, Grid, List, Menu, X, Filter, ChevronRight, Tag } from 'lucide-react'
-import { useCart } from '@/contexts/cart-context'
-import { useProducts, Product } from '@/hooks/useProducts'
-import { useCategories } from '@/hooks/useCategories'
-import { brandColors } from '@/utils/colors'
-import { getOptimizedImageUrl } from '@/utils/image'
-import { CART_API_URL } from '@/lib/config'
-import { useState, useEffect } from 'react'
-import Image from 'next/image'
-import Link from 'next/link'
-import { Box, Heading, Text, Button, Flex, Card, Badge, Select } from '@radix-ui/themes'
-import { ShoppingCart, Grid, List, Filter, X, Menu } from 'lucide-react'
+import { Box, Heading, Text, Button, Flex, Card, Badge, Separator, ScrollArea, Container, IconButton } from '@radix-ui/themes'
+import { ShoppingCart, Grid, List, Menu, X, Filter, ChevronRight, Tag, Star } from 'lucide-react'
 import { useCart } from '@/contexts/cart-context'
 import { useProducts, Product } from '@/hooks/useProducts'
 import { useCategories } from '@/hooks/useCategories'
@@ -92,115 +81,214 @@ export default function TrapsPage() {
       </div>
 
       <div className="flex">
-        {/* Sidebar */}
+        {/* Modern Sidebar - Inspired by top e-commerce sites */}
         <div className={`
           ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} 
           lg:translate-x-0 fixed lg:sticky top-0 lg:top-0 left-0 z-30 
           w-80 h-screen lg:h-auto bg-white border-r border-gray-200 
-          transition-transform duration-300 ease-in-out overflow-y-auto
+          transition-transform duration-300 ease-in-out overflow-y-auto shadow-lg lg:shadow-none
         `}>
-          <div className="p-6">
-            {/* Desktop Title */}
-            <div className="hidden lg:block mb-8">
-              <Heading size="8" className="mb-2" style={{ color: brandColors.primary }}>
-                Gyvūnų spąstai
-              </Heading>
-              <Text size="4" color="gray">
-                Humaniški ir efektyvūs gyvūnų spąstai visų tipų gyvūnams
-              </Text>
+          {/* Header */}
+          <div className="p-4 border-b border-gray-100 bg-gray-50">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Filter className="w-5 h-5" style={{ color: brandColors.primary }} />
+                <Text size="4" weight="bold" style={{ color: brandColors.primary }}>
+                  FILTRAI
+                </Text>
+              </div>
+              <Button
+                variant="ghost"
+                size="1"
+                onClick={() => setSidebarOpen(false)}
+                className="lg:hidden"
+              >
+                <X className="w-4 h-4" />
+              </Button>
             </div>
-
-            {/* Categories Section */}
-            <div className="mb-8">
-              <Heading size="4" className="mb-4" style={{ color: brandColors.primary }}>
-                Kategorijos
-              </Heading>
-              <div className="space-y-2">
-                <button
-                  onClick={() => {
-                    setSelectedCategory('all')
-                    setSidebarOpen(false)
-                  }}
-                  className={`w-full text-left px-4 py-3 rounded-lg transition-colors ${
-                    selectedCategory === 'all'
-                      ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-700'
-                      : 'hover:bg-gray-50 text-gray-700'
-                  }`}
+            {selectedCategory !== 'all' && (
+              <div className="mt-2">
+                <Button
+                  variant="ghost"
+                  size="1"
+                  onClick={() => setSelectedCategory('all')}
+                  className="text-xs text-gray-600 hover:text-red-600"
                 >
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium">Visi spąstai</span>
-                    <span className="text-sm text-gray-500">{products.length}</span>
+                  IŠVALYTI VISUS
+                </Button>
+              </div>
+            )}
+          </div>
+
+          {/* Filter Sections */}
+          <div className="p-4 space-y-6">
+            {/* Categories Filter */}
+            <div>
+              <div className="mb-3">
+                <Text size="3" weight="bold" className="text-gray-900 uppercase tracking-wide">
+                  Kategorijos
+                </Text>
+              </div>
+              
+              <div className="space-y-1">
+                {/* All Categories Option */}
+                <label className="flex items-center justify-between p-2 hover:bg-gray-50 rounded cursor-pointer">
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="radio"
+                      name="category"
+                      checked={selectedCategory === 'all'}
+                      onChange={() => {
+                        setSelectedCategory('all')
+                        setSidebarOpen(false)
+                      }}
+                      className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                    />
+                    <Text size="2" className="text-gray-700">
+                      Visi spąstai
+                    </Text>
                   </div>
-                </button>
-                
-                {categories.map((category) => (
-                  <button
-                    key={category.id}
-                    onClick={() => {
-                      setSelectedCategory(category.id)
-                      setSidebarOpen(false)
-                    }}
-                    className={`w-full text-left px-4 py-3 rounded-lg transition-colors ${
-                      selectedCategory === category.id
-                        ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-700'
-                        : 'hover:bg-gray-50 text-gray-700'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="font-medium">{category.name}</span>
-                      <span className="text-sm text-gray-500">
-                        {products.filter(p => p.categories?.some(c => c.id === category.id)).length}
-                      </span>
-                    </div>
-                    {category.description && (
-                      <p className="text-sm text-gray-500 mt-1">{category.description}</p>
-                    )}
-                  </button>
-                ))}
+                  <Badge variant="soft" color="gray" size="1">
+                    {products.length}
+                  </Badge>
+                </label>
+
+                {/* Individual Categories */}
+                {categories.map((category) => {
+                  const categoryCount = products.filter(p => 
+                    p.categories?.some(c => c.id === category.id)
+                  ).length
+                  
+                  return (
+                    <label key={category.id} className="flex items-center justify-between p-2 hover:bg-gray-50 rounded cursor-pointer">
+                      <div className="flex items-center gap-3">
+                        <input
+                          type="radio"
+                          name="category"
+                          checked={selectedCategory === category.id}
+                          onChange={() => {
+                            setSelectedCategory(category.id)
+                            setSidebarOpen(false)
+                          }}
+                          className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                        />
+                        <div>
+                          <Text size="2" className="text-gray-700 block">
+                            {category.name}
+                          </Text>
+                          {category.description && (
+                            <Text size="1" className="text-gray-500 mt-0.5 line-clamp-1">
+                              {category.description}
+                            </Text>
+                          )}
+                        </div>
+                      </div>
+                      <Badge 
+                        variant="soft" 
+                        color={selectedCategory === category.id ? "blue" : "gray"} 
+                        size="1"
+                      >
+                        {categoryCount}
+                      </Badge>
+                    </label>
+                  )
+                })}
               </div>
             </div>
 
-            {/* View Options */}
-            <div className="mb-6">
-              <Heading size="4" className="mb-4" style={{ color: brandColors.primary }}>
-                Peržiūra
-              </Heading>
-              <div className="flex gap-2">
+            <Separator />
+
+            {/* View Mode Filter */}
+            <div>
+              <div className="mb-3">
+                <Text size="3" weight="bold" className="text-gray-900 uppercase tracking-wide">
+                  Peržiūra
+                </Text>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-2">
                 <Button
                   variant={viewMode === 'grid' ? 'solid' : 'outline'}
                   onClick={() => setViewMode('grid')}
                   size="2"
-                  className="flex-1"
+                  className="flex items-center justify-center gap-2"
                 >
-                  <Grid className="w-4 h-4 mr-2" />
-                  Tinklelis
+                  <Grid className="w-4 h-4" />
+                  <Text size="1">Tinklelis</Text>
                 </Button>
                 <Button
                   variant={viewMode === 'list' ? 'solid' : 'outline'}
                   onClick={() => setViewMode('list')}
                   size="2"
-                  className="flex-1"
+                  className="flex items-center justify-center gap-2"
                 >
-                  <List className="w-4 h-4 mr-2" />
-                  Sąrašas
+                  <List className="w-4 h-4" />
+                  <Text size="1">Sąrašas</Text>
                 </Button>
               </div>
             </div>
 
-            {/* Sort Options */}
+            <Separator />
+
+            {/* Price Range (placeholder for future) */}
             <div>
-              <Heading size="4" className="mb-4" style={{ color: brandColors.primary }}>
-                Rūšiuoti
-              </Heading>
-              <Select.Root value={sortBy} onValueChange={setSortBy}>
-                <Select.Trigger placeholder="Rūšiuoti pagal" className="w-full" />
-                <Select.Content>
-                  <Select.Item value="newest">Naujausi</Select.Item>
-                  <Select.Item value="price-low">Kaina: mažiausia</Select.Item>
-                  <Select.Item value="price-high">Kaina: didžiausia</Select.Item>
-                  <Select.Item value="popular">Populiariausi</Select.Item>
-                </Select.Content>
-              </Select.Root>
+              <div className="mb-3">
+                <Text size="3" weight="bold" className="text-gray-900 uppercase tracking-wide">
+                  Kaina
+                </Text>
+              </div>
+              <div className="space-y-2">
+                <label className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded cursor-pointer">
+                  <input type="checkbox" className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500" />
+                  <Text size="2" className="text-gray-700">Iki €50</Text>
+                </label>
+                <label className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded cursor-pointer">
+                  <input type="checkbox" className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500" />
+                  <Text size="2" className="text-gray-700">€50 - €100</Text>
+                </label>
+                <label className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded cursor-pointer">
+                  <input type="checkbox" className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500" />
+                  <Text size="2" className="text-gray-700">Virš €100</Text>
+                </label>
+              </div>
+            </div>
+
+            <Separator />
+
+            {/* Availability */}
+            <div>
+              <div className="mb-3">
+                <Text size="3" weight="bold" className="text-gray-900 uppercase tracking-wide">
+                  Prieinamumas
+                </Text>
+              </div>
+              <label className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded cursor-pointer">
+                <input type="checkbox" className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500" />
+                <Text size="2" className="text-gray-700">Tik sandėlyje esantys</Text>
+              </label>
+            </div>
+          </div>
+
+          {/* Footer Actions */}
+          <div className="p-4 border-t border-gray-100 bg-gray-50">
+            <div className="grid grid-cols-2 gap-2">
+              <Button 
+                variant="outline" 
+                size="2"
+                onClick={() => setSelectedCategory('all')}
+                className="text-xs"
+              >
+                IŠVALYTI
+              </Button>
+              <Button 
+                variant="solid" 
+                size="2"
+                onClick={() => setSidebarOpen(false)}
+                style={{ backgroundColor: brandColors.primary }}
+                className="text-xs"
+              >
+                PERŽIŪRĖTI ({products.length})
+              </Button>
             </div>
           </div>
         </div>
