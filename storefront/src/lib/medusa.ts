@@ -42,8 +42,33 @@ export async function getProducts(limit = 20, categoryId?: string) {
 // Get single product by handle or id
 export async function getProduct(handleOrId: string) {
   try {
-    const data = await medusaRequest(`/store/products/${handleOrId}`)
-    return data.product || null
+    console.log('getProduct called with handle:', handleOrId);
+    
+    // Get all products and filter by handle client-side
+    // since MedusaJS doesn't support handle filtering via query params
+    const data = await medusaRequest(`/store/products?fields=*,images.*,variants.*,variants.prices.*,categories.*`);
+    
+    if (data.products && data.products.length > 0) {
+      // Filter by exact handle match
+      const productByHandle = data.products.find((product: any) => product.handle === handleOrId);
+      
+      if (productByHandle) {
+        console.log('Found product by handle:', productByHandle.title);
+        return productByHandle;
+      }
+      
+      // If no product found by handle, try by ID as fallback
+      const productById = data.products.find((product: any) => product.id === handleOrId);
+      if (productById) {
+        console.log('Found product by ID:', productById.title);
+        return productById;
+      }
+      
+      console.log('No product found with handle or ID:', handleOrId);
+      console.log('Available handles:', data.products.map((p: any) => p.handle).slice(0, 5));
+    }
+    
+    return null;
   } catch (error) {
     console.error("Error fetching product:", error)
     return null
