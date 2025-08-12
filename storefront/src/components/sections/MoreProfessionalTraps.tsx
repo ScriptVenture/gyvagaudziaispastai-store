@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { Star, Shield, ShoppingCart } from "lucide-react";
 import { brandColors } from "@/utils/colors";
 import { useCart } from "@/contexts/cart-context";
@@ -189,7 +190,8 @@ export default function MoreProfessionalTraps() {
                 const mockReviews = Math.floor(Math.random() * 150) + 30;
                 
                 return (
-                  <div key={product.id} className="group relative bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden border border-gray-200">
+                  <Link key={product.id} href={`/products/${product.handle}`}>
+                    <div className="group relative bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden border border-gray-200 cursor-pointer">
                     
                     {/* Stock Urgency Badge */}
                     {mockStock <= 5 && (
@@ -272,7 +274,11 @@ export default function MoreProfessionalTraps() {
                         style={{ 
                           backgroundColor: brandColors.secondary
                         }}
-                        onClick={() => handleAddToCart(product)}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleAddToCart(product);
+                        }}
                         disabled={addingToCart === product.id || !mainVariant}
                       >
                         {addingToCart === product.id ? (
@@ -294,6 +300,7 @@ export default function MoreProfessionalTraps() {
                       </div>
                     </div>
                   </div>
+                  </Link>
                 );
               })}
             </div>

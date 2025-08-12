@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { Star, Shield, ShoppingCart } from "lucide-react";
 import { brandColors } from "@/utils/colors";
 import { useCart } from "@/contexts/cart-context";
@@ -203,111 +204,112 @@ export default function BestsellingProducts() {
                 const mockReviews = Math.floor(Math.random() * 200) + 50;
                 
                 return (
-                  <div key={product.id} className="group relative bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden border border-gray-200">
-                    
-                    {/* Stock Urgency Badge */}
-                    {mockStock <= 5 && (
-                      <div className="absolute top-2 left-2 z-20">
-                        <div className="bg-red-500 text-white text-xs font-medium px-1.5 py-0.5 rounded">
-                          Tik {mockStock} liko
+                  <Link key={product.id} href={`/products/${product.handle}`}>
+                    <div className="group relative bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden border border-gray-200 cursor-pointer">
+                      
+                      {/* Stock Urgency Badge */}
+                      {mockStock <= 5 && (
+                        <div className="absolute top-2 left-2 z-20">
+                          <div className="bg-red-500 text-white text-xs font-medium px-1.5 py-0.5 rounded">
+                            Tik {mockStock} liko
+                          </div>
                         </div>
-                      </div>
-                    )}
-                    
-                    {/* Bestseller Badge */}
-                    <div className="absolute top-2 right-2 z-20">
-                      <div className="bg-orange-500 text-white text-xs font-medium px-1.5 py-0.5 rounded">
-                        POPULIARIAUSIAS
-                      </div>
-                    </div>
-                    
-                    {/* Product Image */}
-                    <div className="relative overflow-hidden bg-gray-50 h-48">
-                      {(() => {
-                        // Use thumbnail if available, otherwise use first image, otherwise fallback
-                        let imageUrl = product.thumbnail;
-                        
-                        // If no thumbnail but images exist, use the first image
-                        if (!imageUrl && product.images && product.images.length > 0) {
-                          // Sort images by rank and get the first one
-                          const sortedImages = [...product.images].sort((a, b) => a.rank - b.rank);
-                          imageUrl = sortedImages[0].url;
-                        }
-                        
-                        // Convert the URL to use our image optimization if needed
-                        const optimizedImageUrl = imageUrl ? getOptimizedImageUrl(imageUrl) : "/imagen5.jpg";
-                        
-                        return (
-                          <Image 
-                            src={optimizedImageUrl} 
-                            alt={product.title}
-                            fill
-                            className="object-cover group-hover:scale-102 transition-transform duration-200"
-                          />
-                        );
-                      })()}
-                    </div>
-                    
-                    {/* Product Content */}
-                    <div className="p-3">
+                      )}
                       
-                      {/* Rating */}
-                      <div className="flex items-center gap-1 mb-2">
-                        <div className="flex items-center">
-                          {[...Array(5)].map((_, i) => (
-                            <Star key={i} className={`w-3 h-3 ${i < Math.floor(mockRating) ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} />
-                          ))}
-                        </div>
-                        <span className="text-xs text-gray-600 ml-1">({mockReviews})</span>
-                      </div>
-                      
-                      {/* Product Title */}
-                      <h3 className="text-sm font-medium leading-tight mb-2 line-clamp-2" style={{ color: brandColors.textPrimary }}>
-                        {product.title}
-                      </h3>
-                      
-                      {/* Key Feature */}
-                      <div className="text-xs text-gray-600 mb-2">
-                        Profesionalus spąstas
-                      </div>
-                      
-                      {/* Pricing */}
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-1">
-                          <span className="text-lg font-bold" style={{ color: brandColors.primary }}>
-                            {formattedPrice}
-                          </span>
+                      {/* Bestseller Badge */}
+                      <div className="absolute top-2 right-2 z-20">
+                        <div className="bg-orange-500 text-white text-xs font-medium px-1.5 py-0.5 rounded">
+                          POPULIARIAUSIAS
                         </div>
                       </div>
                       
-                      {/* CTA Button */}
-                      <button 
-                        className="w-full py-2 text-sm font-medium text-white rounded transition-colors hover:opacity-90 disabled:opacity-50 flex items-center justify-center gap-2"
-                        style={{ 
-                          backgroundColor: brandColors.secondary
-                        }}
-                        onClick={() => handleAddToCart(product)}
-                        disabled={addingToCart === product.id || !mainVariant}
-                      >
-                        {addingToCart === product.id ? (
-                          <>
-                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                            Pridedama...
-                          </>
-                        ) : (
-                          <>
-                            <ShoppingCart className="w-4 h-4" />
-                            Pridėti į krepšelį
-                          </>
-                        )}
-                      </button>
+                      {/* Product Image */}
+                      <div className="relative overflow-hidden bg-gray-50 h-48">
+                        {(() => {
+                          // Use thumbnail if available, otherwise use first image, otherwise fallback
+                          let imageUrl = product.thumbnail;
+                          
+                          // If no thumbnail but images exist, use the first image
+                          if (!imageUrl && product.images && product.images.length > 0) {
+                            // Sort images by rank and get the first one
+                            const sortedImages = [...product.images].sort((a, b) => a.rank - b.rank);
+                            imageUrl = sortedImages[0].url;
+                          }
+                          
+                          // Convert the URL to use our image optimization if needed
+                          const optimizedImageUrl = imageUrl ? getOptimizedImageUrl(imageUrl) : "/imagen5.jpg";
+                          
+                          return (
+                            <Image 
+                              src={optimizedImageUrl} 
+                              alt={product.title}
+                              fill
+                              className="object-cover group-hover:scale-102 transition-transform duration-200"
+                            />
+                          );
+                        })()}
+                      </div>
                       
-                      {/* Free Shipping */}
-                      <div className="text-center mt-2">
-                        <span className="text-xs text-green-600 font-medium">Nemokamas pristatymas</span>
+                      {/* Product Content */}
+                      <div className="p-3">
+                        
+                        {/* Rating */}
+                        <div className="flex items-center gap-1 mb-2">
+                          <div className="flex items-center">
+                            {[...Array(5)].map((_, i) => (
+                              <Star key={i} className={`w-3 h-3 ${i < Math.floor(mockRating) ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} />
+                            ))}
+                          </div>
+                          <span className="text-xs text-gray-600 ml-1">({mockReviews})</span>
+                        </div>
+                        
+                        {/* Product Title */}
+                        <h3 className="text-sm font-medium leading-tight mb-2 line-clamp-2" style={{ color: brandColors.textPrimary }}>
+                          {product.title}
+                        </h3>
+                        
+                        {/* Key Feature */}
+                        <div className="text-xs text-gray-600 mb-2">
+                          Profesionalus spąstas
+                        </div>
+                        
+                        {/* Pricing */}
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-1">
+                            <span className="text-lg font-bold" style={{ color: brandColors.primary }}>
+                              {formattedPrice}
+                            </span>
+                          </div>
+                        </div>
+                        
+                        {/* CTA Button */}
+                        <button 
+                          className="w-full py-2 text-sm font-medium text-white rounded transition-colors hover:opacity-90 disabled:opacity-50 flex items-center justify-center gap-2"
+                          style={{ 
+                            backgroundColor: brandColors.secondary
+                          }}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            handleAddToCart(product);
+                          }}
+                          disabled={addingToCart === product.id || !mainVariant}
+                        >
+                          {addingToCart === product.id ? (
+                            <>
+                              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                              Pridedama...
+                            </>
+                          ) : (
+                            <>
+                              <ShoppingCart className="w-4 h-4" />
+                              Pridėti į krepšelį
+                            </>
+                          )}
+                        </button>
                       </div>
                     </div>
-                  </div>
+                  </Link>
                 );
               })}
             </div>
