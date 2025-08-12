@@ -24,14 +24,29 @@ async function medusaRequest(endpoint: string, options: RequestInit = {}) {
   return response.json()
 }
 
-// Get all products
-export async function getProducts(limit = 20) {
+// Get all products with optional category filter
+export async function getProducts(limit = 20, categoryId?: string) {
   try {
-    const data = await medusaRequest(`/store/products?limit=${limit}`)
+    let url = `/store/products?limit=${limit}`
+    if (categoryId) {
+      url += `&category_id=${categoryId}`
+    }
+    const data = await medusaRequest(url)
     return data.products || []
   } catch (error) {
     console.error("Error fetching products:", error)
     return []
+  }
+}
+
+// Get single product by handle or id
+export async function getProduct(handleOrId: string) {
+  try {
+    const data = await medusaRequest(`/store/products/${handleOrId}`)
+    return data.product || null
+  } catch (error) {
+    console.error("Error fetching product:", error)
+    return null
   }
 }
 

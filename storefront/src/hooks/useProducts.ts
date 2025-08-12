@@ -9,6 +9,11 @@ export interface Product {
   handle: string
   description: string | null
   thumbnail: string | null
+  images?: Array<{
+    id: string
+    url: string
+    rank: number
+  }>
   variants: Array<{
     id: string
     title: string
@@ -26,7 +31,7 @@ export interface Product {
   }>
 }
 
-export function useProducts() {
+export function useProducts(categoryId?: string) {
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -35,7 +40,7 @@ export function useProducts() {
     async function fetchProducts() {
       try {
         setLoading(true)
-        const fetchedProducts = await getProducts()
+        const fetchedProducts = await getProducts(50, categoryId)
         setProducts(fetchedProducts)
       } catch (err) {
         setError("Failed to fetch products")
@@ -46,7 +51,7 @@ export function useProducts() {
     }
 
     fetchProducts()
-  }, [])
+  }, [categoryId])
 
   return { products, loading, error }
 }

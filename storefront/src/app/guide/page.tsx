@@ -176,14 +176,14 @@ export default function GuidePage() {
         </div>
 
       {/* Step by Step Guide */}
-      <Box mb={{ initial: "8", md: "12" }}>
-        <Heading size={{ initial: "4", md: "5", lg: "6" }} mb={{ initial: "4", md: "6" }} style={{ color: brandColors.primary }}>
+      <Box className="mb-8 md:mb-12">
+        <Heading size="6" className="mb-4 md:mb-6" style={{ color: brandColors.primary }}>
           6 žingsnių vadovas
         </Heading>
         
         <Box style={{ gap: '16px 0' }}>
           {guideSteps.map((step) => (
-            <Card key={step.id} p={{ initial: "4", md: "6" }} mb={{ initial: "4", md: "6" }}>
+            <Card key={step.id} className="p-4 md:p-6 mb-4 md:mb-6">
               <Flex gap="4">
                 {/* Step Number and Icon */}
                 <Box className="flex-shrink-0">
@@ -206,14 +206,14 @@ export default function GuidePage() {
                 
                 {/* Step Content */}
                 <Box className="flex-1">
-                  <Heading size={{ initial: "3", md: "4" }} mb={{ initial: "1", md: "2" }} style={{ color: brandColors.primary }}>
+                  <Heading size="4" className="mb-1 md:mb-2" style={{ color: brandColors.primary }}>
                     {step.title}
                   </Heading>
-                  <Text size={{ initial: "2", md: "3" }} color="gray" mb={{ initial: "3", md: "4" }}>
+                  <Text size="3" color="gray" className="mb-3 md:mb-4">
                     {step.description}
                   </Text>
                   
-                  <Box className="grid grid-cols-1 lg:grid-cols-2" gap={{ initial: "1", md: "2" }}>
+                  <Box className="grid grid-cols-1 lg:grid-cols-2 gap-1 md:gap-2">
                     {step.tips.map((tip, index) => (
                       <Flex key={index} align="center" gap="2">
                         <CheckCircle className="w-3 h-3 md:w-4 md:h-4 text-green-500 flex-shrink-0" />
@@ -229,15 +229,15 @@ export default function GuidePage() {
       </Box>
 
       {/* Animal-Specific Guides */}
-      <Box mb={{ initial: "8", md: "12" }}>
-        <Heading size={{ initial: "4", md: "5", lg: "6" }} mb={{ initial: "4", md: "6" }} style={{ color: brandColors.primary }}>
-          Patarimai pagal gyvūno tipą
+            <Box className="mb-8 md:mb-12">
+        <Heading size="6" className="mb-4 md:mb-6" style={{ color: brandColors.primary }}>
+          Spąstų tipai pagal gyvūną
         </Heading>
 
         <Tabs.Root value={activeAnimalTab} onValueChange={setActiveAnimalTab}>
           <Tabs.List className="grid grid-cols-2 lg:grid-cols-4" style={{ gap: '8px', marginBottom: '24px' }}>
             {Object.entries(animalGuides).map(([key, guide]) => (
-              <Tabs.Trigger key={key} value={key} className="text-center border rounded-lg hover:shadow-md transition-all" p={{ initial: "2", md: "4" }}>
+              <Tabs.Trigger key={key} value={key} className="text-center border rounded-lg hover:shadow-md transition-all p-2 md:p-4">
                 <Box className="mb-1 md:mb-2" style={{ fontSize: '20px' }}>{guide.icon}</Box>
                 <Text size={{ initial: "1", md: "2" }} weight="medium" style={{ color: guide.color }}>
                   {guide.title}
@@ -248,8 +248,8 @@ export default function GuidePage() {
 
           {Object.entries(animalGuides).map(([key, guide]) => (
             <Tabs.Content key={key} value={key}>
-              <Card p={{ initial: "4", md: "6" }}>
-                <Flex align="center" gap="4" mb={{ initial: "3", md: "4" }}>
+              <Card className="p-4 md:p-6">
+                <Flex align="center" gap="4" className="mb-3 md:mb-4">
                   <Box style={{ fontSize: '32px' }}>{guide.icon}</Box>
                   <Box>
                     <Heading size={{ initial: "3", md: "4" }} style={{ color: guide.color }}>
@@ -261,7 +261,7 @@ export default function GuidePage() {
                   </Box>
                 </Flex>
                 
-                <Box className="grid grid-cols-1 lg:grid-cols-2" gap={{ initial: "2", md: "3" }}>
+                <Box className="grid grid-cols-1 lg:grid-cols-2 gap-2 md:gap-3">
                   {guide.tips.map((tip, index) => (
                     <Flex key={index} align="center" gap="2">
                       <CheckCircle className="w-3 h-3 md:w-4 md:h-4 flex-shrink-0" style={{ color: guide.color }} />
@@ -276,15 +276,15 @@ export default function GuidePage() {
       </Box>
 
       {/* Safety Warnings */}
-      <Card p={{ initial: "4", md: "6" }} mb={{ initial: "8", md: "12" }} style={{ backgroundColor: "#FEF3C7", borderColor: "#F59E0B" }}>
-        <Flex align="center" gap="3" mb={{ initial: "3", md: "4" }}>
+      <Card className="p-4 md:p-6 mb-8 md:mb-12" style={{ backgroundColor: "#FEF3C7", borderColor: "#F59E0B" }}>
+        <Flex align="center" gap="3" className="mb-3 md:mb-4">
           <AlertTriangle className="w-5 h-5 md:w-6 md:h-6 text-amber-600" />
           <Heading size={{ initial: "4", md: "5" }} className="text-amber-800">
             Saugos nurodymai
           </Heading>
         </Flex>
         
-        <Box className="grid grid-cols-1 md:grid-cols-2" gap={{ initial: "3", md: "4" }}>
+        <Box className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
           <Box>
             <Text size={{ initial: "2", md: "3" }} weight="medium" className="text-amber-800" mb="2">
               Prieš naudojimą:
@@ -311,12 +311,12 @@ export default function GuidePage() {
       </Card>
 
       {/* Contact Support */}
-      <Card p={{ initial: "4", md: "6" }} className="text-center" style={{ backgroundColor: "#F0F9FF", borderColor: brandColors.primary }}>
-        <Heading size={{ initial: "3", md: "4" }} mb={{ initial: "1", md: "2" }} style={{ color: brandColors.primary }}>
+      <Card className="p-4 md:p-6 text-center" style={{ backgroundColor: "#F0F9FF", borderColor: brandColors.primary }}>
+        <Heading size="4" className="mb-1 md:mb-2" style={{ color: brandColors.primary }}>
           Reikia pagalbos?
         </Heading>
-        <Text size={{ initial: "2", md: "3" }} color="gray" mb={{ initial: "3", md: "4" }}>
-          Mūsų ekspertai visada pasirengę padėti jums saugiai ir efektyviai naudoti gyvūnų spąstus.
+        <Text size="3" color="gray" className="mb-3 md:mb-4">
+          Susisiekite su mūsų ekspertais dėl individualių konsultacijų
         </Text>
         
         <Flex justify="center" gap="3" direction={{ initial: "column", sm: "row" }}>
@@ -332,5 +332,4 @@ export default function GuidePage() {
       </Card>
     </Container>
   );
-}
 }
