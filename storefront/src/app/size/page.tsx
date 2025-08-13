@@ -78,7 +78,7 @@ export default function SizePage() {
     const fetchProducts = async () => {
       try {
         setLoading(true)
-        const response = await fetch(`${STORE_API_URL}/products?fields=*,images.*`, {
+        const response = await fetch(`${STORE_API_URL}/products?fields=*,images.*,variants.*,variants.prices.*`, {
           headers: {
             'x-publishable-api-key': MEDUSA_PUBLISHABLE_KEY,
             'Content-Type': 'application/json',
@@ -90,6 +90,8 @@ export default function SizePage() {
         }
         
         const data = await response.json()
+        console.log('Fetched products:', data.products?.length, 'products')
+        console.log('Sample product:', data.products?.[0])
         setProducts(data.products || [])
         setFilteredProducts(data.products || [])
       } catch (err: unknown) {
@@ -108,16 +110,31 @@ export default function SizePage() {
     const category = sizeCategories.find(cat => cat.id === categoryId)
     
     if (category) {
-      // Filter products based on category (you can implement more sophisticated filtering here)
-      const filtered = products.filter(product => {
+      console.log('Filtering products for category:', categoryId)
+      console.log('Available products:', products.length)
+      
+      // Filter products based on category
+      const filtered = products.filter((product: Product) => {
         const title = product.title?.toLowerCase() || ''
-        return category.sizes.some(size => 
+        const description = product.description?.toLowerCase() || ''
+        
+        // Check if title or description contains size indicators or animal types
+        const hasSize = category.sizes.some(size => 
           title.includes(size.toLowerCase()) || 
           title.includes(`dydis ${size.toLowerCase()}`) ||
-          category.examples.some(example => title.includes(example.toLowerCase()))
+          description.includes(size.toLowerCase())
         )
+        
+        const hasAnimal = category.examples.some(example => 
+          title.includes(example.toLowerCase()) ||
+          description.includes(example.toLowerCase())
+        )
+        
+        return hasSize || hasAnimal
       })
-      setFilteredProducts(filtered.length > 0 ? filtered : products.slice(0, 6))
+      
+      console.log('Filtered products:', filtered.length)
+      setFilteredProducts(filtered.length > 0 ? filtered : products.slice(0, 8))
     }
   }
 
@@ -275,11 +292,30 @@ export default function SizePage() {
                       <h3 className="font-semibold text-gray-800 mb-2 line-clamp-2 text-sm lg:text-base">
                         {product.title}
                       </h3>
-                      {product.variants?.[0]?.prices?.[0] && (
-                        <p className="text-lg font-bold text-green-600">
-                          €{((product.variants[0].prices[0].amount || 0) / 100).toFixed(2)}
-                        </p>
-                      )}
+                      {(() => {
+                        const variant = product.variants?.[0]
+                        if (!variant?.prices?.length) return null
+                        
+                        let price = 0
+                        const eurPrice = variant.prices.find((p: any) => 
+                          p.currency_code === 'eur' || p.currency_code === 'EUR'
+                        )
+                        
+                        if (eurPrice) {
+                          price = eurPrice.amount || 0
+                        } else if (variant.prices[0]) {
+                          price = variant.prices[0].amount || 0
+                        }
+                        
+                        // Handle price formatting - if over 1000, divide by 100 (cents to euros)
+                        const formattedPrice = price > 1000 ? (price / 100).toFixed(2) : price.toFixed(2)
+                        
+                        return (
+                          <p className="text-lg font-bold text-green-600">
+                            €{formattedPrice}
+                          </p>
+                        )
+                      })()}
                     </div>
                   </div>
                 </Link>
