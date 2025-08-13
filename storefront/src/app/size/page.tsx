@@ -3,19 +3,18 @@
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Box, Heading, Text, Button, Flex, Card, Badge, Tabs, Container } from '@radix-ui/themes'
-import { ShoppingCart, Info, Ruler, Zap } from 'lucide-react'
+import { ShoppingCart, ArrowRight, CheckCircle } from 'lucide-react'
 import { useCart } from '@/contexts/cart-context'
 import { brandColors } from '@/utils/colors'
 import { getOptimizedImageUrl } from '@/utils/image'
-import { STORE_API_URL, CART_API_URL, MEDUSA_PUBLISHABLE_KEY } from '@/lib/config'
+import { STORE_API_URL, MEDUSA_PUBLISHABLE_KEY } from '@/lib/config'
 
-// Use any type to match the actual Medusa response structure
 interface Product {
   id: string
   title: string
   description?: string
   thumbnail?: string
+  handle: string
   images?: Array<{
     id: string
     url: string
@@ -26,37 +25,54 @@ interface Product {
   [key: string]: any
 }
 
-const animalSizeCategories = {
-  small: {
-    title: "Maži gyvūnai", 
-    description: "Pelės, žiurkės, voverės, šeškai",
-    icon: "🐁",
-    color: "#10B981",
-    examples: ["Pelės", "Žiurkės", "Voverės", "Šeškai", "Ežiukai", "Smulkūs graužikai"]
+const sizeCategories = [
+  {
+    id: 'small',
+    name: 'Smulkūs gyvūnai',
+    icon: '🐁',
+    description: 'Pelėms, žiurkėms, voveriukams',
+    gradient: 'from-green-100 to-emerald-200',
+    hoverGradient: 'from-green-200 to-emerald-300',
+    borderColor: 'border-green-300',
+    textColor: 'text-green-700',
+    buttonColor: 'bg-green-600 hover:bg-green-700',
+    examples: ['Pelės', 'Žiurkės', 'Voverės', 'Šeškai'],
+    sizes: ['XS', 'S']
   },
-  medium: {
-    title: "Vidutiniai gyvūnai", 
-    description: "Katės, šunys, kiškiai, ežiai",
-    icon: "🐱",
-    color: "#F59E0B",
-    examples: ["Katės", "Šunys", "Kiškiai", "Ežiai", "Šuniukai", "Kačiukai"]
+  {
+    id: 'medium',
+    name: 'Vidutiniai gyvūnai',
+    icon: '🐱',
+    description: 'Katėms, triušiams, šeškataupiams',
+    gradient: 'from-blue-100 to-cyan-200',
+    hoverGradient: 'from-blue-200 to-cyan-300',
+    borderColor: 'border-blue-300',
+    textColor: 'text-blue-700',
+    buttonColor: 'bg-blue-600 hover:bg-blue-700',
+    examples: ['Katės', 'Triušiai', 'Šeškataupiams', 'Ežiai'],
+    sizes: ['M']
   },
-  large: {
-    title: "Dideli gyvūnai",
-    description: "Barsukai, lapės, vilkai, elniai",
-    icon: "🦝",
-    color: "#EF4444",
-    examples: ["Barsukai", "Lapės", "Vilkai", "Elniai", "Dideli šunys", "Kiti stambesni gyvūnai"]
+  {
+    id: 'large',
+    name: 'Stambūs gyvūnai',
+    icon: '🦝',
+    description: 'Meškėnams, šunims, lapėms',
+    gradient: 'from-purple-100 to-violet-200',
+    hoverGradient: 'from-purple-200 to-violet-300',
+    borderColor: 'border-purple-300',
+    textColor: 'text-purple-700',
+    buttonColor: 'bg-purple-600 hover:bg-purple-700',
+    examples: ['Meškėnai', 'Šunys', 'Lapės', 'Dideli gyvūnai'],
+    sizes: ['L', 'XL', 'XXL']
   }
-}
+]
 
 export default function SizePage() {
   const [products, setProducts] = useState<Product[]>([])
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>([])
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [activeTab, setActiveTab] = useState('small')
-  
-  const { refreshCart, isLoading: cartLoading } = useCart()
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -68,22 +84,14 @@ export default function SizePage() {
             'Content-Type': 'application/json',
           },
         })
+        
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`)
         }
         
         const data = await response.json()
-        
-        console.log('Size page - API response:', data)
-        console.log('Size page - Products length:', data.products?.length || 0)
-        
-        // Handle both old and new API response formats
-        if (data.success !== false) {
-          setProducts(data.products || data || [])
-          console.log('Size page - Set products:', data.products?.length || 0, 'items')
-        } else {
-          throw new Error(data.error || 'Failed to fetch products')
-        }
+        setProducts(data.products || [])
+        setFilteredProducts(data.products || [])
       } catch (err: unknown) {
         console.error('Error fetching products:', err)
         setError(err instanceof Error ? err.message : 'An unknown error occurred')
@@ -95,185 +103,232 @@ export default function SizePage() {
     fetchProducts()
   }, [])
 
-  const handleAddToCart = async (variantId: string) => {
-    try {
-      const response = await fetch(`${CART_API_URL}/add`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          variantId,
-          quantity: 1
-        })
+  const handleCategorySelect = (categoryId: string) => {
+    setSelectedCategory(categoryId)
+    const category = sizeCategories.find(cat => cat.id === categoryId)
+    
+    if (category) {
+      // Filter products based on category (you can implement more sophisticated filtering here)
+      const filtered = products.filter(product => {
+        const title = product.title?.toLowerCase() || ''
+        return category.sizes.some(size => 
+          title.includes(size.toLowerCase()) || 
+          title.includes(`dydis ${size.toLowerCase()}`) ||
+          category.examples.some(example => title.includes(example.toLowerCase()))
+        )
       })
-
-      if (!response.ok) {
-        throw new Error('Failed to add to cart')
-      }
-
-      // Refresh cart after successful addition
-      await refreshCart()
-    } catch (error) {
-      console.error('Error adding to cart:', error)
+      setFilteredProducts(filtered.length > 0 ? filtered : products.slice(0, 6))
     }
   }
 
-  const filterProductsBySize = (size: string) => {
-    // For now, distribute products evenly across categories
-    // In a real implementation, this would be based on product metadata
-    const productsPerCategory = Math.ceil(products.length / 3)
-    const startIndex = size === 'small' ? 0 : size === 'medium' ? productsPerCategory : productsPerCategory * 2
-    return products.slice(startIndex, startIndex + productsPerCategory)
+  const clearFilter = () => {
+    setSelectedCategory(null)
+    setFilteredProducts(products)
   }
 
   if (loading) {
     return (
-      <Box className="container mx-auto" p="4" py="8">
-        <Box className="text-center">
-          <Text>Kraunami produktai...</Text>
-        </Box>
-      </Box>
-    )
-  }
-
-  if (error) {
-    return (
-      <Box className="container mx-auto" p="4" py="8">
-        <Box className="text-center">
-          <Text color="red">Klaida: {error}</Text>
-        </Box>
-      </Box>
+      <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-green-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 text-lg">Kraunami produktai...</p>
+        </div>
+      </div>
     )
   }
 
   return (
-    <Container size="4" className="py-8">
-      {/* Header Section */}
-      <Box className="text-center mb-8">
-        <Heading size="8" className="mb-4" style={{ color: brandColors.primary }}>
-          Parinkite spąstą pagal gyvūno dydį
-        </Heading>
-        <Text className="text-lg max-w-3xl mx-auto mb-6">
-          Humaniški gyvūnų spąstai skirtingų dydžių gyvūnams. 
-          Pasirinkite tinkamą kategoriją ir raskite idealų sprendimą.
-        </Text>
-        
-        <div className="flex flex-wrap justify-center gap-2">
-          <Badge size="2" style={{ backgroundColor: `${brandColors.primary}20`, color: brandColors.primary }}>
-            100% Humaniška
-          </Badge>
-          <Badge size="2" style={{ backgroundColor: "#10B98120", color: "#10B981" }}>
-            Efektyvu ir saugu
-          </Badge>
-          <Badge size="2" style={{ backgroundColor: "#F59E0B20", color: "#F59E0B" }}>
-            Profesionalus sprendimas
-          </Badge>
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
+      <div className="container mx-auto px-4 py-8 lg:py-16">
+        {/* Header */}
+        <div className="text-center mb-12 lg:mb-16">
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-800 mb-4 lg:mb-6">
+            Pasirinkite pagal dydį
+          </h1>
+          <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto mb-8">
+            Raskite tinkamą spąstą pagal jūsų reikalingą gyvūno dydį. 
+            Spauskite ant gyvūno piktogramos ir pamatykite tinkamus produktus.
+          </p>
+          
+          {/* Benefits */}
+          <div className="flex flex-wrap justify-center gap-4 mb-8">
+            <div className="flex items-center gap-2 bg-white/70 backdrop-blur px-4 py-2 rounded-full">
+              <CheckCircle className="w-5 h-5 text-green-600" />
+              <span className="text-gray-700 font-medium">Humaniška</span>
+            </div>
+            <div className="flex items-center gap-2 bg-white/70 backdrop-blur px-4 py-2 rounded-full">
+              <CheckCircle className="w-5 h-5 text-blue-600" />
+              <span className="text-gray-700 font-medium">Efektyvu</span>
+            </div>
+            <div className="flex items-center gap-2 bg-white/70 backdrop-blur px-4 py-2 rounded-full">
+              <CheckCircle className="w-5 h-5 text-purple-600" />
+              <span className="text-gray-700 font-medium">Saugus</span>
+            </div>
+          </div>
         </div>
-      </Box>
 
-      {/* Size Categories Tabs */}
-      <Box className="mb-8">
-        <Tabs.Root value={activeTab} onValueChange={setActiveTab}>
-          <Tabs.List className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-            {Object.entries(animalSizeCategories).map(([key, category]) => (
-              <Tabs.Trigger 
-                key={key} 
-                value={key} 
-                className="text-center border rounded-lg hover:shadow-md transition-all p-4 bg-white"
-              >
-                <Box className="text-3xl mb-2">{category.icon}</Box>
-                <Heading size="4" className="mb-2" style={{ color: category.color }}>
-                  {category.title}
-                </Heading>
-                <Text size="2" color="gray" className="mb-3">
+        {/* Animal Size Category Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 mb-12">
+          {sizeCategories.map((category) => (
+            <div
+              key={category.id}
+              onClick={() => handleCategorySelect(category.id)}
+              className={`
+                relative cursor-pointer transform transition-all duration-300 hover:scale-105
+                bg-gradient-to-br ${category.gradient} hover:${category.hoverGradient}
+                rounded-3xl p-6 lg:p-8 shadow-lg hover:shadow-2xl
+                border-2 ${selectedCategory === category.id ? 'border-gray-800 ring-4 ring-gray-200' : `${category.borderColor} hover:border-gray-400`}
+                min-h-[280px] lg:min-h-[320px] flex flex-col justify-between
+              `}
+            >
+              <div className="text-center">
+                <div className="text-6xl lg:text-7xl mb-4 lg:mb-6">{category.icon}</div>
+                <h3 className={`text-xl lg:text-2xl font-bold ${category.textColor} mb-3`}>
+                  {category.name}
+                </h3>
+                <p className="text-gray-600 mb-4 text-sm lg:text-base">
                   {category.description}
-                </Text>
-                <Box className="flex flex-wrap justify-center gap-1">
-                  {category.examples.slice(0, 3).map((example, i) => (
-                    <Badge key={i} size="1" style={{ backgroundColor: `${category.color}20`, color: category.color }}>
-                      {example}
-                    </Badge>
-                  ))}
-                </Box>
-              </Tabs.Trigger>
-            ))}
-          </Tabs.List>
-
-          {Object.entries(animalSizeCategories).map(([key, category]) => (
-            <Tabs.Content key={key} value={key}>
-              {/* Category Header */}
-              <Box className="mb-6 p-6 rounded-xl" style={{ backgroundColor: `${category.color}10` }}>
-                <Flex align="center" gap="4" className="mb-4">
-                  <Box className="text-4xl">{category.icon}</Box>
-                  <Box>
-                    <Heading size="6" className="mb-2" style={{ color: category.color }}>
-                      {category.title}
-                    </Heading>
-                    <Text size="3" color="gray">
-                      Idealūs spąstai: {category.description}
-                    </Text>
-                  </Box>
-                </Flex>
+                </p>
                 
-                <Flex wrap="wrap" gap="2">
-                  <Text size="2" weight="medium" color="gray">Tinka šiems gyvūnams:</Text>
-                  {category.examples.map((example, i) => (
-                    <Badge key={i} size="2" style={{ backgroundColor: `${category.color}20`, color: category.color }}>
-                      {example}
-                    </Badge>
+                {/* Size badges */}
+                <div className="flex flex-wrap justify-center gap-2 mb-4">
+                  {category.sizes.map((size) => (
+                    <span
+                      key={size}
+                      className="bg-white/80 backdrop-blur px-3 py-1 rounded-full text-sm font-semibold text-gray-700"
+                    >
+                      {size}
+                    </span>
                   ))}
-                </Flex>
-              </Box>
-
-                {/* Products Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {products.slice(0, 6).map((product) => (
-                  <Card key={product.id} size="2" className="p-4 hover:shadow-lg transition-shadow">
-                    <Link href={`/products/${product.handle}`}>
-                      <Flex direction="column" gap="3">
-                        <div className="relative aspect-square bg-gray-50 rounded-lg overflow-hidden">
-                          {product.thumbnail ? (
-                            <Image
-                              src={product.thumbnail}
-                              alt={product.title}
-                              fill
-                              className="object-cover"
-                            />
-                          ) : (
-                            <Flex align="center" justify="center" className="h-full">
-                              <Text color="gray">Nuotrauka neprieinama</Text>
-                            </Flex>
-                          )}
-                        </div>
-                        
-                        <Box>
-                          <Heading size="4" weight="medium" className="mb-2">
-                            {product.title}
-                          </Heading>
-                          
-                          <Text size="2" color="gray" className="mb-3 line-clamp-2">
-                            {product.description}
-                          </Text>
-                          
-                          <Flex justify="between" align="center">
-                            <Text size="3" weight="bold" style={{ color: category.color }}>
-                              €{(product.variants?.[0]?.prices?.[0]?.amount / 100).toFixed(2)}
-                            </Text>
-                            <Button size="2" style={{ backgroundColor: category.color }}>
-                              Peržiūrėti
-                            </Button>
-                          </Flex>
-                        </Box>
-                      </Flex>
-                    </Link>
-                  </Card>
-                ))}
+                </div>
+                
+                {/* Examples */}
+                <div className="text-xs text-gray-600">
+                  <span className="font-medium">Pavyzdžiai: </span>
+                  {category.examples.slice(0, 2).join(', ')}
+                </div>
               </div>
-            </Tabs.Content>
+              
+              {/* Selected indicator */}
+              {selectedCategory === category.id && (
+                <div className="absolute top-4 right-4">
+                  <div className="bg-gray-800 text-white rounded-full w-8 h-8 flex items-center justify-center">
+                    <CheckCircle className="w-5 h-5" />
+                  </div>
+                </div>
+              )}
+              
+              {/* Click indicator */}
+              <div className="flex items-center justify-center mt-4">
+                <div className={`${category.buttonColor} text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2`}>
+                  <span>Žiūrėti produktus</span>
+                  <ArrowRight className="w-4 h-4" />
+                </div>
+              </div>
+            </div>
           ))}
-        </Tabs.Root>
-      </Box>
-    </Container>
-  );
+        </div>
+
+        {/* Clear Filter Button */}
+        {selectedCategory && (
+          <div className="text-center mb-8">
+            <button
+              onClick={clearFilter}
+              className="bg-white hover:bg-gray-50 text-gray-700 px-6 py-3 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 border border-gray-200 font-medium"
+            >
+              ← Grįžti į visus produktus
+            </button>
+          </div>
+        )}
+
+        {/* Products Grid */}
+        {selectedCategory && (
+          <div className="bg-white/80 backdrop-blur rounded-3xl p-6 lg:p-8 shadow-lg">
+            <div className="text-center mb-8">
+              <h2 className="text-2xl lg:text-3xl font-bold text-gray-800 mb-2">
+                {sizeCategories.find(cat => cat.id === selectedCategory)?.name} produktai
+              </h2>
+              <p className="text-gray-600">
+                Parinkti spąstai {sizeCategories.find(cat => cat.id === selectedCategory)?.description.toLowerCase()}
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {filteredProducts.slice(0, 8).map((product) => (
+                <Link key={product.id} href={`/products/${product.handle}`}>
+                  <div className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group hover:-translate-y-1">
+                    <div className="aspect-square relative overflow-hidden">
+                      {product.thumbnail ? (
+                        <Image
+                          src={getOptimizedImageUrl(product.thumbnail)}
+                          alt={product.title}
+                          fill
+                          className="object-cover group-hover:scale-110 transition-transform duration-300"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                          <ShoppingCart className="w-12 h-12 text-gray-400" />
+                        </div>
+                      )}
+                    </div>
+                    <div className="p-4">
+                      <h3 className="font-semibold text-gray-800 mb-2 line-clamp-2 text-sm lg:text-base">
+                        {product.title}
+                      </h3>
+                      {product.variants?.[0]?.prices?.[0] && (
+                        <p className="text-lg font-bold text-green-600">
+                          €{((product.variants[0].prices[0].amount || 0) / 100).toFixed(2)}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* No Products Message */}
+        {selectedCategory && filteredProducts.length === 0 && (
+          <div className="text-center py-16">
+            <div className="text-6xl mb-4">🔍</div>
+            <h3 className="text-2xl font-bold text-gray-700 mb-2">
+              Produktų nerasta
+            </h3>
+            <p className="text-gray-500 max-w-md mx-auto">
+              Šioje kategorijoje produktų nerasta. Pabandykite kitą kategoriją arba grįžkite į visus produktus.
+            </p>
+          </div>
+        )}
+        
+        {/* Bottom CTA */}
+        {!selectedCategory && (
+          <div className="text-center mt-16">
+            <div className="bg-white/80 backdrop-blur rounded-3xl p-8 shadow-lg max-w-2xl mx-auto">
+              <h3 className="text-2xl font-bold text-gray-800 mb-4">
+                Nežinote, kokio dydžio spąsto reikia?
+              </h3>
+              <p className="text-gray-600 mb-6">
+                Susisiekite su mūsų ekspertais ir gaukite nemokamą konsultaciją
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Link 
+                  href="/contact"
+                  className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-xl font-medium transition-colors"
+                >
+                  Susisiekti su ekspertais
+                </Link>
+                <Link 
+                  href="/"
+                  className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-8 py-3 rounded-xl font-medium transition-colors"
+                >
+                  Žiūrėti visus produktus
+                </Link>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  )
 }
