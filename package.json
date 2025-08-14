@@ -19,5 +19,11 @@
   "homepage": "https://github.com/ScriptVenture/gyvagaudziaispastai-store#readme",
   "devDependencies": {
     "@playwright/test": "^1.54.2"
+  },
+  "dependencies": {
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "node-fetch": "^2.7.0",
+    "tailwind-merge": "^3.3.1"
   }
 }

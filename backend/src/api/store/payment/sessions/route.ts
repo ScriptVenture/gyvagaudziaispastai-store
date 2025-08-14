@@ -1,5 +1,6 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http";
 import { createPaymentCollectionForCartWorkflow } from "@medusajs/medusa/core-flows";
+import { Logger } from "@medusajs/types";
 
 type CreatePaymentSessionBody = {
   cart_id: string;
@@ -10,6 +11,7 @@ export async function POST(
   req: MedusaRequest,
   res: MedusaResponse
 ) {
+  const logger: Logger = req.scope.resolve("logger");
   const { cart_id } = req.body as CreatePaymentSessionBody;
 
   if (!cart_id) {
@@ -32,7 +34,7 @@ export async function POST(
     });
 
   } catch (error: any) {
-    console.error("Payment session creation error:", error);
+    logger.error(`Payment session creation error: ${error.message}`);
     res.status(500).json({
       error: "Failed to create payment sessions",
       details: error.message
@@ -51,6 +53,7 @@ export async function PUT(
   req: MedusaRequest,
   res: MedusaResponse
 ) {
+  const logger: Logger = req.scope.resolve("logger");
   const { cart_id, provider_id, data } = req.body as UpdatePaymentSessionBody;
 
   if (!cart_id || !provider_id) {
@@ -71,7 +74,7 @@ export async function PUT(
     });
 
   } catch (error: any) {
-    console.error("Payment session update error:", error);
+    logger.error(`Payment session update error: ${error.message}`);
     res.status(500).json({
       error: "Failed to update payment session",
       details: error.message
@@ -89,6 +92,7 @@ export async function PATCH(
   req: MedusaRequest,
   res: MedusaResponse
 ) {
+  const logger: Logger = req.scope.resolve("logger");
   const { cart_id, provider_id } = req.body as SelectPaymentSessionBody;
 
   if (!cart_id || !provider_id) {
@@ -114,7 +118,7 @@ export async function PATCH(
     });
 
   } catch (error: any) {
-    console.error("Payment session selection error:", error);
+    logger.error(`Payment session selection error: ${error.message}`);
     res.status(500).json({
       error: "Failed to select payment session",
       details: error.message

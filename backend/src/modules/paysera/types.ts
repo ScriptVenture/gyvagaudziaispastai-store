@@ -20,35 +20,33 @@ export interface PayseraPaymentResponse {
   orderid: string;
 }
 
+/**
+ * Represents the raw, encoded data received from the Paysera callback.
+ * The `data` property is a URL-safe base64 encoded string.
+ */
+export interface PayseraRawCallback {
+  data: string;
+  ss1: string;
+  ss2?: string;
+}
+
+/**
+ * Represents the decoded data from the `data` parameter of the callback.
+ */
 export interface PayseraCallbackData {
   projectid: string;
   orderid: string;
   lang: string;
-  amount: string;
-  currency: string;
-  payment: string;
-  country: string;
-  paytext: string;
-  p_firstname?: string;
-  p_lastname?: string;
-  p_email?: string;
-  p_street?: string;
-  p_city?: string;
-  p_state?: string;
-  p_zip?: string;
-  p_countrycode?: string;
-  test: string;
-  requestid: string;
-  payamount: string;
+  paytime: string;
+  paystatus: string;
+  paytype: string;
   paycurrency: string;
   version: string;
   status: string;
-  name: string;
-  surename: string;
-  paymentmethod: string;
-  personcode: string;
-  userid: string;
-  ss1?: string;
-  ss2?: string;
-  key: string;
+  // These fields are not part of the decoded data, but the raw callback
+  // name: string;
+  // surename: string;
+  // paymentmethod: string;
+  // personcode: string;
+  // userid: string;
 }

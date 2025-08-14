@@ -1,5 +1,6 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http";
 import { createCartWorkflow } from "@medusajs/medusa/core-flows";
+import { Logger } from "@medusajs/types";
 
 type CreateCartBody = {
   region_id?: string;
@@ -13,6 +14,7 @@ export async function POST(
   req: MedusaRequest,
   res: MedusaResponse
 ) {
+  const logger: Logger = req.scope.resolve("logger");
   try {
     const body = req.body as CreateCartBody;
     
@@ -31,7 +33,7 @@ export async function POST(
     });
 
   } catch (error: any) {
-    console.error("Cart creation error:", error);
+    logger.error(`Cart creation error: ${error.message}`);
     res.status(500).json({
       error: "Failed to create cart",
       details: error.message
@@ -44,6 +46,7 @@ export async function GET(
   req: MedusaRequest,
   res: MedusaResponse
 ) {
+  const logger: Logger = req.scope.resolve("logger");
   const { cart_id } = req.query;
 
   if (!cart_id) {
@@ -71,7 +74,7 @@ export async function GET(
     });
 
   } catch (error: any) {
-    console.error("Cart retrieval error:", error);
+    logger.error(`Cart retrieval error: ${error.message}`);
     res.status(404).json({
       error: "Cart not found"
     });

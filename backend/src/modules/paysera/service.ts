@@ -22,7 +22,7 @@ import {
   WebhookActionResult,
   PaymentSessionStatus
 } from "@medusajs/framework/types";
-import { PayseraConfig, PayseraPaymentData, PayseraCallbackData } from "./types";
+import { PayseraConfig, PayseraPaymentData, PayseraRawCallback, PayseraCallbackData } from "./types";
 import crypto from "crypto";
 
 class PayseraPaymentService extends AbstractPaymentProvider<PayseraConfig> {
@@ -201,28 +201,30 @@ class PayseraPaymentService extends AbstractPaymentProvider<PayseraConfig> {
       .digest('hex');
   }
 
-  public validateCallback(callbackData: PayseraCallbackData): boolean {
+  public validateCallback(rawCallback: PayseraRawCallback): boolean {
     try {
-      const { key, ...params } = callbackData;
-      
-      // Build the string for signature verification exactly as Paysera expects
-      const sortedParams = Object.keys(params)
-        .sort()
-        .map(paramKey => `${paramKey}=${params[paramKey]}`)
-        .join('&');
-      
-      // NOTE: MD5 required by Paysera API for callback validation
+      // 1. Check for the required parameters
+      if (!rawCallback.data || !rawCallback.ss1) {
+        return false;
+      }
+
+      // 2. Verify the signature (ss1)
+      // The signature is created from the 'data' parameter and the project password.
       const expectedSignature = crypto
         .createHash('md5')
-        .update(sortedParams + this.config.sign_password)
+        .update(rawCallback.data + this.config.sign_password)
         .digest('hex');
+
+      if (rawCallback.ss1 !== expectedSignature) {
+        return false;
+      }
       
-      // Debug logging removed for security - was exposing signatures
-      
-      return key === expectedSignature;
+      // 3. (Optional) Verify ss2 if you use it for different purposes.
+      // Not implemented here as it's not standard for basic validation.
+
+      return true;
     } catch (error) {
       // Log error without exposing sensitive details
-      // Consider using a proper logging service that sanitizes sensitive data
       return false;
     }
   }

@@ -1,9 +1,11 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
+import { Logger } from "@medusajs/types";
 
 export const GET = async (
   req: MedusaRequest,
   res: MedusaResponse
 ) => {
+  const logger: Logger = req.scope.resolve("logger");
   try {
     // Query product categories from the database using the query builder
     const query = req.scope.resolve("query")
@@ -31,7 +33,7 @@ export const GET = async (
     })
 
   } catch (error) {
-    console.error("Error fetching categories:", error)
+    logger.error(`Error fetching categories: ${error.message}`);
     return res.status(500).json({ 
       error: "Failed to fetch categories",
       details: error.message 

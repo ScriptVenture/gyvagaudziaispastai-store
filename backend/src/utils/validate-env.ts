@@ -1,3 +1,5 @@
+import logger from './logger';
+
 /**
  * Environment Variables Validation
  * Ensures all required environment variables are present before application starts
@@ -48,7 +50,7 @@ export interface OptionalEnvVars {
 export function validateEnvironment(): RequiredEnvVars & OptionalEnvVars {
   // Skip validation during build if flag is set
   if (process.env.SKIP_ENV_VALIDATION === 'true') {
-    console.log('⏭️  Skipping environment validation during build');
+    logger.info('⏭️  Skipping environment validation during build');
     return process.env as unknown as RequiredEnvVars & OptionalEnvVars;
   }
 
@@ -98,7 +100,7 @@ export function validateEnvironment(): RequiredEnvVars & OptionalEnvVars {
     throw new Error(`Missing required environment variables: ${missing.join(', ')}`);
   }
   
-  console.log('✅ Environment validation successful');
+  logger.info('✅ Environment validation successful');
   
   return process.env as unknown as RequiredEnvVars & OptionalEnvVars;
 }
@@ -112,13 +114,13 @@ let config: RequiredEnvVars & OptionalEnvVars;
 if (process.env.SKIP_ENV_VALIDATION !== 'true') {
   try {
     config = validateEnvironment();
-    console.log('✅ Environment validation passed');
+    logger.info('✅ Environment validation passed');
   } catch (error) {
-    console.error('❌ Environment validation failed:', error);
+    logger.error('❌ Environment validation failed:', error);
     throw error;
   }
 } else {
-  console.log('⏭️  Environment validation skipped during build');
+  logger.info('⏭️  Environment validation skipped during build');
   config = process.env as unknown as RequiredEnvVars & OptionalEnvVars;
 }
 

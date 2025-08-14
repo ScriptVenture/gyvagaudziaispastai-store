@@ -60,7 +60,7 @@ export interface VenipakShipmentRequest {
     address: string
     city: string
     postal_code: string
-    country: string
+    country_code: string
     phone?: string
     email?: string
   }
@@ -70,7 +70,7 @@ export interface VenipakShipmentRequest {
     address: string
     city: string
     postal_code: string
-    country: string
+    country_code: string
     phone?: string
     email?: string
   }
@@ -82,9 +82,11 @@ export interface VenipakShipmentRequest {
     description: string
     value?: number
   }
-  service_type: string
+  service_code: string
   reference?: string
   delivery_instructions?: string
+  cod_amount?: number
+  comment?: string
 }
 
 export interface VenipakShipmentResponse {

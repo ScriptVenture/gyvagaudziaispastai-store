@@ -1,10 +1,12 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http";
+import { Logger } from "@medusajs/types";
 
 // Get order by ID
 export async function GET(
   req: MedusaRequest,
   res: MedusaResponse
 ) {
+  const logger: Logger = req.scope.resolve("logger");
   const { order_id } = req.query;
 
   if (!order_id) {
@@ -34,7 +36,7 @@ export async function GET(
     });
 
   } catch (error: any) {
-    console.error("Order retrieval error:", error);
+    logger.error(`Order retrieval error: ${error.message}`);
     res.status(404).json({
       error: "Order not found",
       details: error.message
@@ -53,6 +55,7 @@ export async function POST(
   req: MedusaRequest,
   res: MedusaResponse
 ) {
+  const logger: Logger = req.scope.resolve("logger");
   const { customer_email, limit = 10, offset = 0 } = req.body as ListOrdersBody;
 
   try {
@@ -86,7 +89,7 @@ export async function POST(
     }
 
   } catch (error: any) {
-    console.error("Orders listing error:", error);
+    logger.error(`Orders listing error: ${error.message}`);
     res.status(500).json({
       error: "Failed to retrieve orders",
       details: error.message

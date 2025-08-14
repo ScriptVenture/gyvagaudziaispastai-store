@@ -1,4 +1,5 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http";
+import { Logger } from "@medusajs/types";
 
 type ValidateCheckoutBody = {
   cart_id: string;
@@ -8,6 +9,7 @@ export async function POST(
   req: MedusaRequest,
   res: MedusaResponse
 ) {
+  const logger: Logger = req.scope.resolve("logger");
   const { cart_id } = req.body as ValidateCheckoutBody;
 
   if (!cart_id) {
@@ -52,7 +54,7 @@ export async function POST(
     });
 
   } catch (error: any) {
-    console.error("Checkout validation error:", error);
+    logger.error(`Checkout validation error: ${error.message}`);
     res.status(500).json({
       error: "Internal server error during checkout validation",
       details: error.message

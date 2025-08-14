@@ -24,16 +24,27 @@ import {
   VenipakPickupPointsResponse,
   VenipakPostOffice
 } from "./types";
-import https from "https";
-import http from "http";
+import { Logger } from "@medusajs/types";
+import { create } from 'xmlbuilder2';
+
+// Define a list of standard box sizes available in the warehouse
+const STANDARD_BOXES = [
+    { name: 'XS', length: 20, width: 15, height: 10, volume: 20 * 15 * 10 }, // 3000 cm³
+    { name: 'S', length: 30, width: 20, height: 15, volume: 30 * 20 * 15 },  // 9000 cm³
+    { name: 'M', length: 40, width: 30, height: 20, volume: 40 * 30 * 20 },  // 24000 cm³
+    { name: 'L', length: 50, width: 40, height: 30, volume: 50 * 40 * 30 },  // 60000 cm³
+    { name: 'XL', length: 60, width: 50, height: 40, volume: 60 * 50 * 40 }  // 120000 cm³
+].sort((a, b) => a.volume - b.volume); // Sort by volume ascending
 
 export default class VenipakFulfillmentProvider implements IFulfillmentProvider {
   static identifier = "venipak";
   
   private options_: VenipakConfig;
+  private logger_: Logger;
 
-  constructor(_: any, options: VenipakConfig) {
-    console.log("🚀 VenipakFulfillmentProvider constructor called with options:", options);
+  constructor({ logger }: { logger: Logger }, options: VenipakConfig) {
+    this.logger_ = logger;
+    this.logger_.info("🚀 VenipakFulfillmentProvider constructor called");
     this.options_ = {
       api_key: options.api_key || "",
       username: options.username || "",
@@ -42,7 +53,7 @@ export default class VenipakFulfillmentProvider implements IFulfillmentProvider 
       base_url: options.base_url || "https://go.venipak.lt/ws",
       default_currency: options.default_currency || "EUR"
     };
-    console.log("✅ VenipakFulfillmentProvider initialized successfully");
+    this.logger_.info("✅ VenipakFulfillmentProvider initialized successfully");
   }
 
   getIdentifier(): string {
@@ -52,13 +63,13 @@ export default class VenipakFulfillmentProvider implements IFulfillmentProvider 
   // Get available fulfillment options from Venipak API
   async getFulfillmentOptions(): Promise<FulfillmentOption[]> {
     try {
-      console.log("Fetching Venipak fulfillment options from API...");
+      this.logger_.info("Fetching Venipak fulfillment options from API...");
       
       // Get available services from Venipak API
       const services = await this.getAvailableServices();
       
       if (!services || services.length === 0) {
-        console.log("No services returned from Venipak API, using fallback options");
+        this.logger_.warn("No services returned from Venipak API, using fallback options");
         return this.getFallbackOptions();
       }
 
@@ -78,10 +89,10 @@ export default class VenipakFulfillmentProvider implements IFulfillmentProvider 
         }
       }));
 
-      console.log(`Loaded ${options.length} Venipak fulfillment options from API`);
+      this.logger_.info(`Loaded ${options.length} Venipak fulfillment options from API`);
       return options;
     } catch (error: any) {
-      console.error("Error fetching Venipak shipping options:", error);
+      this.logger_.error(`Error fetching Venipak shipping options: ${error.message}`);
       // Return fallback options if API fails
       return this.getFallbackOptions();
     }
@@ -89,7 +100,7 @@ export default class VenipakFulfillmentProvider implements IFulfillmentProvider 
 
   // Fallback options if API is unavailable
   private getFallbackOptions(): FulfillmentOption[] {
-    console.log("Using Venipak fallback options");
+    this.logger_.info("Using Venipak fallback options");
     return [
       {
         id: "venipak_standard",
@@ -127,7 +138,7 @@ export default class VenipakFulfillmentProvider implements IFulfillmentProvider 
     context: ValidateFulfillmentDataContext
   ): Promise<any> {
     try {
-      console.log("Venipak validateFulfillmentData called with:", { optionData, data, context });
+      this.logger_.info("Venipak validateFulfillmentData called");
       
       // Basic validation - check if shipping address exists
       if (!context.shipping_address) {
@@ -138,7 +149,7 @@ export default class VenipakFulfillmentProvider implements IFulfillmentProvider 
       const supportedCountries = ['LT', 'LV', 'EE'];
       const countryCode = context.shipping_address.country_code?.toUpperCase() || '';
       if (!supportedCountries.includes(countryCode)) {
-        console.log(`Venipak validation failed: Unsupported country ${countryCode}`);
+        this.logger_.warn(`Venipak validation failed: Unsupported country ${countryCode}`);
         throw new Error("Venipak only supports shipping to Lithuania, Latvia, and Estonia");
       }
 
@@ -154,10 +165,10 @@ export default class VenipakFulfillmentProvider implements IFulfillmentProvider 
         throw new Error("Invalid Estonian postal code format");
       }
 
-      console.log(`Venipak validation passed for ${countryCode}`);
+      this.logger_.info(`Venipak validation passed for ${countryCode}`);
       return true;
     } catch (error: any) {
-      console.error("Venipak fulfillment data validation error:", error);
+      this.logger_.error(`Venipak fulfillment data validation error: ${error.message}`);
       return false;
     }
   }
@@ -171,7 +182,7 @@ export default class VenipakFulfillmentProvider implements IFulfillmentProvider 
       
       return validOptionIds.includes(optionId);
     } catch (error: any) {
-      console.error("Venipak option validation error:", error);
+      this.logger_.error(`Venipak option validation error: ${error.message}`);
       return false;
     }
   }
@@ -180,10 +191,10 @@ export default class VenipakFulfillmentProvider implements IFulfillmentProvider 
   async canCalculate(data: CreateShippingOptionDTO): Promise<boolean> {
     try {
       // Always return true for Venipak provider - let Medusa handle the option filtering
-      console.log("Venipak canCalculate called with:", data);
+      this.logger_.info("Venipak canCalculate called");
       return true;
     } catch (error: any) {
-      console.error("Venipak canCalculate error:", error);
+      this.logger_.error(`Venipak canCalculate error: ${error.message}`);
       return false;
     }
   }
@@ -195,8 +206,7 @@ export default class VenipakFulfillmentProvider implements IFulfillmentProvider 
     context: CalculateShippingOptionPriceContext
   ): Promise<CalculatedShippingOptionPrice> {
     try {
-      console.log("🔥 VENIPAK CALCULATE PRICE CALLED!");
-      console.log("Venipak calculatePrice called with:", { optionData, data, context });
+      this.logger_.info("🔥 VENIPAK CALCULATE PRICE CALLED!");
       
       // Extract shipping address from context
       const shippingAddress = context.shipping_address;
@@ -233,20 +243,20 @@ export default class VenipakFulfillmentProvider implements IFulfillmentProvider 
       const apiPrice = await this.calculateShippingRate(rateRequest);
       
       if (apiPrice && apiPrice.price) {
-        console.log(`Venipak API price: €${apiPrice.price} for service ${rateRequest.service_code}`);
+        this.logger_.info(`Venipak API price: €${apiPrice.price} for service ${rateRequest.service_code}`);
         
         const result = {
           calculated_amount: Math.round(apiPrice.price * 100), // Convert to cents
           is_calculated_price_tax_inclusive: apiPrice.tax_inclusive || false
         };
         
-        console.log(`🔢 Returning calculated price result:`, result);
+        this.logger_.info(`🔢 Returning calculated price result: ${JSON.stringify(result)}`);
         return result;
       }
 
       // Fallback to base price if API fails
       const fallbackPrice = (optionData.data as any)?.base_price || 399;
-      console.log(`Venipak API failed, using fallback price: €${fallbackPrice/100}`);
+      this.logger_.warn(`Venipak API failed, using fallback price: €${fallbackPrice/100}`);
       
       return {
         calculated_amount: fallbackPrice,
@@ -254,7 +264,7 @@ export default class VenipakFulfillmentProvider implements IFulfillmentProvider 
       };
 
     } catch (error: any) {
-      console.error("Venipak price calculation error:", error);
+      this.logger_.error(`Venipak price calculation error: ${error.message}`);
       
       // Return fallback price on error
       const fallbackPrice = (optionData.data as any)?.base_price || 399;
@@ -267,21 +277,14 @@ export default class VenipakFulfillmentProvider implements IFulfillmentProvider 
 
   // Helper to calculate package info from cart items
   private calculatePackageInfo(items: any[]): any {
-    console.log("📦 Calculating package info for items:", items?.length || 0);
+    this.logger_.info(`📦 Calculating package info for ${items?.length || 0} items.`);
     
     let totalWeight = 0;
     let totalValue = 0;
-    let packages: Array<{length: number, width: number, height: number, weight: number}> = [];
+    let totalVolume = 0;
     
     if (items && items.length > 0) {
       items.forEach((item, index) => {
-        console.log(`Item ${index + 1}:`, {
-          title: item.product?.title || 'Unknown Product',
-          quantity: item.quantity,
-          variant: item.variant
-        });
-        
-        // Get dimensions from variant (product variant contains dimensions)
         const variant = item.variant || {};
         const product = item.product || {};
         
@@ -290,87 +293,54 @@ export default class VenipakFulfillmentProvider implements IFulfillmentProvider 
         totalWeight += itemWeight * item.quantity;
         
         // Dimensions in cm (Medusa might store in different units)
-        const length = Number(variant.length || product.length || 30);
-        const width = Number(variant.width || product.width || 20);  
+        const length = Number(variant.length || product.length || 10); // Default to 10cm
+        const width = Number(variant.width || product.width || 10);  
         const height = Number(variant.height || product.height || 10);
+        const itemVolume = length * width * height;
+        totalVolume += itemVolume * item.quantity;
         
-        console.log(`Item ${index + 1} dimensions:`, {
-          weight: itemWeight + 'kg',
-          dimensions: `${length}x${width}x${height}cm`,
-          quantity: item.quantity
-        });
-        
-        // For multiple quantities, we need to calculate combined package size
-        for (let i = 0; i < item.quantity; i++) {
-          packages.push({
-            length: length,
-            width: width,
-            height: height,
-            weight: itemWeight
-          });
-        }
+        this.logger_.info(`Item ${index + 1} (${product.title || 'Unknown Product'}): ${item.quantity} units, weight ${itemWeight}kg, dimensions ${length}x${width}x${height}cm, volume ${itemVolume}cm³`);
         
         // Total value in cents
         totalValue += (item.unit_price || 0) * item.quantity;
       });
     } else {
-      console.log("⚠️ No items found, using default package info");
-      // Default package info
+      this.logger_.warn("⚠️ No items found, using default package info");
+      // Default package info for a single small item
       totalWeight = 1;
-      packages.push({ length: 30, width: 20, height: 10, weight: 1 });
+      totalVolume = 10 * 10 * 10; // 1000 cm³
       totalValue = 1000; // 10 EUR default
     }
 
-    // Calculate combined package dimensions for multiple items
-    const combinedDimensions = this.calculateCombinedPackageDimensions(packages);
+    // Find the smallest standard box that fits the total volume
+    const selectedBox = STANDARD_BOXES.find(box => box.volume >= totalVolume);
+
+    if (!selectedBox) {
+        this.logger_.warn(`🚨 Total volume ${totalVolume}cm³ exceeds largest standard box. Using largest box dimensions.`);
+        const largestBox = STANDARD_BOXES[STANDARD_BOXES.length - 1];
+        const result = {
+            weight: Math.max(totalWeight, 0.1), // Minimum 100g
+            length: largestBox.length,
+            width: largestBox.width,
+            height: largestBox.height,
+            value: totalValue / 100, // Convert cents to euros
+            item_count: items?.length || 1
+        };
+        this.logger_.info(`📦 Final package info (oversized): ${JSON.stringify(result)}`);
+        return result;
+    }
     
     const result = {
       weight: Math.max(totalWeight, 0.1), // Minimum 100g
-      length: combinedDimensions.length,
-      width: combinedDimensions.width,
-      height: combinedDimensions.height,
+      length: selectedBox.length,
+      width: selectedBox.width,
+      height: selectedBox.height,
       value: totalValue / 100, // Convert cents to euros
-      item_count: packages.length
+      item_count: items?.length || 1
     };
     
-    console.log("📦 Final package info:", result);
+    this.logger_.info(`📦 Final package info (using box '${selectedBox.name}'): ${JSON.stringify(result)}`);
     return result;
-  }
-
-  // Calculate combined package dimensions when multiple items
-  private calculateCombinedPackageDimensions(packages: Array<{length: number, width: number, height: number, weight: number}>): {length: number, width: number, height: number} {
-    if (packages.length === 0) {
-      return { length: 30, width: 20, height: 10 };
-    }
-    
-    if (packages.length === 1) {
-      return {
-        length: packages[0].length,
-        width: packages[0].width,
-        height: packages[0].height
-      };
-    }
-    
-    // For multiple packages, we need to estimate combined size
-    // Strategy: Stack items optimally (simple approach - stack by height)
-    let maxLength = 0;
-    let maxWidth = 0;
-    let totalHeight = 0;
-    
-    packages.forEach(pkg => {
-      maxLength = Math.max(maxLength, pkg.length);
-      maxWidth = Math.max(maxWidth, pkg.width);
-      totalHeight += pkg.height;
-    });
-    
-    // Add some padding for packaging
-    const packagingPadding = Math.min(packages.length * 2, 10); // Max 10cm padding
-    
-    return {
-      length: maxLength + packagingPadding,
-      width: maxWidth + packagingPadding,  
-      height: totalHeight + packagingPadding
-    };
   }
 
   // Create fulfillment
@@ -381,29 +351,67 @@ export default class VenipakFulfillmentProvider implements IFulfillmentProvider 
     fulfillment: Partial<Omit<FulfillmentDTO, "provider_id" | "data" | "items">>
   ): Promise<CreateFulfillmentResult> {
     try {
-      console.log("Creating Venipak fulfillment:", { data, items, order });
+      this.logger_.info(`Creating Venipak fulfillment for fulfillment ${fulfillment.id} and order ${order?.id}`);
 
-      // Generate mock tracking number
-      const trackingNumber = `VP${Date.now()}${Math.random().toString(36).substr(2, 4).toUpperCase()}`;
-      
-      // In production, this would create actual shipment via Venipak API
-      // For now, return mock data
+      if (!order || !order.shipping_address) {
+        throw new Error("Order and shipping address are required to create a Venipak fulfillment.");
+      }
+
+      // 1. Calculate package info
+      const packageInfo = this.calculatePackageInfo(items);
+      const serviceCode = (data.data as any)?.service_code || "STANDARD";
+
+      // 2. Build the XML payload for Venipak API
+      const shipmentRequest: VenipakShipmentRequest = {
+        ...packageInfo,
+        recipient: {
+          name: `${order.shipping_address.first_name} ${order.shipping_address.last_name}`,
+          company: order.shipping_address.company || '',
+          address: order.shipping_address.address_1,
+          city: order.shipping_address.city,
+          postal_code: order.shipping_address.postal_code,
+          country_code: order.shipping_address.country_code,
+          phone: order.shipping_address.phone,
+          email: order.email
+        },
+        sender: {
+          name: process.env.COMPANY_NAME || "My Store",
+          address: process.env.COMPANY_ADDRESS || "Some Street 1",
+          city: process.env.COMPANY_CITY || "Kaunas",
+          postal_code: process.env.COMPANY_POSTAL_CODE || "50194",
+          country_code: process.env.COMPANY_COUNTRY || "LT",
+          phone: process.env.COMPANY_PHONE || "860000000"
+        },
+        service_code: serviceCode,
+        comment: `Order ID: ${order.display_id}`,
+        cod_amount: order.total, // Cash on Delivery amount
+        delivery_time: (data.data as any)?.delivery_time || "2-3 business days"
+      };
+
+      const shipmentResponse = await this.createVenipakShipment(shipmentRequest);
+
+      if (!shipmentResponse || !shipmentResponse.tracking_number) {
+        throw new Error("Failed to create Venipak shipment: No tracking number received.");
+      }
+
+      this.logger_.info(`Venipak shipment created successfully with tracking: ${shipmentResponse.tracking_number}`);
+
       return {
         data: {
-          venipak_shipment_id: `ship_${Date.now()}`,
-          service_type: data.service_type || VenipakServiceType.STANDARD,
-          estimated_delivery: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+          venipak_shipment_id: shipmentResponse.shipment_id,
+          service_type: serviceCode,
+          estimated_delivery: shipmentResponse.estimated_delivery
         },
         labels: [
           {
-            tracking_number: trackingNumber,
-            tracking_url: `https://www.venipak.lt/track/${trackingNumber}`,
-            label_url: `https://example.com/label-${trackingNumber}.pdf`
+            tracking_number: shipmentResponse.tracking_number,
+            tracking_url: `https://www.venipak.lt/track/${shipmentResponse.tracking_number}`,
+            label_url: shipmentResponse.label_url || `https://example.com/label-${shipmentResponse.tracking_number}.pdf`
           }
         ]
       };
     } catch (error: any) {
-      console.error("Error creating Venipak fulfillment:", error);
+      this.logger_.error(`Error creating Venipak fulfillment: ${error.message}`);
       throw new Error(`Failed to create Venipak fulfillment: ${error.message}`);
     }
   }
@@ -411,7 +419,7 @@ export default class VenipakFulfillmentProvider implements IFulfillmentProvider 
   // Cancel fulfillment
   async cancelFulfillment(fulfillment: Record<string, unknown>): Promise<any> {
     try {
-      console.log("Cancelling Venipak fulfillment:", fulfillment);
+      this.logger_.info(`Cancelling Venipak fulfillment: ${JSON.stringify(fulfillment)}`);
       
       // In production, cancel via Venipak API
       return {
@@ -419,7 +427,7 @@ export default class VenipakFulfillmentProvider implements IFulfillmentProvider 
         cancelled_at: new Date().toISOString()
       };
     } catch (error: any) {
-      console.error("Error cancelling Venipak fulfillment:", error);
+      this.logger_.error(`Error cancelling Venipak fulfillment: ${error.message}`);
       throw new Error(`Failed to cancel Venipak fulfillment: ${error.message}`);
     }
   }
@@ -432,7 +440,7 @@ export default class VenipakFulfillmentProvider implements IFulfillmentProvider 
         tracking_info: data.tracking_info || null
       };
     } catch (error: any) {
-      console.error("Error getting Venipak documents:", error);
+      this.logger_.error(`Error getting Venipak documents: ${error.message}`);
       return null;
     }
   }
@@ -440,7 +448,7 @@ export default class VenipakFulfillmentProvider implements IFulfillmentProvider 
   // Create return fulfillment
   async createReturnFulfillment(fromData: Record<string, unknown>): Promise<CreateFulfillmentResult> {
     try {
-      console.log("Creating Venipak return fulfillment:", fromData);
+      this.logger_.info(`Creating Venipak return fulfillment: ${JSON.stringify(fromData)}`);
       
       const returnTrackingNumber = `VPR${Date.now()}${Math.random().toString(36).substr(2, 4).toUpperCase()}`;
       
@@ -458,7 +466,7 @@ export default class VenipakFulfillmentProvider implements IFulfillmentProvider 
         ]
       };
     } catch (error: any) {
-      console.error("Error creating Venipak return:", error);
+      this.logger_.error(`Error creating Venipak return: ${error.message}`);
       throw new Error(`Failed to create Venipak return: ${error.message}`);
     }
   }
@@ -471,7 +479,7 @@ export default class VenipakFulfillmentProvider implements IFulfillmentProvider 
         return_tracking_info: data.tracking_info || null
       };
     } catch (error: any) {
-      console.error("Error getting Venipak return documents:", error);
+      this.logger_.error(`Error getting Venipak return documents: ${error.message}`);
       return null;
     }
   }
@@ -484,7 +492,7 @@ export default class VenipakFulfillmentProvider implements IFulfillmentProvider 
         tracking_info: data.tracking_info || null
       };
     } catch (error: any) {
-      console.error("Error getting Venipak shipment documents:", error);
+      this.logger_.error(`Error getting Venipak shipment documents: ${error.message}`);
       return null;
     }
   }
@@ -504,7 +512,7 @@ export default class VenipakFulfillmentProvider implements IFulfillmentProvider 
           return fulfillmentData;
       }
     } catch (error: any) {
-      console.error("Error retrieving Venipak documents:", error);
+      this.logger_.error(`Error retrieving Venipak documents: ${error.message}`);
       return null;
     }
   }
@@ -537,7 +545,7 @@ export default class VenipakFulfillmentProvider implements IFulfillmentProvider 
         estimated_delivery: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
       };
     } catch (error: any) {
-      console.error("Error getting Venipak tracking info:", error);
+      this.logger_.error(`Error getting Venipak tracking info: ${error.message}`);
       return null;
     }
   }
@@ -584,7 +592,7 @@ export default class VenipakFulfillmentProvider implements IFulfillmentProvider 
         }))
       };
     } catch (error: any) {
-      console.error("Error calculating Venipak rates:", error);
+      this.logger_.error(`Error calculating Venipak rates: ${error.message}`);
       return {
         success: false,
         error: error.message
@@ -606,7 +614,7 @@ export default class VenipakFulfillmentProvider implements IFulfillmentProvider 
   // Get available services - now we know pickup points API works, let's create real options
   private async getAvailableServices(): Promise<any[]> {
     try {
-      console.log("Getting Venipak available services with real API data...");
+      this.logger_.info("Getting Venipak available services with real API data...");
       
       // Test if pickup points are available to offer pickup/locker options
       const hasPickupPoints = await this.hasPickupPointsAvailable();
@@ -670,10 +678,10 @@ export default class VenipakFulfillmentProvider implements IFulfillmentProvider 
         });
       }
 
-      console.log(`Loaded ${services.length} Venipak services (pickup points available: ${hasPickupPoints})`);
+      this.logger_.info(`Loaded ${services.length} Venipak services (pickup points available: ${hasPickupPoints})`);
       return services;
     } catch (error: any) {
-      console.error("Error getting Venipak services:", error);
+      this.logger_.error(`Error getting Venipak services: ${error.message}`);
       return [];
     }
   }
@@ -684,7 +692,7 @@ export default class VenipakFulfillmentProvider implements IFulfillmentProvider 
       const pickupPointsResponse = await this.getPickupPoints();
       return pickupPointsResponse.success && (pickupPointsResponse.pickup_points?.length || 0) > 0;
     } catch (error: any) {
-      console.error("Error checking pickup points availability:", error);
+      this.logger_.error(`Error checking pickup points availability: ${error.message}`);
       return false;
     }
   }
@@ -692,16 +700,18 @@ export default class VenipakFulfillmentProvider implements IFulfillmentProvider 
   // Test Venipak API connectivity
   async testVenipakAPI(): Promise<any> {
     try {
-      console.log("Testing Venipak API connectivity...");
-      console.log("Using credentials:", {
-        api_key: this.options_.api_key,
-        username: this.options_.username,
-        base_url: this.options_.base_url
-      });
+      this.logger_.info("Testing Venipak API connectivity...");
+      this.logger_.info(
+        `Using credentials: ${JSON.stringify({
+          api_key: this.options_.api_key ? 'present' : 'missing',
+          username: this.options_.username,
+          base_url: this.options_.base_url
+        })}`
+      );
       
       // Test pickup points API (no auth required)
       const pickupResponse = await this.callVenipakAPI("/get_pickup_points", "GET");
-      console.log("Pickup points test:", pickupResponse ? "SUCCESS" : "FAILED");
+      this.logger_.info(`Pickup points test: ${JSON.stringify({ success: Array.isArray(pickupResponse) })}`);
       
       return {
         pickup_points_available: Array.isArray(pickupResponse),
@@ -709,7 +719,7 @@ export default class VenipakFulfillmentProvider implements IFulfillmentProvider 
         api_accessible: true
       };
     } catch (error: any) {
-      console.error("Venipak API test failed:", error);
+      this.logger_.error(`Venipak API test failed: ${error.message}`);
       return {
         pickup_points_available: false,
         pickup_count: 0,
@@ -722,9 +732,8 @@ export default class VenipakFulfillmentProvider implements IFulfillmentProvider 
   // Enhanced pickup points API with filtering and POST office support
   async getPickupPoints(request?: VenipakPickupPointsRequest): Promise<VenipakPickupPointsResponse> {
     try {
-      console.log("Fetching Venipak pickup points from API with filters:", request);
+      this.logger_.info(`Fetching Venipak pickup points from API with filters: ${JSON.stringify(request)}`);
       
-      // Build query parameters for filtering
       const queryParams: Record<string, string> = {};
       if (request?.country) queryParams.country = request.country;
       if (request?.city) queryParams.city = request.city;
@@ -733,7 +742,6 @@ export default class VenipakFulfillmentProvider implements IFulfillmentProvider 
       if (request?.limit) queryParams.limit = request.limit.toString();
       if (request?.radius) queryParams.radius = request.radius.toString();
       
-      // Try multiple endpoints based on the request type
       const endpoints = this.getPickupPointEndpoints(request?.type);
       let allPickupPoints: VenipakPickupPoint[] = [];
       
@@ -744,23 +752,20 @@ export default class VenipakFulfillmentProvider implements IFulfillmentProvider 
           if (response && Array.isArray(response)) {
             const mappedPoints = this.mapPickupPointsResponse(response, endpoint);
             allPickupPoints = [...allPickupPoints, ...mappedPoints];
-            console.log(`Found ${mappedPoints.length} points from ${endpoint}`);
+            this.logger_.info(`Found ${mappedPoints.length} points from ${endpoint}`);
           }
         } catch (endpointError: any) {
-          console.warn(`Error fetching from ${endpoint}:`, endpointError.message);
-          // Continue with other endpoints
+          this.logger_.warn(`Error fetching from ${endpoint}, error: ${endpointError.message}`);
         }
       }
       
-      // Apply client-side filtering if needed
       let filteredPoints = this.applyClientSideFiltering(allPickupPoints, request);
       
-      // Sort by distance if coordinates provided
       if (request?.postal_code || request?.address) {
         filteredPoints = await this.sortByDistance(filteredPoints, request);
       }
       
-      console.log(`Total ${filteredPoints.length} pickup points after filtering`);
+      this.logger_.info(`Total ${filteredPoints.length} pickup points after filtering`);
       
       return {
         success: true,
@@ -768,7 +773,7 @@ export default class VenipakFulfillmentProvider implements IFulfillmentProvider 
         total_count: filteredPoints.length
       };
     } catch (error: any) {
-      console.error("Error fetching Venipak pickup points:", error);
+      this.logger_.error(`Error fetching Venipak pickup points, error: ${error.message}`);
       return {
         success: false,
         error: error.message
@@ -872,20 +877,22 @@ export default class VenipakFulfillmentProvider implements IFulfillmentProvider 
     // 1. Geocode the user's address/postal code
     // 2. Calculate distances to each pickup point
     // 3. Sort by distance
-    console.log("Distance sorting requested but not implemented - returning unsorted points");
+    this.logger_.info("Distance sorting requested but not implemented - returning unsorted points");
     return points;
   }
 
   // Calculate shipping rate (Venipak uses fixed pricing based on weight and dimensions)
   private async calculateShippingRate(rateRequest: any): Promise<any> {
     try {
-      console.log("🚚 Calculating Venipak shipping rate for:", {
-        weight: rateRequest.package.weight + 'kg',
-        dimensions: `${rateRequest.package.length}x${rateRequest.package.width}x${rateRequest.package.height}cm`,
-        value: '€' + rateRequest.package.value,
-        service: rateRequest.service_code,
-        destination: rateRequest.recipient.country
-      });
+      this.logger_.info(
+        `🚚 Calculating Venipak shipping rate for: ${JSON.stringify({
+          weight: rateRequest.package.weight + 'kg',
+          dimensions: `${rateRequest.package.length}x${rateRequest.package.width}x${rateRequest.package.height}cm`,
+          value: '€' + rateRequest.package.value,
+          service: rateRequest.service_code,
+          destination: rateRequest.recipient.country
+        })}`
+      );
       
       const pkg = rateRequest.package;
       const weight = pkg.weight;
@@ -896,7 +903,7 @@ export default class VenipakFulfillmentProvider implements IFulfillmentProvider 
       const volumetricWeight = (pkg.length * pkg.width * pkg.height) / 5000;
       const chargeableWeight = Math.max(weight, volumetricWeight);
       
-      console.log(`📏 Weight calculation: actual=${weight}kg, volumetric=${volumetricWeight.toFixed(2)}kg, chargeable=${chargeableWeight.toFixed(2)}kg`);
+      this.logger_.info(`📏 Weight calculation: actual=${weight}kg, volumetric=${volumetricWeight.toFixed(2)}kg, chargeable=${chargeableWeight.toFixed(2)}kg`);
       
       let basePrice = 399; // Default: €3.99
       
@@ -921,10 +928,10 @@ export default class VenipakFulfillmentProvider implements IFulfillmentProvider 
       const maxDim = Math.max(pkg.length, pkg.width, pkg.height);
       if (maxDim > 120) {
         basePrice = Math.round(basePrice * 1.5); // 50% surcharge for oversized
-        console.log("📦 Oversized package surcharge applied (max dimension > 120cm)");
+        this.logger_.info("📦 Oversized package surcharge applied (max dimension > 120cm)");
       } else if (maxDim > 80) {
         basePrice = Math.round(basePrice * 1.25); // 25% surcharge for large packages
-        console.log("📦 Large package surcharge applied (max dimension > 80cm)");
+        this.logger_.info("📦 Large package surcharge applied (max dimension > 80cm)");
       }
       
       // Service type adjustments
@@ -939,7 +946,7 @@ export default class VenipakFulfillmentProvider implements IFulfillmentProvider 
           basePrice = Math.round(basePrice * 0.75); // Locker: -25%
           // Check locker size limits
           if (maxDim > 40 || chargeableWeight > 20) {
-            console.log("⚠️ Package too large for locker, fallback to pickup point pricing");
+            this.logger_.warn("⚠️ Package too large for locker, fallback to pickup point pricing");
             basePrice = Math.round(basePrice / 0.75 * 0.85); // Convert back to pickup pricing
           }
           break;
@@ -953,12 +960,12 @@ export default class VenipakFulfillmentProvider implements IFulfillmentProvider 
       if (pkg.value > 100) {
         const insuranceFee = Math.round(pkg.value * 0.01 * 100); // 1% of value in cents
         basePrice += Math.min(insuranceFee, 500); // Max €5 insurance
-        console.log(`💰 Insurance fee added: €${insuranceFee/100} for value €${pkg.value}`);
+        this.logger_.info(`💰 Insurance fee added: €${insuranceFee/100} for value €${pkg.value}`);
       }
       
       const finalPrice = basePrice / 100; // Convert cents to euros
       
-      console.log(`🚚 Venipak final price: €${finalPrice} for ${chargeableWeight.toFixed(2)}kg to ${rateRequest.recipient.country} (${serviceCode})`);
+      this.logger_.info(`🚚 Venipak final price: €${finalPrice} for ${chargeableWeight.toFixed(2)}kg to ${rateRequest.recipient.country} (${serviceCode})`);
       
       return {
         price: finalPrice,
@@ -975,7 +982,7 @@ export default class VenipakFulfillmentProvider implements IFulfillmentProvider 
         }
       };
     } catch (error: any) {
-      console.error("Error calculating Venipak shipping rate:", error);
+      this.logger_.error(`Error calculating Venipak shipping rate: ${error.message}`);
       return null;
     }
   }
@@ -1001,115 +1008,136 @@ export default class VenipakFulfillmentProvider implements IFulfillmentProvider 
   }
 
   // Create shipment via Venipak API (XML-based)
-  private async createVenipakShipment(shipmentData: any): Promise<any> {
-    try {
-      console.log("Creating Venipak shipment via XML API...", shipmentData);
-      
-      // Venipak uses XML for shipment creation (see WordPress plugin dispatch.php)
-      // For now, return mock data - this would need full XML generation
-      const trackingNumber = `VP${Date.now()}${Math.random().toString(36).substr(2, 4).toUpperCase()}`;
-      
-      console.log("Venipak shipment creation requires XML format - returning mock data for now");
-      
+  private async createVenipakShipment(shipmentData: VenipakShipmentRequest): Promise<any> {
+    this.logger_.info("Creating Venipak shipment via XML API...");
+
+    const today = new Date().toISOString().split('T')[0];
+
+    const root = create({ version: '1.0', encoding: 'UTF-8' })
+      .ele('send_request')
+        .ele('user').txt(this.options_.username).up()
+        .ele('pass').txt(this.options_.password).up()
+        .ele('shipment')
+          .ele('consignee')
+            .ele('name').txt(shipmentData.recipient.name).up()
+            .ele('company').txt(shipmentData.recipient.company || '').up()
+            .ele('address').txt(shipmentData.recipient.address).up()
+            .ele('city').txt(shipmentData.recipient.city).up()
+            .ele('post_code').txt(shipmentData.recipient.postal_code).up()
+            .ele('country').txt(shipmentData.recipient.country_code).up()
+            .ele('phone').txt(shipmentData.recipient.phone || '').up()
+            .ele('email').txt(shipmentData.recipient.email || '').up()
+          .up()
+          .ele('consignor')
+            .ele('name').txt(shipmentData.sender.name).up()
+            .ele('company').txt('').up()
+            .ele('address').txt(shipmentData.sender.address).up()
+            .ele('city').txt(shipmentData.sender.city).up()
+            .ele('post_code').txt(shipmentData.sender.postal_code).up()
+            .ele('country').txt(shipmentData.sender.country_code).up()
+            .ele('phone').txt(shipmentData.sender.phone || '').up()
+          .up()
+          .ele('pack_no').txt('1').up() // Assuming one package for now
+          .ele('weight').txt(String(shipmentData.package.weight)).up()
+          .ele('volume').txt(String(shipmentData.package.weight)).up() // Venipak often uses weight as volume
+          .ele('delivery_type').txt(shipmentData.service_code).up()
+          .ele('cod').txt(String((shipmentData.cod_amount || 0) / 100)).up() // Convert cents to euros
+          .ele('comment').txt(shipmentData.comment || '').up()
+          .ele('date_y').txt(today.split('-')[0]).up()
+          .ele('date_m').txt(today.split('-')[1]).up()
+          .ele('date_d').txt(today.split('-')[2]).up()
+        .up();
+
+    const xml = root.end({ prettyPrint: true });
+    this.logger_.info(`Generated Venipak XML Payload: ${xml}`);
+
+    if (this.options_.test_mode) {
+      this.logger_.info("Venipak is in test mode. Returning mock shipment data.");
+      const mockTrackingNumber = `VP_TEST_${Date.now()}`;
       return {
-        tracking_number: trackingNumber,
-        shipment_id: `ship_${Date.now()}`,
-        label_url: null, // Would come from print_label API
-        estimated_delivery: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+        tracking_number: mockTrackingNumber,
+        shipment_id: `ship_test_${Date.now()}`,
+        label_url: `https://go.venipak.lt/ws/print_label.php?track_no=${mockTrackingNumber}`,
+        estimated_delivery: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
       };
+    }
+
+    try {
+      // Venipak's send endpoint is different
+      const responseXml = await this.callVenipakAPI('/import/send.php', 'POST', { xml_text: xml });
+      
+      // Parse the XML response
+      const responseObj = create(responseXml).toObject() as any;
+      const responseCode = responseObj?.send_request?.response?.[0]?.text;
+      
+      if (responseCode && responseCode.startsWith('ok')) {
+        const trackingNumber = responseCode.split(';')[1];
+        this.logger_.info(`Successfully created Venipak shipment with tracking: ${trackingNumber}`);
+        return {
+          tracking_number: trackingNumber,
+          shipment_id: `ship_${trackingNumber}`,
+          label_url: `https://go.venipak.lt/ws/print_label.php?track_no=${trackingNumber}`,
+          estimated_delivery: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+        };
+      } else {
+        const error = responseObj?.send_request?.response?.[0]?.text || 'Unknown API error';
+        this.logger_.error(`Venipak API error: ${error}`);
+        throw new Error(`Venipak API Error: ${error}`);
+      }
     } catch (error: any) {
-      console.error("Error creating Venipak shipment:", error);
-      return null;
+      this.logger_.error(`Error creating Venipak shipment: ${error.message}`);
+      throw error;
     }
   }
 
-  // Generic method to call Venipak API
+    // Generic method to call Venipak API
   private async callVenipakAPI(endpoint: string, method: string = "GET", data?: any): Promise<any> {
-    return new Promise((resolve, reject) => {
-      try {
-        const url = new URL(this.options_.base_url + endpoint);
-        const isHttps = url.protocol === 'https:';
-        const httpModule = isHttps ? https : http;
-        
-        // Format data as URL-encoded form data (like WordPress plugin)
-        let postData: string | null = null;
-        if (data && method === "POST") {
-          const params = new URLSearchParams();
-          // Always include user/pass for authenticated endpoints
-          params.append('user', this.options_.username);
-          params.append('pass', this.options_.password);
-          
-          for (const [key, value] of Object.entries(data)) {
-            params.append(key, String(value));
-          }
-          postData = params.toString();
-        }
-        
-        const options = {
-          hostname: url.hostname,
-          port: url.port || (isHttps ? 443 : 80),
-          path: url.pathname + url.search,
-          method: method,
-          headers: {
+    const url = new URL(this.options_.base_url + endpoint);
+    this.logger_.info(`Calling Venipak API: ${method} ${url.href}`);
+
+    const options: RequestInit = {
+        method: method,
+        headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
             'User-Agent': 'Medusa-Venipak/1.0',
             'Referer': 'https://medusajs.com/'
-          }
-        };
+        }
+    };
 
-        if (postData) {
-          options.headers['Content-Length'] = Buffer.byteLength(postData);
+    if (data && method === "POST") {
+        const params = new URLSearchParams();
+        // Always include user/pass for authenticated endpoints
+        params.append('user', this.options_.username);
+        params.append('pass', this.options_.password);
+        
+        for (const [key, value] of Object.entries(data)) {
+            params.append(key, String(value));
+        }
+        options.body = params.toString();
+    } else if (data && method === "GET") {
+        Object.keys(data).forEach(key => url.searchParams.append(key, data[key]));
+    }
+
+    try {
+        const response = await fetch(url.toString(), options);
+
+        if (!response.ok) {
+            const errorBody = await response.text();
+            const errorMessage = `Venipak API error: ${response.status} ${response.statusText}. Body: ${errorBody}`;
+            this.logger_.error(errorMessage);
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
 
-        console.log(`Calling Venipak API: ${method} ${url.href}`);
+        const responseData = await response.json();
+        return responseData;
 
-        const req = httpModule.request(options, (res) => {
-          let responseData = '';
-
-          res.on('data', (chunk) => {
-            responseData += chunk;
-          });
-
-          res.on('end', () => {
-            try {
-              const statusCode = res.statusCode || 500;
-              if (statusCode >= 200 && statusCode < 300) {
-                const parsedData = JSON.parse(responseData);
-                resolve(parsedData);
-              } else {
-                console.error(`Venipak API error: ${statusCode} ${res.statusMessage || 'Unknown error'}`);
-                console.error("Response:", responseData);
-                reject(new Error(`HTTP ${statusCode}: ${res.statusMessage || 'Unknown error'}`));
-              }
-            } catch (parseError) {
-              console.error("Error parsing Venipak API response:", parseError);
-              console.error("Raw response:", responseData);
-              reject(parseError);
-            }
-          });
-        });
-
-        req.on('error', (error) => {
-          console.error("Venipak API request error:", error);
-          reject(error);
-        });
-
-        if (postData) {
-          req.write(postData);
+    } catch (error) {
+        let errorMessage = `Venipak API request failed: ${error.message}`;
+        if (error instanceof Error && 'cause' in error) {
+            errorMessage += ` | Cause: ${JSON.stringify(error.cause)}`;
         }
-
-        req.end();
-
-        // Set timeout
-        req.setTimeout(30000, () => {
-          req.destroy();
-          reject(new Error("Venipak API request timeout"));
-        });
-
-      } catch (error) {
-        console.error("Error setting up Venipak API request:", error);
-        reject(error);
-      }
-    });
+        this.logger_.error(errorMessage);
+        throw new Error(errorMessage);
+    }
   }
 }
