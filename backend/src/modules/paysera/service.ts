@@ -56,14 +56,7 @@ class PayseraPaymentService extends AbstractPaymentProvider<PayseraConfig> {
       const encodedData = this.encodePaymentData(paymentData);
       const signature = this.generateSignature(encodedData);
       
-      console.log('Paysera payment creation debug:', {
-        project_id: this.config.project_id,
-        amount: paymentData.amount,
-        currency: paymentData.currency,
-        test_mode: this.config.test_mode,
-        encoded_data: encodedData,
-        signature: signature
-      });
+      // Debug logging removed for security - was exposing sensitive payment data
       
       const paymentUrl = `${this.config.base_url || "https://www.paysera.com/pay"}/?data=${encodedData}&sign=${signature}`;
 
@@ -199,6 +192,9 @@ class PayseraPaymentService extends AbstractPaymentProvider<PayseraConfig> {
   }
 
   private generateSignature(data: string): string {
+    // NOTE: MD5 is required by Paysera API specification
+    // This is not our choice - Paysera's legacy system requires MD5 signatures
+    // See: https://developers.paysera.com/en/payments/current#request-parameters
     return crypto
       .createHash('md5')
       .update(data + this.config.sign_password)
@@ -215,20 +211,18 @@ class PayseraPaymentService extends AbstractPaymentProvider<PayseraConfig> {
         .map(paramKey => `${paramKey}=${params[paramKey]}`)
         .join('&');
       
+      // NOTE: MD5 required by Paysera API for callback validation
       const expectedSignature = crypto
         .createHash('md5')
         .update(sortedParams + this.config.sign_password)
         .digest('hex');
       
-      console.log('Callback validation:', {
-        received_key: key,
-        expected_key: expectedSignature,
-        params_string: sortedParams
-      });
+      // Debug logging removed for security - was exposing signatures
       
       return key === expectedSignature;
     } catch (error) {
-      console.error('Callback validation error:', error);
+      // Log error without exposing sensitive details
+      // Consider using a proper logging service that sanitizes sensitive data
       return false;
     }
   }

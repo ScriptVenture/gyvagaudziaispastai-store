@@ -61,19 +61,9 @@ export default function CheckoutPage() {
   }
 
   const handleUpdateData = (data: any) => {
-    console.log('🔍 handleUpdateData called with:', data)
+    // Debug logging removed for security - was exposing customer data
     setCheckoutData(prev => {
       const updated = { ...prev, ...data }
-      console.log('🔍 Updated checkoutData:', updated)
-      if (data.shippingMethod) {
-        console.log('🔍 Shipping method details:', data.shippingMethod)
-        console.log('🔍 Available amount fields:', {
-          calculated_amount: data.shippingMethod.calculated_amount,
-          'data.calculated_amount': data.shippingMethod.data?.calculated_amount,
-          'data.amount': data.shippingMethod.data?.amount,
-          amount: data.shippingMethod.amount
-        })
-      }
       return updated
     })
   }

@@ -2,6 +2,23 @@ import { loadEnv, defineConfig } from '@medusajs/framework/utils'
 
 loadEnv(process.env.NODE_ENV || 'development', process.cwd())
 
+// Validate required environment variables
+const requiredEnvVars = [
+  'DATABASE_URL',
+  'REDIS_URL', 
+  'JWT_SECRET',
+  'COOKIE_SECRET',
+  'MEDUSA_BACKEND_URL'
+];
+
+// Only validate in production
+if (process.env.NODE_ENV === 'production') {
+  const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
+  if (missingVars.length > 0) {
+    throw new Error(`Missing required environment variables: ${missingVars.join(', ')}`);
+  }
+}
+
 module.exports = defineConfig({
   projectConfig: {
     databaseUrl: process.env.DATABASE_URL,
@@ -15,8 +32,8 @@ module.exports = defineConfig({
       storeCors: process.env.STORE_CORS || "https://gyva.appiolabs.com",
       adminCors: process.env.ADMIN_CORS || "https://gyva.appiolabs.com",
       authCors: process.env.AUTH_CORS || "https://gyva.appiolabs.com",
-      jwtSecret: process.env.JWT_SECRET || "supersecret",
-      cookieSecret: process.env.COOKIE_SECRET || "supersecret",
+      jwtSecret: process.env.JWT_SECRET,  // No fallback - validated above
+      cookieSecret: process.env.COOKIE_SECRET,  // No fallback - validated above
       authMethodsPerActor: {
         user: ["session", "bearer", "emailpass"],
         customer: ["session", "bearer", "emailpass"]
@@ -57,7 +74,7 @@ module.exports = defineConfig({
     {
       resolve: "@medusajs/user",
       options: {
-        jwt_secret: process.env.JWT_SECRET || "supersecret",
+        jwt_secret: process.env.JWT_SECRET,  // Removed fallback - will use validated env var
       },
     },
     {

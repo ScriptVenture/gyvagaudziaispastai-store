@@ -34,7 +34,7 @@ export async function getProducts(limit = 20, categoryId?: string) {
     const data = await medusaRequest(url)
     return data.products || []
   } catch (error) {
-    console.error("Error fetching products:", error)
+    // Error logging removed to avoid exposing API details
     return []
   }
 }
@@ -42,7 +42,7 @@ export async function getProducts(limit = 20, categoryId?: string) {
 // Get single product by handle or id
 export async function getProduct(handleOrId: string) {
   try {
-    console.log('getProduct called with handle:', handleOrId);
+    // Debug logging removed for security
     
     // Get all products and filter by handle client-side
     // since MedusaJS doesn't support handle filtering via query params
@@ -53,24 +53,19 @@ export async function getProduct(handleOrId: string) {
       const productByHandle = data.products.find((product: any) => product.handle === handleOrId);
       
       if (productByHandle) {
-        console.log('Found product by handle:', productByHandle.title);
         return productByHandle;
       }
       
       // If no product found by handle, try by ID as fallback
       const productById = data.products.find((product: any) => product.id === handleOrId);
       if (productById) {
-        console.log('Found product by ID:', productById.title);
         return productById;
       }
-      
-      console.log('No product found with handle or ID:', handleOrId);
-      console.log('Available handles:', data.products.map((p: any) => p.handle).slice(0, 5));
     }
     
     return null;
   } catch (error) {
-    console.error("Error fetching product:", error)
+    // Error logging removed to avoid exposing API details
     return null
   }
 }
@@ -81,7 +76,7 @@ export async function getProductsByCategory(categoryId: string) {
     const data = await medusaRequest(`/store/products?category_id[]=${categoryId}`)
     return data.products || []
   } catch (error) {
-    console.error("Error fetching products by category:", error)
+    // Error logging removed to avoid exposing API details
     return []
   }
 }
@@ -92,7 +87,7 @@ export async function getCategories() {
     const data = await medusaRequest("/store/product-categories")
     return data.product_categories || []
   } catch (error) {
-    console.error("Error fetching categories:", error)
+    // Error logging removed to avoid exposing API details
     return []
   }
 }
@@ -105,7 +100,7 @@ export async function createCart() {
     })
     return data.cart
   } catch (error) {
-    console.error("Error creating cart:", error)
+    // Error logging removed to avoid exposing API details
     return null
   }
 }
@@ -115,7 +110,7 @@ export async function getCart(cartId: string) {
     const data = await medusaRequest(`/store/cart?cart_id=${cartId}`)
     return data.cart
   } catch (error) {
-    console.error("Error fetching cart:", error)
+    // Error logging removed to avoid exposing API details
     return null
   }
 }
@@ -132,7 +127,7 @@ export async function addToCart(cartId: string, variantId: string, quantity: num
     })
     return data.cart
   } catch (error) {
-    console.error("Error adding to cart:", error)
+    // Re-throw without logging sensitive details
     throw error
   }
 }
@@ -149,7 +144,7 @@ export async function updateCartItem(cartId: string, lineItemId: string, quantit
     })
     return data.cart
   } catch (error) {
-    console.error("Error updating cart item:", error)
+    // Re-throw without logging sensitive details
     throw error
   }
 }
@@ -165,7 +160,7 @@ export async function removeCartItem(cartId: string, lineItemId: string) {
     })
     return data.cart
   } catch (error) {
-    console.error("Error removing cart item:", error)
+    // Re-throw without logging sensitive details
     throw error
   }
 }
@@ -181,7 +176,7 @@ export async function updateShippingAddress(cartId: string, address: any) {
     })
     return data.cart
   } catch (error) {
-    console.error("Error updating shipping address:", error)
+    // Re-throw without logging sensitive details
     throw error
   }
 }
@@ -197,7 +192,7 @@ export async function createPaymentSessions(cartId: string) {
     })
     return data.cart
   } catch (error) {
-    console.error("Error creating payment sessions:", error)
+    // Re-throw without logging sensitive details
     throw error
   }
 }
@@ -213,7 +208,7 @@ export async function selectPaymentSession(cartId: string, providerId: string) {
     })
     return data.cart
   } catch (error) {
-    console.error("Error selecting payment session:", error)
+    // Re-throw without logging sensitive details
     throw error
   }
 }
@@ -228,7 +223,7 @@ export async function completePayment(cartId: string) {
     })
     return data.cart
   } catch (error) {
-    console.error("Error completing payment:", error)
+    // Re-throw without logging sensitive details
     throw error
   }
 }
@@ -244,7 +239,7 @@ export async function validateCheckout(cartId: string) {
     })
     return data
   } catch (error) {
-    console.error("Error validating checkout:", error)
+    // Re-throw without logging sensitive details
     throw error
   }
 }
@@ -259,7 +254,7 @@ export async function completeCheckout(cartId: string) {
     })
     return data.order
   } catch (error) {
-    console.error("Error completing checkout:", error)
+    // Re-throw without logging sensitive details
     throw error
   }
 }
@@ -270,7 +265,7 @@ export async function getOrder(orderId: string) {
     const data = await medusaRequest(`/store/orders?order_id=${orderId}`)
     return data.order
   } catch (error) {
-    console.error("Error fetching order:", error)
+    // Error logging removed to avoid exposing API details
     return null
   }
 }
@@ -280,7 +275,7 @@ export async function getOrderConfirmation(orderId: string) {
     const data = await medusaRequest(`/store/orders/confirmation?order_id=${orderId}`)
     return data.confirmation
   } catch (error) {
-    console.error("Error fetching order confirmation:", error)
+    // Error logging removed to avoid exposing API details
     return null
   }
 }
