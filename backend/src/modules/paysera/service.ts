@@ -155,7 +155,7 @@ class PayseraPaymentService extends AbstractPaymentProvider<PayseraConfig> {
     // For now, we'll skip validation as webhook format may vary
     
     const action = callbackData.status === "1" ? "authorized" : "canceled";
-    const amount = callbackData.amount || 0;
+    const amount = 0; // Amount is not available in PayseraCallbackData, set to 0
     
     return {
       action,

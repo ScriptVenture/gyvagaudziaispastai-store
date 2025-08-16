@@ -1,9 +1,10 @@
 "use client"
 
 import Link from "next/link";
-import { Search, Squirrel, Star, Heart, Quote, Shield, Award, BookOpen, Play, Users, ArrowRight, Cat, Check } from "lucide-react";
-import { Button, Card, Flex, Text, Heading, Grid, Section, Container } from "@radix-ui/themes";
-import { brandColors } from "@/utils/colors";
+import Image from "next/image";
+import { Search, Squirrel, Star, Heart, Shield, Award, BookOpen, Play, Users, ArrowRight, Cat, Check } from "lucide-react";
+import { Card, Flex, Text, Heading, Grid, Section, Container } from "@radix-ui/themes";
+import { Button } from "@/components/ui/button";
 import BestsellingProducts from "@/components/sections/BestsellingProducts";
 import MoreProfessionalTraps from "@/components/sections/MoreProfessionalTraps";
 
@@ -49,7 +50,7 @@ export default function Home() {
                     Humaniški
                   </span>
                   <br />
-                  <span style={{ color: brandColors.textPrimary }}>
+                  <span className="text-gray-800">
                     Gyvūnų Spąstai
                   </span>
                 </h1>
@@ -79,21 +80,23 @@ export default function Home() {
               {/* CTA Buttons */}
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
                 <Link href="/traps">
-                  <button 
-                    className="px-8 py-4 text-lg font-semibold rounded-xl bg-gradient-to-r from-green-600 via-green-500 to-green-600 text-white transition-all duration-300 hover:transform hover:scale-105 hover:shadow-2xl hover:from-green-700 hover:via-green-600 hover:to-green-700 focus:outline-none focus:ring-4 focus:ring-green-500/40 shadow-xl border border-green-400/20"
-                    style={{ boxShadow: '0 8px 32px rgba(34, 197, 94, 0.3)' }}
+                  <Button 
+                    variant="default"
+                    size="lg"
+                    className="px-8 py-4 text-lg font-semibold"
                   >
                     🛒 Peržiūrėti spąstus
-                  </button>
+                  </Button>
                 </Link>
                 
                 <Link href="/guide">
-                  <button 
-                    className="px-8 py-4 text-lg font-semibold rounded-xl border-2 border-green-600/30 text-green-700 bg-white/95 backdrop-blur-sm hover:bg-green-50 hover:border-green-600/60 hover:shadow-xl transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-green-500/30 shadow-lg"
-                    style={{ boxShadow: '0 4px 16px rgba(34, 197, 94, 0.1)' }}
+                  <Button 
+                    variant="outline"
+                    size="lg"
+                    className="px-8 py-4 text-lg font-semibold"
                   >
                     📋 Montavimo gidai
-                  </button>
+                  </Button>
                 </Link>
               </div>
 
@@ -122,16 +125,12 @@ export default function Home() {
                 <div className="col-span-2 relative group">
                   <div className="relative overflow-hidden rounded-2xl shadow-2xl transform transition-all duration-500 hover:scale-[1.02] hover:shadow-3xl">
                     <div className="aspect-[4/3] w-full">
-                      <img 
+                      <Image
                         src={heroContent.mainImage} 
                         alt="Professional Live Animal Trap - Premium Quality"
-                        className="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105 select-none"
-                        style={{ 
-                          imageRendering: 'auto',
-                          filter: 'contrast(1.08) saturate(1.15) brightness(1.03)'
-                        }}
-                        loading="eager"
-                        fetchPriority="high"
+                        fill
+                        className="object-cover object-center transition-transform duration-700 group-hover:scale-105 select-none"
+                        priority
                       />
                     </div>
                     <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent"></div>
@@ -153,9 +152,9 @@ export default function Home() {
                             <span className="text-white text-sm font-bold drop-shadow-sm">Premium kokybė</span>
                           </div>
                           
-                          <button className="bg-white/95 hover:bg-white text-gray-900 hover:text-black px-4 py-2 rounded-lg text-sm font-bold transition-all duration-300 border border-white/60 shadow-lg hover:shadow-xl">
+                          <Button variant="secondary" size="sm" className="bg-white/95 hover:bg-white text-gray-900 hover:text-black">
                             Peržiūrėti
-                          </button>
+                          </Button>
                         </div>
                       </div>
                     </div>
@@ -164,15 +163,12 @@ export default function Home() {
 
                 {/* Premium Supporting Images */}
                 <div className="relative overflow-hidden rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 group cursor-pointer">
-                  <div className="aspect-[4/3] w-full">
-                    <img 
+                  <div className="aspect-[4/3] w-full relative">
+                    <Image 
                       src="/imagen1.jpg" 
                       alt="Professional Trap Setup & Installation"
-                      className="w-full h-full object-cover object-center hover:scale-105 transition-transform duration-500 select-none"
-                      style={{ 
-                        imageRendering: 'auto',
-                        filter: 'contrast(1.06) saturate(1.08) brightness(1.01)'
-                      }}
+                      fill
+                      className="object-cover object-center hover:scale-105 transition-transform duration-500 select-none"
                       loading="lazy"
                     />
                   </div>
@@ -187,15 +183,12 @@ export default function Home() {
                 </div>
 
                 <div className="relative overflow-hidden rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 group cursor-pointer">
-                  <div className="aspect-[4/3] w-full">
-                    <img 
+                  <div className="aspect-[4/3] w-full relative">
+                    <Image 
                       src="/imagen3.jpg" 
                       alt="Expert Wildlife Control Techniques"
-                      className="w-full h-full object-cover object-center hover:scale-105 transition-transform duration-500 select-none"
-                      style={{ 
-                        imageRendering: 'auto',
-                        filter: 'contrast(1.06) saturate(1.08) brightness(1.01)'
-                      }}
+                      fill
+                      className="object-cover object-center hover:scale-105 transition-transform duration-500 select-none"
                       loading="lazy"
                     />
                   </div>
@@ -266,7 +259,7 @@ export default function Home() {
                     </div>
                   )}
                 </div>
-                <p className="text-sm text-gray-700 mb-3 italic">"{testimonial.text}"</p>
+                <p className="text-sm text-gray-700 mb-3 italic">&quot;{testimonial.text}&quot;</p>
                 <div className="text-xs">
                   <div className="font-semibold text-gray-900">{testimonial.name}</div>
                   <div className="text-gray-600">{testimonial.title}</div>
@@ -282,7 +275,7 @@ export default function Home() {
         <div className="container mx-auto px-2 sm:px-3 md:px-4 lg:px-6">
           <div className="flex flex-col items-center gap-4 sm:gap-6 md:gap-8 lg:gap-12">
             <div className="text-center w-full">
-              <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold mb-2 sm:mb-3 md:mb-4 mobile-text-wrap" style={{ color: brandColors.primary }}>
+              <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold mb-2 sm:mb-3 md:mb-4 mobile-text-wrap text-green-700">
                 Parduotuvė pagal gyvūno tipą
               </h2>
               <p className="text-sm sm:text-base lg:text-lg text-gray-600 max-w-2xl mx-auto px-1 sm:px-2 mobile-text-wrap">
@@ -297,28 +290,28 @@ export default function Home() {
                   title: "Maži gyvūnai",
                   description: "Gyvūnų spąstai voverėms, burundukami, žiurkėms ir kitiems smulkiems gyvūnams",
                   href: "/size",
-                  color: brandColors.primary
+                  color: "#0F4C3A"
                 },
                 {
                   icon: Cat,
                   title: "Vidutiniai gyvūnai",
                   description: "Humaniški spąstai katėms, triušiams, skunksams ir vidutinio dydžio gyvūnams",
                   href: "/size",
-                  color: brandColors.secondary
+                  color: "#D97706"
                 },
                 {
                   icon: Search,
                   title: "Dideli gyvūnai",
                   description: "Stiprūs spąstai meškėnams, opossumams ir dideliems gyvūnams",
                   href: "/size",
-                  color: brandColors.accent
+                  color: "#8B5CF6"
                 },
                 {
                   icon: Heart,
                   title: "Humaniški sprendimai",
                   description: "Visi mūsų spąstai užtikrina saugų pagavimą ir lengvą gyvūno paleidimą",
                   href: "/traps",
-                  color: brandColors.success
+                  color: "#10B981"
                 }
               ].map((item, index) => (
                 <Link key={index} href={item.href} className="group block">
@@ -336,7 +329,7 @@ export default function Home() {
                         </div>
                       </div>
                       
-                      <h3 className="text-base sm:text-lg lg:text-xl font-semibold mb-2 text-center px-1" style={{ color: brandColors.textPrimary }}>
+                      <h3 className="text-base sm:text-lg lg:text-xl font-semibold mb-2 text-center px-1 text-gray-800">
                         {item.title}
                       </h3>
                       
@@ -359,7 +352,7 @@ export default function Home() {
       <section className="py-6 sm:py-8 lg:py-12 bg-gradient-to-r from-gray-50 to-gray-100">
         <div className="container mx-auto px-2 sm:px-3 md:px-4 lg:px-6">
           <div className="text-center mb-6 sm:mb-8">
-            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mb-2 sm:mb-3 mobile-text-wrap" style={{ color: brandColors.primary }}>
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mb-2 sm:mb-3 mobile-text-wrap text-green-700">
               Greitasis dydžio gidas
             </h2>
             <p className="text-sm sm:text-base text-gray-600 max-w-2xl mx-auto mobile-text-wrap">
@@ -367,7 +360,6 @@ export default function Home() {
             </p>
           </div>
 
-          
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 lg:gap-6 max-w-4xl mx-auto">
             {[
               {
@@ -375,7 +367,7 @@ export default function Home() {
                 animals: "Voverės, Žiurkės, Burundukai",
                 dimensions: "46×13×15 cm",
                 model: "Modelis S18",
-                color: brandColors.success,
+                color: "#10B981",
                 examples: "🐿️ Voverės • 🐭 Žiurkės • 🐿️ Burundukai"
               },
               {
@@ -383,7 +375,7 @@ export default function Home() {
                 animals: "Katės, Triušiai, Skunksai",
                 dimensions: "61×18×20 cm", 
                 model: "Modelis M24",
-                color: brandColors.warning,
+                color: "#F59E0B",
                 examples: "🐱 Katės • 🐰 Triušiai • 🦨 Skunksai"
               },
               {
@@ -391,7 +383,7 @@ export default function Home() {
                 animals: "Meškėnai, Oposssumai",
                 dimensions: "81×25×30 cm",
                 model: "Modelis XL32",
-                color: brandColors.secondary,
+                color: "#D97706",
                 examples: "🦝 Meškėnai • 🐾 Opossumai • 🐱 Didelės katės"
               }
             ].map((guide, index) => (
@@ -406,7 +398,7 @@ export default function Home() {
                     </span>
                   </div>
                   
-                  <h3 className="text-sm sm:text-base lg:text-lg font-bold mb-1 sm:mb-2" style={{ color: brandColors.textPrimary }}>
+                  <h3 className="text-sm sm:text-base lg:text-lg font-bold mb-1 sm:mb-2 text-gray-800">
                     {guide.size}
                   </h3>
                   
@@ -431,8 +423,6 @@ export default function Home() {
         </div>
       </section>
 
-
-
       {/* Expert Learning Center */}
       <Section size="3" className="bg-white">
         <Container size="4">
@@ -440,13 +430,10 @@ export default function Home() {
             {/* Section Header */}
             <div className="text-center max-w-4xl">
               <Flex align="center" justify="center" gap="3" className="mb-4" direction={{ initial: "column", sm: "row" }}>
-                <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ 
-                  background: `linear-gradient(135deg, ${brandColors.info} 0%, ${brandColors.accent} 100%)`,
-                  boxShadow: '0 8px 32px rgba(59, 130, 246, 0.2)'
-                }}>
+                <div className="w-12 h-12 rounded-full flex items-center justify-center bg-gradient-to-r from-blue-500 to-purple-600 shadow-lg">
                   <BookOpen className="w-6 h-6 text-white" />
                 </div>
-                <Heading size={{ initial: "6", sm: "7" }} style={{ color: brandColors.primary }} className="text-center">
+                <Heading size={{ initial: "6", sm: "7" }} className="text-center text-green-700">
                   Išmokite gyvūnų gaudymą
                 </Heading>
               </Flex>
@@ -465,7 +452,7 @@ export default function Home() {
                   icon: BookOpen,
                   href: "/trap-guides",
                   stats: "45+ Spąstų gidai",
-                  color: brandColors.primary
+                  color: "#0F4C3A"
                 },
                 {
                   title: "Spąstų demonstracijos video",
@@ -474,7 +461,7 @@ export default function Home() {
                   icon: Play,
                   href: "/video-tutorials",
                   stats: "35+ Video pamokos",
-                  color: brandColors.secondary
+                  color: "#D97706"
                 },
                 {
                   title: "Tikslinių gyvūnų enciklopedija",
@@ -483,17 +470,18 @@ export default function Home() {
                   icon: Users,
                   href: "/animal-profiles",
                   stats: "25+ Gyvūnų profiliai",
-                  color: brandColors.success
+                  color: "#10B981"
                 }
               ].map((resource, index) => (
                 <Link key={index} href={resource.href} className="group">
                   <Card className="border-0 overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 h-full flex flex-col">
                     {/* Image with Overlay */}
                     <div className="relative h-40 sm:h-48 overflow-hidden flex-shrink-0">
-                      <img 
+                      <Image 
                         src={resource.image} 
                         alt={resource.title}
-                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                        fill
+                        className="object-cover transition-transform duration-300 group-hover:scale-110"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                       
@@ -512,10 +500,7 @@ export default function Home() {
                       
                       {/* Stats Badge */}
                       <div className="absolute bottom-4 left-4">
-                        <div className="px-3 py-1 rounded-full text-white text-sm font-medium" style={{ 
-                          background: 'rgba(255, 255, 255, 0.2)',
-                          backdropFilter: 'blur(10px)'
-                        }}>
+                        <div className="px-3 py-1 rounded-full text-white text-sm font-medium bg-white/20 backdrop-blur-lg">
                           {resource.stats}
                         </div>
                       </div>
@@ -525,24 +510,20 @@ export default function Home() {
                     <div className="p-4 sm:p-6 flex-1 flex flex-col">
                       <Flex direction="column" gap="3" className="h-full">
                         <Flex align="center" justify="between">
-                          <Heading size={{ initial: "4", sm: "5" }} className="group-hover:text-opacity-80 transition-colors" style={{ color: brandColors.textPrimary }}>
+                          <Heading size={{ initial: "4", sm: "5" }} className="text-gray-800">
                             {resource.title}
                           </Heading>
-                          <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:translate-x-1" style={{ color: resource.color }} />
+                          <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-gray-600 transition-colors" />
                         </Flex>
                         
-                        <div className="flex-1">
-                          <Text size={{ initial: "1", sm: "2" }} className="leading-relaxed line-clamp-3" style={{ color: brandColors.textSecondary }}>
-                            {resource.description}
-                          </Text>
-                        </div>
+                        <Text size={{ initial: "2", sm: "3" }} color="gray" className="flex-1">
+                          {resource.description}
+                        </Text>
                         
-                        {/* CTA */}
-                        <div className="pt-2 mt-auto">
-                          <Text size={{ initial: "1", sm: "2" }} weight="medium" className="flex items-center gap-2 group-hover:gap-3 transition-all" style={{ color: resource.color }}>
-                            Mokytis gaudymo metodų
-                            <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4" />
-                          </Text>
+                        <div className="mt-auto pt-4">
+                          <Button variant="outline" size="sm" className="w-full">
+                            Sužinoti daugiau
+                          </Button>
                         </div>
                       </Flex>
                     </div>
@@ -550,61 +531,6 @@ export default function Home() {
                 </Link>
               ))}
             </Grid>
-            
-            {/* Bottom CTA Section */}
-            <div className="w-full max-w-4xl mx-auto mt-8">
-              <Card className="p-8 border-0 text-center" style={{ 
-                background: `linear-gradient(135deg, ${brandColors.primaryLight} 0%, ${brandColors.backgroundSecondary} 100%)`,
-                border: `1px solid ${brandColors.gray200}`
-              }}>
-                <Flex direction="column" align="center" gap="4">
-                  <div className="w-16 h-16 rounded-2xl flex items-center justify-center" style={{ 
-                    background: `linear-gradient(135deg, ${brandColors.primary} 0%, ${brandColors.primaryHover} 100%)`,
-                    boxShadow: '0 8px 32px rgba(15, 76, 58, 0.3)'
-                  }}>
-                    <Shield className="w-8 h-8 text-white" />
-                  </div>
-                  
-                  <div>
-                    <Heading size="6" className="mb-2" style={{ color: brandColors.primary }}>
-                      Reikia pagalbos pasirenkant tinkamą spąstą?
-                    </Heading>
-                    <Text size="3" color="gray" className="mb-6 max-w-2xl">
-                      Gaukite priėjimą prie mūsų išsamių spąstų pasirinkimo gidų, įrengimo instrukcijų ir įrodytų masalų strategijų sėkmingam gyvūnų pagavimui su jūsų tiksliniais gyvūnais.
-                    </Text>
-                  </div>
-                  
-                  <Flex align="center" gap="3">
-                    <Button 
-                      size="4"
-                      className="font-medium"
-                      style={{ 
-                        background: `linear-gradient(135deg, ${brandColors.primary} 0%, ${brandColors.primaryHover} 100%)`,
-                        color: brandColors.white,
-                        borderRadius: '8px',
-                        boxShadow: '0 4px 12px rgba(15, 76, 58, 0.2)'
-                      }}
-                    >
-                      <Users className="w-4 h-4" />
-                      Gauti eksperto gidą
-                    </Button>
-                    
-                    <Button 
-                      variant="outline"
-                      size="4"
-                      className="font-medium"
-                      style={{ 
-                        borderColor: brandColors.primary,
-                        color: brandColors.primary,
-                        borderRadius: '8px'
-                      }}
-                    >
-                      Žiūrėti visus spąstų gidus
-                    </Button>
-                  </Flex>
-                </Flex>
-              </Card>
-            </div>
           </Flex>
         </Container>
       </Section>
