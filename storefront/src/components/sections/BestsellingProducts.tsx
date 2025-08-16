@@ -3,11 +3,10 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Star, Shield, ShoppingCart } from "lucide-react";
+import { Star } from "lucide-react";
 import { brandColors } from "@/utils/colors";
-import { useCart } from "@/contexts/cart-context";
 import { getOptimizedImageUrl } from "@/utils/image";
-import { STORE_API_URL, CART_API_URL, MEDUSA_PUBLISHABLE_KEY } from "@/lib/config";
+import { STORE_API_URL, MEDUSA_PUBLISHABLE_KEY } from "@/lib/config";
 
 interface Product {
   id: string;
@@ -78,8 +77,6 @@ async function fetchProducts() {
 export default function BestsellingProducts() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const [addingToCart, setAddingToCart] = useState<string | null>(null);
-  const { refreshCart } = useCart();
 
   useEffect(() => {
     async function loadProducts() {
@@ -91,49 +88,6 @@ export default function BestsellingProducts() {
     loadProducts();
   }, []);
 
-  const handleAddToCart = async (product: Product) => {
-    if (!product.variants || product.variants.length === 0) {
-      alert('Šis produktas neturi variantų');
-      return;
-    }
-
-    setAddingToCart(product.id);
-    
-    try {
-      const mainVariant = product.variants[0];
-      const response = await fetch(`${CART_API_URL}/add`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          variantId: mainVariant.id,
-          quantity: 1
-        }),
-      });
-
-      const data = await response.json();
-      
-      if (response.ok) {
-        console.log('Product added to cart successfully');
-        // Refresh cart data in context
-        await refreshCart();
-        
-        // Dispatch cart update event for any other listeners
-        window.dispatchEvent(new Event('cart-updated'));
-        
-        // Optional: Show success notification
-        // You could add a toast notification here
-      } else {
-        throw new Error(data.error || 'Failed to add to cart');
-      }
-    } catch (error) {
-      console.error('Error adding to cart:', error);
-      alert('Nepavyko pridėti į krepšelį. Bandykite dar kartą.');
-    } finally {
-      setAddingToCart(null);
-    }
-  };
 
   if (loading) {
     return (
@@ -282,31 +236,12 @@ export default function BestsellingProducts() {
                           </div>
                         </div>
                         
-                        {/* CTA Button */}
-                        <button 
-                          className="w-full py-2 text-sm font-medium text-white rounded transition-colors hover:opacity-90 disabled:opacity-50 flex items-center justify-center gap-2"
-                          style={{ 
-                            backgroundColor: brandColors.secondary
-                          }}
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            handleAddToCart(product);
-                          }}
-                          disabled={addingToCart === product.id || !mainVariant}
-                        >
-                          {addingToCart === product.id ? (
-                            <>
-                              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                              Pridedama...
-                            </>
-                          ) : (
-                            <>
-                              <ShoppingCart className="w-4 h-4" />
-                              Pridėti į krepšelį
-                            </>
-                          )}
-                        </button>
+                        {/* View Product Indicator */}
+                        <div className="text-center py-2">
+                          <span className="text-sm text-gray-500 group-hover:text-blue-600 transition-colors">
+                            Spustelėkite peržiūrėti produktą
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </Link>

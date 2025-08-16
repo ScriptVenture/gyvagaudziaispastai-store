@@ -1,14 +1,15 @@
 "use client"
 
 import { useState, useEffect } from 'react'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { Container, Heading, Text, Button, Flex, Card, Badge, Separator } from '@radix-ui/themes'
-import { ShoppingCart, ArrowLeft, Heart, Share, Star } from 'lucide-react'
+import { ShoppingCart, ArrowLeft, Heart, Share, Star, Check } from 'lucide-react'
 import { useCart } from '@/contexts/cart-context'
 import { getProduct } from '@/lib/medusa'
 import { brandColors } from '@/utils/colors'
 import { getOptimizedImageUrl } from '@/utils/image'
+import { CART_API_URL } from '@/lib/config'
 
 interface Product {
   id: string
@@ -37,12 +38,15 @@ interface Product {
 
 export default function ProductPage() {
   const params = useParams()
+  const router = useRouter()
   const handle = params.handle as string
   
   const [product, setProduct] = useState<Product | null>(null)
   const [loading, setLoading] = useState(true)
   const [selectedImage, setSelectedImage] = useState(0)
   const [quantity, setQuantity] = useState(1)
+  const [addingToCart, setAddingToCart] = useState(false)
+  const [showAddedToCart, setShowAddedToCart] = useState(false)
   
   const { refreshCart, isLoading: cartLoading } = useCart()
 
@@ -65,14 +69,56 @@ export default function ProductPage() {
   }, [handle])
 
   const handleAddToCart = async () => {
-    if (!product?.variants?.[0]) return
+    if (!product?.variants?.[0]) {
+      alert('Šis produktas neturi variantų')
+      return
+    }
+
+    setAddingToCart(true)
     
     try {
-      // Add to cart logic here - you'll need to implement this
-      await refreshCart()
+      const mainVariant = product.variants[0]
+      const response = await fetch(`${CART_API_URL}/add`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          variantId: mainVariant.id,
+          quantity: quantity
+        }),
+      })
+
+      const data = await response.json()
+      
+      if (response.ok) {
+        console.log('Product added to cart successfully')
+        // Refresh cart data in context
+        await refreshCart()
+        
+        // Dispatch cart update event for any other listeners
+        window.dispatchEvent(new Event('cart-updated'))
+        
+        // Show success state
+        setShowAddedToCart(true)
+      } else {
+        throw new Error(data.error || 'Failed to add to cart')
+      }
     } catch (error) {
       console.error('Error adding to cart:', error)
+      alert('Nepavyko pridėti į krepšelį. Bandykite dar kartą.')
+    } finally {
+      setAddingToCart(false)
     }
+  }
+
+  const handleContinueShopping = () => {
+    setShowAddedToCart(false)
+    router.push('/')
+  }
+
+  const handleProceedToCheckout = () => {
+    router.push('/cart')
   }
 
   if (loading) {
@@ -229,16 +275,57 @@ export default function ProductPage() {
               </div>
             </div>
 
-            <Button
-              size="4"
-              className="w-full"
-              style={{ backgroundColor: brandColors.primary }}
-              onClick={handleAddToCart}
-              disabled={cartLoading || !mainVariant}
-            >
-              <ShoppingCart className="w-5 h-5 mr-2" />
-              Įdėti į krepšelį
-            </Button>
+            {!showAddedToCart ? (
+              <Button
+                size="4"
+                className="w-full"
+                style={{ backgroundColor: brandColors.primary }}
+                onClick={handleAddToCart}
+                disabled={addingToCart || cartLoading || !mainVariant}
+              >
+                {addingToCart ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                    Pridedama...
+                  </>
+                ) : (
+                  <>
+                    <ShoppingCart className="w-5 h-5 mr-2" />
+                    Įdėti į krepšelį
+                  </>
+                )}
+              </Button>
+            ) : (
+              <div className="space-y-3">
+                {/* Success Message */}
+                <div className="flex items-center justify-center gap-2 p-3 bg-green-50 border border-green-200 rounded-lg">
+                  <Check className="w-5 h-5 text-green-600" />
+                  <Text size="3" weight="medium" className="text-green-700">
+                    Produktas sėkmingai pridėtas į krepšelį!
+                  </Text>
+                </div>
+                
+                {/* Action Buttons */}
+                <div className="grid grid-cols-2 gap-3">
+                  <Button
+                    size="3"
+                    variant="outline"
+                    onClick={handleContinueShopping}
+                    className="w-full"
+                  >
+                    Tęsti apsipirkimą
+                  </Button>
+                  <Button
+                    size="3"
+                    onClick={handleProceedToCheckout}
+                    className="w-full"
+                    style={{ backgroundColor: brandColors.secondary }}
+                  >
+                    Pereiti į krepšelį
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Additional Actions */}
