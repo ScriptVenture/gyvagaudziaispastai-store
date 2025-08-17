@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { Search, Squirrel, Star, Heart, Shield, Award, BookOpen, Play, Users, ArrowRight, Cat, Check } from "lucide-react";
+import { Search, Squirrel, Star, Heart, Shield, Award, BookOpen, Play, Users, ArrowRight, Cat, Check, ShoppingCart } from "lucide-react";
 import { Card, Flex, Text, Heading, Grid, Section, Container } from "@radix-ui/themes";
 import { Button } from "@/components/ui/button";
 import BestsellingProducts from "@/components/sections/BestsellingProducts";
@@ -20,12 +20,29 @@ export default function Home() {
   return (
     <div>
       {/* Modern Split-Screen Hero Section */}
-      <section className="relative min-h-[500px] bg-gradient-to-br from-green-50/30 via-white to-blue-50/20 overflow-hidden" style={{backgroundImage: 'radial-gradient(circle at 20% 80%, rgba(34, 197, 94, 0.05) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(59, 130, 246, 0.05) 0%, transparent 50%)'}}>
+      <section className="relative min-h-[600px] lg:min-h-[700px] bg-gradient-to-br from-green-50/30 via-white to-blue-50/20 overflow-hidden" style={{backgroundImage: 'radial-gradient(circle at 20% 80%, rgba(34, 197, 94, 0.05) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(59, 130, 246, 0.05) 0%, transparent 50%)'}}>
         
-        {/* Animated Background Elements */}
+        {/* Enhanced Animated Background Elements */}
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-green-200/20 to-blue-200/20 rounded-full blur-3xl animate-pulse"></div>
           <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-gradient-to-tr from-amber-200/20 to-green-200/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-gradient-to-r from-purple-200/10 to-pink-200/10 rounded-full blur-2xl animate-pulse delay-500"></div>
+        </div>
+
+        {/* Floating particles for premium feel */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {[...Array(6)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute w-2 h-2 bg-green-300/30 rounded-full animate-bounce"
+              style={{
+                left: `${20 + i * 15}%`,
+                top: `${30 + (i % 2) * 40}%`,
+                animationDelay: `${i * 0.5}s`,
+                animationDuration: `${3 + i * 0.5}s`
+              }}
+            />
+          ))}
         </div>
 
         <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20">
@@ -43,21 +60,30 @@ export default function Home() {
                 <Shield className="w-4 h-4 text-green-600" />
               </div>
 
-              {/* Main Heading */}
-              <div className="space-y-4">
-                <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold tracking-tight">
-                  <span className="bg-gradient-to-r from-green-700 to-green-500 bg-clip-text text-transparent">
-                    Humaniški
-                  </span>
-                  <br />
-                  <span className="text-gray-800">
-                    Gyvūnų Spąstai
-                  </span>
-                </h1>
+              {/* Enhanced Main Heading with better typography */}
+              <div className="space-y-6">
+                <div className="space-y-2">
+                  <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight leading-[1.1]">
+                    <span className="bg-gradient-to-r from-green-700 via-green-600 to-emerald-500 bg-clip-text text-transparent animate-pulse">
+                      Humaniški
+                    </span>
+                    <br />
+                    <span className="text-gray-800 relative">
+                      Gyvūnų Spąstai
+                      <div className="absolute -bottom-2 left-0 w-24 h-1 bg-gradient-to-r from-green-500 to-emerald-400 rounded-full"></div>
+                    </span>
+                  </h1>
+                  
+                  {/* Enhanced subtitle with better spacing */}
+                  <div className="pt-4">
+                    <p className="text-xl sm:text-2xl lg:text-3xl font-medium text-gray-700 max-w-2xl mx-auto lg:mx-0 leading-relaxed">
+                      Profesionalūs sprendimai gyvūnų kontrolei
+                    </p>
+                  </div>
+                </div>
                 
-                <p className="text-lg sm:text-xl text-gray-600 max-w-xl mx-auto lg:mx-0 leading-relaxed">
-                  Profesionalūs gyvūnų kontrolės sprendimai, kuriais pasitiki ekspertai visame pasaulyje. 
-                  Saugūs, efektyvūs ir visiškai humaniški gyvūnų gaudymo spąstai.
+                <p className="text-lg sm:text-xl text-gray-600 max-w-xl mx-auto lg:mx-0 leading-relaxed font-light">
+                  Patikimi ekspertų visame pasaulyje. Saugūs, efektyvūs ir visiškai humaniški gyvūnų gaudymo spąstai su 30 dienų garantija.
                 </p>
               </div>
 
@@ -77,25 +103,32 @@ export default function Home() {
                 ))}
               </div>
 
-              {/* CTA Buttons */}
+              {/* Enhanced CTA Buttons with modern styling */}
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                <Link href="/traps">
+                <Link href="/traps" className="group">
                   <Button 
                     variant="default"
                     size="lg"
-                    className="px-8 py-4 text-lg font-semibold"
+                    className="px-10 py-5 text-lg font-semibold bg-gradient-to-r from-green-600 to-emerald-500 hover:from-green-700 hover:to-emerald-600 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300 border-0 relative overflow-hidden"
                   >
-                    🛒 Peržiūrėti spąstus
+                    <span className="relative z-10 flex items-center gap-3">
+                      <ShoppingCart className="w-5 h-5" />
+                      Peržiūrėti spąstus
+                    </span>
+                    <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                   </Button>
                 </Link>
                 
-                <Link href="/guide">
+                <Link href="/guide" className="group">
                   <Button 
                     variant="outline"
                     size="lg"
-                    className="px-8 py-4 text-lg font-semibold"
+                    className="px-10 py-5 text-lg font-semibold border-2 border-green-200 hover:border-green-300 hover:bg-green-50 transform hover:-translate-y-0.5 transition-all duration-300 relative overflow-hidden"
                   >
-                    📋 Montavimo gidai
+                    <span className="flex items-center gap-3">
+                      <BookOpen className="w-5 h-5" />
+                      Montavimo gidai
+                    </span>
                   </Button>
                 </Link>
               </div>

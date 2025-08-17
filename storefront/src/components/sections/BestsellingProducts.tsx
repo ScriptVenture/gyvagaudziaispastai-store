@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Star } from "lucide-react";
+import { Star, Eye, Zap, TrendingUp } from "lucide-react";
 import { brandColors } from "@/utils/colors";
 import { getOptimizedImageUrl } from "@/utils/image";
 import { STORE_API_URL, MEDUSA_PUBLISHABLE_KEY } from "@/lib/config";
@@ -152,33 +152,46 @@ export default function BestsellingProducts() {
                 // Handle price formatting (prices can be in cents or whole numbers)
                 const formattedPrice = price > 1000 ? `€${(price / 100).toFixed(2)}` : `€${price.toFixed(2)}`;
                 
-                // Simulate some dynamic data based on product
+                // Enhanced dynamic data with more realistic patterns
                 const mockStock = index < 2 ? Math.floor(Math.random() * 5) + 1 : Math.floor(Math.random() * 20) + 10;
                 const mockRating = 4.6 + Math.random() * 0.4;
                 const mockReviews = Math.floor(Math.random() * 200) + 50;
+                const isHotSelling = index === 0 || index === 2; // Mark certain products as hot
+                const recentPurchases = Math.floor(Math.random() * 15) + 5;
                 
                 return (
-                  <Link key={product.id} href={`/products/${product.handle}`}>
-                    <div className="group relative bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden border border-gray-200 cursor-pointer">
+                  <Link key={product.id} href={`/products/${product.handle}`} className="group">
+                    <div className="relative bg-white rounded-2xl shadow-sm hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100 cursor-pointer transform hover:-translate-y-2 hover:scale-[1.02]">
                       
-                      {/* Stock Urgency Badge */}
-                      {mockStock <= 5 && (
-                        <div className="absolute top-2 left-2 z-20">
-                          <div className="bg-red-500 text-white text-xs font-medium px-1.5 py-0.5 rounded">
-                            Tik {mockStock} liko
+                      {/* Enhanced Badge System */}
+                      <div className="absolute top-3 left-3 z-20 flex flex-col gap-1">
+                        {mockStock <= 5 && (
+                          <div className="bg-gradient-to-r from-red-500 to-red-600 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg animate-pulse">
+                            <div className="flex items-center gap-1">
+                              <Zap className="w-3 h-3" />
+                              Tik {mockStock} liko
+                            </div>
                           </div>
-                        </div>
-                      )}
+                        )}
+                        {isHotSelling && (
+                          <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg">
+                            <div className="flex items-center gap-1">
+                              <TrendingUp className="w-3 h-3" />
+                              HOT
+                            </div>
+                          </div>
+                        )}
+                      </div>
                       
-                      {/* Bestseller Badge */}
-                      <div className="absolute top-2 right-2 z-20">
-                        <div className="bg-orange-500 text-white text-xs font-medium px-1.5 py-0.5 rounded">
-                          POPULIARIAUSIAS
+                      {/* Bestseller Badge - Enhanced */}
+                      <div className="absolute top-3 right-3 z-20">
+                        <div className="bg-gradient-to-r from-amber-400 to-orange-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg">
+                          🏆 #1 BESTSELLER
                         </div>
                       </div>
                       
-                      {/* Product Image */}
-                      <div className="relative overflow-hidden bg-gray-50 h-48">
+                      {/* Enhanced Product Image with Overlay Effects */}
+                      <div className="relative overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 h-56">
                         {(() => {
                           // Use thumbnail if available, otherwise use first image, otherwise fallback
                           let imageUrl = product.thumbnail;
@@ -198,51 +211,108 @@ export default function BestsellingProducts() {
                               src={optimizedImageUrl} 
                               alt={product.title}
                               fill
-                              className="object-cover group-hover:scale-102 transition-transform duration-200"
+                              className="object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
                             />
                           );
                         })()}
+                        
+                        {/* Gradient Overlay for Better Text Readability */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                        
+                        {/* Quick View Button - Modern 2025 Pattern */}
+                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
+                          <div className="bg-white/95 backdrop-blur-sm text-gray-900 px-4 py-2 rounded-full font-medium text-sm shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300 flex items-center gap-2">
+                            <Eye className="w-4 h-4" />
+                            Peržiūrėti detaliai
+                          </div>
+                        </div>
                       </div>
                       
-                      {/* Product Content */}
-                      <div className="p-3">
+                      {/* Enhanced Product Content */}
+                      <div className="p-4 space-y-3">
                         
-                        {/* Rating */}
-                        <div className="flex items-center gap-1 mb-2">
-                          <div className="flex items-center">
-                            {[...Array(5)].map((_, i) => (
-                              <Star key={i} className={`w-3 h-3 ${i < Math.floor(mockRating) ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} />
-                            ))}
+                        {/* Rating with Enhanced Styling */}
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-1">
+                            <div className="flex items-center">
+                              {[...Array(5)].map((_, i) => (
+                                <Star key={i} className={`w-3.5 h-3.5 ${i < Math.floor(mockRating) ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} />
+                              ))}
+                            </div>
+                            <span className="text-xs text-gray-600 ml-1 font-medium">
+                              {mockRating.toFixed(1)} ({mockReviews})
+                            </span>
                           </div>
-                          <span className="text-xs text-gray-600 ml-1">({mockReviews})</span>
+                          
+                          {/* Social Proof Indicator */}
+                          <div className="text-xs text-green-600 font-medium">
+                            {recentPurchases} nupirkta šią savaitę
+                          </div>
                         </div>
                         
-                        {/* Product Title */}
-                        <h3 className="text-sm font-medium leading-tight mb-2 line-clamp-2" style={{ color: brandColors.textPrimary }}>
+                        {/* Product Title with Better Typography */}
+                        <h3 className="text-base font-semibold leading-tight line-clamp-2 text-gray-900 group-hover:text-green-700 transition-colors duration-200">
                           {product.title}
                         </h3>
                         
-                        {/* Key Feature */}
-                        <div className="text-xs text-gray-600 mb-2">
-                          Profesionalus spąstas
-                        </div>
-                        
-                        {/* Pricing */}
-                        <div className="flex items-center justify-between mb-3">
-                          <div className="flex items-center gap-1">
-                            <span className="text-lg font-bold" style={{ color: brandColors.primary }}>
-                              {formattedPrice}
-                            </span>
+                        {/* Enhanced Key Features */}
+                        <div className="flex items-center gap-2">
+                          <div className="inline-flex items-center gap-1 bg-green-50 text-green-700 px-2 py-1 rounded-full text-xs font-medium">
+                            <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
+                            Profesionalus
+                          </div>
+                          <div className="inline-flex items-center gap-1 bg-blue-50 text-blue-700 px-2 py-1 rounded-full text-xs font-medium">
+                            <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
+                            Humaniška
                           </div>
                         </div>
                         
-                        {/* View Product Indicator */}
-                        <div className="text-center py-2">
-                          <span className="text-sm text-gray-500 group-hover:text-blue-600 transition-colors">
-                            Spustelėkite peržiūrėti produktą
-                          </span>
+                        {/* Enhanced Pricing Section */}
+                        <div className="flex items-center justify-between pt-2">
+                          <div className="flex flex-col">
+                            <span className="text-xl font-bold text-green-600">
+                              {formattedPrice}
+                            </span>
+                            <span className="text-xs text-gray-500">
+                              + nemokamas pristatymas
+                            </span>
+                          </div>
+                          
+                          {/* Availability Indicator */}
+                          <div className="text-right">
+                            <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
+                              mockStock > 10 
+                                ? 'bg-green-50 text-green-700' 
+                                : mockStock > 5 
+                                ? 'bg-yellow-50 text-yellow-700'
+                                : 'bg-red-50 text-red-700'
+                            }`}>
+                              <div className={`w-1.5 h-1.5 rounded-full ${
+                                mockStock > 10 
+                                  ? 'bg-green-500' 
+                                  : mockStock > 5 
+                                  ? 'bg-yellow-500'
+                                  : 'bg-red-500 animate-pulse'
+                              }`}></div>
+                              {mockStock > 10 ? 'Sandėlyje' : mockStock > 5 ? 'Mažai liko' : 'Skubėkite'}
+                            </div>
+                          </div>
+                        </div>
+                        
+                        {/* Modern CTA with Micro-interaction */}
+                        <div className="pt-2">
+                          <div className="w-full bg-gradient-to-r from-green-50 to-emerald-50 hover:from-green-100 hover:to-emerald-100 border border-green-200 hover:border-green-300 rounded-xl py-3 px-4 text-center transition-all duration-300 group-hover:shadow-md">
+                            <span className="text-sm font-semibold text-green-700 group-hover:text-green-800 flex items-center justify-center gap-2">
+                              <Eye className="w-4 h-4" />
+                              Peržiūrėti produktą
+                              <div className="w-1 h-1 bg-green-500 rounded-full animate-pulse"></div>
+                            </span>
+                          </div>
                         </div>
                       </div>
+                      
+                      {/* Subtle Border Animation */}
+                      <div className="absolute inset-0 rounded-2xl border-2 border-transparent group-hover:border-green-200 transition-colors duration-300 pointer-events-none"></div>
                     </div>
                   </Link>
                 );

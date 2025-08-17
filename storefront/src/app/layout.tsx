@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import "@radix-ui/themes/styles.css";
 import "../styles/colors.css";
+import "../styles/modern-animations.css";
 import { Theme } from "@radix-ui/themes";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
