@@ -18,9 +18,9 @@ export default function TermsOfServicePage() {
           <Box>
             <Heading size="5" className="mb-3">1. Bendrosios nuostatos</Heading>
             <Text className="block mb-4">
-              Šios pardavimo sąlygos (toliau - Sąlygos) nustato UAB „Gyvagaudziaspastai" (toliau - Pardavėjas) 
+              Šios pardavimo sąlygos (toliau - Sąlygos) nustato UAB DIGIMAKSAS (toliau - Pardavėjas) 
               ir pirkėjo (toliau - Pirkėjas) teises, pareigas ir atsakomybę, įsigyjant prekes internetinėje parduotuvėje 
-              gyvagaudziaspastai.lt.
+              www.gyvagaudziaispastai.lt.
             </Text>
             <Text className="block mb-4">
               Pateikdamas užsakymą, Pirkėjas patvirtina, kad sutinka su šiomis pardavimo sąlygomis ir įsipareigoja 
@@ -35,25 +35,19 @@ export default function TermsOfServicePage() {
           <Box>
             <Heading size="5" className="mb-3">2. Pardavėjo informacija</Heading>
             <Text className="block mb-2">
-              <strong>Įmonės pavadinimas:</strong> UAB „Gyvagaudziaspastai"
+              <strong>Įmonės pavadinimas:</strong> UAB DIGIMAKSAS
             </Text>
             <Text className="block mb-2">
-              <strong>Įmonės kodas:</strong> [Įrašykite įmonės kodą]
+              <strong>Registracijos adresas:</strong> Savanorių pr. 214, LT-50194 Kaunas, Lithuania
             </Text>
             <Text className="block mb-2">
-              <strong>PVM mokėtojo kodas:</strong> [Įrašykite PVM kodą]
+              <strong>Telefonas:</strong> +37060988861
             </Text>
             <Text className="block mb-2">
-              <strong>Registracijos adresas:</strong> [Įrašykite įmonės adresą]
-            </Text>
-            <Text className="block mb-2">
-              <strong>Telefonas:</strong> [Įrašykite telefono numerį]
-            </Text>
-            <Text className="block mb-2">
-              <strong>El. paštas:</strong> info@gyvagaudziaspastai.lt
+              <strong>El. paštas:</strong> prekyba@dmax.lt
             </Text>
             <Text className="block">
-              <strong>Internetinės parduotuvės adresas:</strong> gyvagaudziaspastai.lt
+              <strong>Internetinės parduotuvės adresas:</strong> www.gyvagaudziaispastai.lt
             </Text>
           </Box>
 
@@ -253,16 +247,16 @@ export default function TermsOfServicePage() {
             </Text>
             <Box className="ml-4 space-y-2">
               <Text className="block">
-                <strong>El. paštas:</strong> info@gyvagaudziaspastai.lt
+                <strong>El. paštas:</strong> prekyba@dmax.lt
               </Text>
               <Text className="block">
-                <strong>Telefonas:</strong> [Įrašykite telefono numerį]
+                <strong>Telefonas:</strong> +37060988861
               </Text>
               <Text className="block">
                 <strong>Darbo laikas:</strong> I-V 9:00-17:00, VI-VII poilsis
               </Text>
               <Text className="block">
-                <strong>Adresas:</strong> [Įrašykite įmonės adresą]
+                <strong>Adresas:</strong> Savanorių pr. 214, LT-50194 Kaunas, Lithuania
               </Text>
             </Box>
           </Box>

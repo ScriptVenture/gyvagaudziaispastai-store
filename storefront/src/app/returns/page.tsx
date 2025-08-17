@@ -18,12 +18,12 @@ export default function ReturnPolicyPage() {
           <Box>
             <Heading size="5" className="mb-3">1. Bendrosios nuostatos</Heading>
             <Text className="block mb-4">
-              UAB „Gyvagaudziaspastai" supranta, kad kartais prekė gali neatitikti Jūsų lūkesčių. 
+              UAB DIGIMAKSAS supranta, kad kartais prekė gali neatitikti Jūsų lūkesčių. 
               Todėl mes siūlome paprastą ir patogų prekių grąžinimo bei keitimo procesą, 
               laikydamiesi Lietuvos Respublikos ir Europos Sąjungos teisės aktų reikalavimų.
             </Text>
             <Text className="block">
-              Ši politika taikoma visoms prekėms, įsigytos mūsų internetinėje parduotuvėje gyvagaudziaspastai.lt.
+              Ši politika taikoma visoms prekėms, įsigytos mūsų internetinėje parduotuvėje www.gyvagaudziaispastai.lt.
             </Text>
           </Box>
 
@@ -79,8 +79,8 @@ export default function ReturnPolicyPage() {
               <Heading size="4" className="mb-2">4.1. Pranešimas apie grąžinimą</Heading>
               <Text className="block mb-3">Susisiekite su mumis bet kuriuo būdu:</Text>
               <Box className="ml-4 space-y-2">
-                <Text className="block">📧 <strong>El. paštas:</strong> returns@gyvagaudziaspastai.lt</Text>
-                <Text className="block">📞 <strong>Telefonas:</strong> [Telefono numeris]</Text>
+                <Text className="block">📧 <strong>El. paštas:</strong> prekyba@dmax.lt</Text>
+                <Text className="block">📞 <strong>Telefonas:</strong> +37060988861</Text>
                 <Text className="block">💬 <strong>Kontaktų forma:</strong> svetainėje</Text>
               </Box>
             </Box>
@@ -110,10 +110,10 @@ export default function ReturnPolicyPage() {
             <Box>
               <Heading size="4" className="mb-2">4.4. Grąžinimo adresas</Heading>
               <Box className="p-4 bg-gray-50 rounded-lg">
-                <Text className="block font-semibold">UAB „Gyvagaudziaspastai"</Text>
+                <Text className="block font-semibold">UAB DIGIMAKSAS</Text>
                 <Text className="block">Grąžinimo departamentas</Text>
-                <Text className="block">[Įrašykite grąžinimo adresą]</Text>
-                <Text className="block">[Pašto kodas] [Miestas]</Text>
+                <Text className="block">Savanorių pr. 214</Text>
+                <Text className="block">LT-50194 Kaunas</Text>
                 <Text className="block">Lietuva</Text>
               </Box>
             </Box>
@@ -248,10 +248,10 @@ export default function ReturnPolicyPage() {
             </Text>
             <Box className="ml-4 space-y-2">
               <Text className="block">
-                📧 <strong>El. paštas:</strong> returns@gyvagaudziaspastai.lt
+                📧 <strong>El. paštas:</strong> prekyba@dmax.lt
               </Text>
               <Text className="block">
-                📞 <strong>Telefonas:</strong> [Telefono numeris]
+                📞 <strong>Telefonas:</strong> +37060988861
               </Text>
               <Text className="block">
                 🕒 <strong>Darbo laikas:</strong> I-V 9:00-17:00, VI-VII poilsis

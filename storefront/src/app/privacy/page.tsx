@@ -18,7 +18,7 @@ export default function PrivacyPolicyPage() {
           <Box>
             <Heading size="5" className="mb-3">1. Bendrosios nuostatos</Heading>
             <Text className="block mb-4">
-              UAB „Gyvagaudziaspastai" (toliau - mes, mūsų, Įmonė) gerbia Jūsų privatumą ir įsipareigoja apsaugoti Jūsų asmens duomenis. 
+              UAB DIGIMAKSAS (toliau - mes, mūsų, Įmonė) gerbia Jūsų privatumą ir įsipareigoja apsaugoti Jūsų asmens duomenis. 
               Ši privatumo politika aprašo, kaip mes renkame, naudojame ir saugome Jūsų asmens duomenis, kai naudojatės mūsų internetinės parduotuvės paslaugomis.
             </Text>
             <Text className="block">
@@ -30,13 +30,12 @@ export default function PrivacyPolicyPage() {
           <Box>
             <Heading size="5" className="mb-3">2. Duomenų valdytojas</Heading>
             <Text className="block mb-2">
-              <strong>UAB „Gyvagaudziaspastai"</strong>
+              <strong>UAB DIGIMAKSAS</strong>
             </Text>
-            <Text className="block mb-2">Įmonės kodas: [Įrašykite įmonės kodą]</Text>
-            <Text className="block mb-2">PVM mokėtojo kodas: [Įrašykite PVM kodą]</Text>
-            <Text className="block mb-2">Adresas: [Įrašykite įmonės adresą]</Text>
-            <Text className="block mb-2">El. paštas: info@gyvagaudziaspastai.lt</Text>
-            <Text className="block">Telefonas: [Įrašykite telefono numerį]</Text>
+            <Text className="block mb-2">Adresas: Savanorių pr. 214, LT-50194 Kaunas, Lithuania</Text>
+            <Text className="block mb-2">El. paštas: prekyba@dmax.lt</Text>
+            <Text className="block mb-2">Telefonas: +37060988861</Text>
+            <Text className="block">Svetainė: www.gyvagaudziaispastai.lt</Text>
           </Box>
 
           <Box>
@@ -174,9 +173,9 @@ export default function PrivacyPolicyPage() {
             </Text>
             
             <Box className="ml-4 space-y-2">
-              <Text className="block">El. paštas: privacy@gyvagaudziaspastai.lt</Text>
-              <Text className="block">Telefonas: [Įrašykite telefono numerį]</Text>
-              <Text className="block">Adresas: [Įrašykite įmonės adresą]</Text>
+              <Text className="block">El. paštas: prekyba@dmax.lt</Text>
+              <Text className="block">Telefonas: +37060988861</Text>
+              <Text className="block">Adresas: Savanorių pr. 214, LT-50194 Kaunas, Lithuania</Text>
             </Box>
             
             <Text className="block mt-3">

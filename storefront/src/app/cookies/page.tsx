@@ -335,10 +335,10 @@ export default function CookiePolicyPage() {
             <Box className="p-4 bg-green-50 border border-green-200 rounded">
               <Box className="space-y-2">
                 <Text className="block">
-                  📧 <strong>El. paštas:</strong> cookies@gyvagaudziaispastai.lt
+                  📧 <strong>El. paštas:</strong> prekyba@dmax.lt
                 </Text>
                 <Text className="block">
-                  📞 <strong>Telefonas:</strong> [Telefono numeris]
+                  📞 <strong>Telefonas:</strong> +37060988861
                 </Text>
                 <Text className="block">
                   🕐 <strong>Darbo laikas:</strong> I-V 9:00-17:00

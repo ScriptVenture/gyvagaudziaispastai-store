@@ -77,9 +77,9 @@ export default function GDPRCompliancePage() {
             
             <Box className="p-4 bg-blue-50 rounded-lg mb-4">
               <Text className="block font-semibold mb-2">Duomenų apsaugos pareigūnas:</Text>
-              <Text className="block">📧 El. paštas: privacy@gyvagaudziaspastai.lt</Text>
-              <Text className="block">📞 Telefonas: [Telefono numeris]</Text>
-              <Text className="block">📍 Adresas: [Įmonės adresas]</Text>
+              <Text className="block">📧 El. paštas: prekyba@dmax.lt</Text>
+              <Text className="block">📞 Telefonas: +37060988861</Text>
+              <Text className="block">📍 Adresas: Savanorių pr. 214, LT-50194 Kaunas, Lithuania</Text>
             </Box>
 
             <Text className="block mb-4">
@@ -279,7 +279,7 @@ export default function GDPRCompliancePage() {
             <Box className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Box className="p-4 bg-gray-50 rounded">
                 <Text className="block font-semibold mb-2">1️⃣ Pirma - kreipkitės į mus:</Text>
-                <Text className="block text-sm mb-2">privacy@gyvagaudziaispastai.lt</Text>
+                <Text className="block text-sm mb-2">prekyba@dmax.lt</Text>
                 <Text className="block text-sm">Patarysime išspręsti problemą tiesiogiai ir greitai.</Text>
               </Box>
 
@@ -322,7 +322,7 @@ export default function GDPRCompliancePage() {
               <Heading size="4" className="text-green-800">Mūsų įsipareigojimas</Heading>
             </Box>
             <Text className="block text-green-800">
-              UAB „Gyvagaudziaspastai" įsipareigoja laikytis aukščiausių duomenų apsaugos standartų, 
+              UAB DIGIMAKSAS įsipareigoja laikytis aukščiausių duomenų apsaugos standartų, 
               gerbti Jūsų privatumą ir užtikrinti skaidrų duomenų tvarkymą. Jūsų pasitikėjimas mums 
               yra svarbiausias.
             </Text>
