@@ -261,6 +261,7 @@ export default function Footer() {
                   { label: 'Grąžinimai', href: '/returns' },
                   { label: 'BDAR', href: '/gdpr' },
                   { label: 'Slapukai', href: '/cookies' },
+                  { label: 'Slapukų nustatymai', href: '/cookie-preferences' },
                   { label: 'Apie mus', href: '/about' }
                 ].map((item) => (
                   <Link 

@@ -8,6 +8,8 @@ import { Theme } from "@radix-ui/themes";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { Providers } from "@/components/providers/Providers";
+import CookieConsent from "@/components/ui/CookieConsent";
+import PrivacyBanner from "@/components/ui/PrivacyBanner";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -38,11 +40,13 @@ export default function RootLayout({
       >
         <Theme accentColor="green" grayColor="gray" radius="large" scaling="110%" appearance="light">
           <Providers>
+            <PrivacyBanner />
             <Header />
             <main className="flex-1">
               {children}
             </main>
             <Footer />
+            <CookieConsent />
           </Providers>
         </Theme>
       </body>
