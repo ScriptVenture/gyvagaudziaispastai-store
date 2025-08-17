@@ -12,6 +12,8 @@ import { Providers } from "@/components/providers/Providers";
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
+  display: "swap", // Improves loading performance
+  preload: true,   // Preloads for better performance
 });
 
 export const metadata: Metadata = {
@@ -34,7 +36,7 @@ export default function RootLayout({
       <body
         className={`${inter.variable} antialiased min-h-screen flex flex-col`}
       >
-        <Theme accentColor="green" grayColor="gray" radius="large" scaling="100%" appearance="light">
+        <Theme accentColor="green" grayColor="gray" radius="large" scaling="110%" appearance="light">
           <Providers>
             <Header />
             <main className="flex-1">

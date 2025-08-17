@@ -1,26 +1,78 @@
 "use client"
 
 import { useState, useEffect } from 'react'
-import Image from 'next/image'
-import Link from 'next/link'
 import { Box, Heading, Text, Button, Flex, Card, Badge, Separator, ScrollArea, Container, IconButton } from '@radix-ui/themes'
 import { ShoppingCart, Grid, List, Menu, X, Filter, ChevronRight, Tag, Star } from 'lucide-react'
 import { useCart } from '@/contexts/cart-context'
 import { useProducts, Product } from '@/hooks/useProducts'
 import { useCategories } from '@/hooks/useCategories'
 import { brandColors } from '@/utils/colors'
-import { getOptimizedImageUrl } from '@/utils/image'
 import { CART_API_URL } from '@/lib/config'
+import ProductCard from '@/components/product/ProductCard'
 
 export default function TrapsPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
+  const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [sortBy, setSortBy] = useState<string>('newest')
   const [sidebarOpen, setSidebarOpen] = useState(false)
   
   const { refreshCart, isLoading: cartLoading } = useCart()
   const { categories, loading: categoriesLoading } = useCategories()
-  const { products, loading: productsLoading } = useProducts(selectedCategory === 'all' ? undefined : selectedCategory)
+  const { products: allProducts, loading: productsLoading } = useProducts(selectedCategory === 'all' ? undefined : selectedCategory)
+
+  // Custom hook to fetch tags from product-tags API
+  const [availableTags, setAvailableTags] = useState<string[]>([])
+  const [tagsLoading, setTagsLoading] = useState(true)
+
+  useEffect(() => {
+    async function fetchTags() {
+      try {
+        setTagsLoading(true)
+        const response = await fetch(`${process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL}/store/product-tags`, {
+          headers: {
+            'Content-Type': 'application/json',
+            'x-publishable-api-key': process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || '',
+          },
+        })
+        
+        if (response.ok) {
+          const data = await response.json()
+          const tags = data.product_tags?.map((tag: any) => tag.value) || []
+          setAvailableTags(tags.sort())
+        }
+      } catch (error) {
+        console.error('Error fetching tags:', error)
+      } finally {
+        setTagsLoading(false)
+      }
+    }
+
+    fetchTags()
+  }, [])
+
+  // Filter products by selected tags
+  const products = allProducts.filter(product => {
+    if (selectedTags.length === 0) return true;
+    return selectedTags.some(selectedTag => 
+      product.tags?.some(tag => tag.value.toLowerCase() === selectedTag.toLowerCase())
+    );
+  });
+
+  // Get all unique tags from products
+  const allTags = Array.from(new Set(
+    allProducts.flatMap(product => 
+      product.tags?.map(tag => tag.value) || []
+    )
+  )).sort();
+
+  // Debug logging for tags
+  if (typeof window !== 'undefined' && allProducts.length > 0) {
+    console.log('Debug - All products:', allProducts.length);
+    console.log('Debug - Products with tags:', allProducts.filter(p => p.tags && p.tags.length > 0).length);
+    console.log('Debug - All tags found:', allTags);
+    console.log('Debug - Sample product with tags:', allProducts.find(p => p.tags && p.tags.length > 0));
+  }
 
   const handleAddToCart = async (variantId: string) => {
     try {
@@ -106,12 +158,15 @@ export default function TrapsPage() {
                 <X className="w-4 h-4" />
               </Button>
             </div>
-            {selectedCategory !== 'all' && (
+            {(selectedCategory !== 'all' || selectedTags.length > 0) && (
               <div className="mt-2">
                 <Button
                   variant="ghost"
                   size="1"
-                  onClick={() => setSelectedCategory('all')}
+                  onClick={() => {
+                    setSelectedCategory('all');
+                    setSelectedTags([]);
+                  }}
                   className="text-xs text-gray-600 hover:text-red-600"
                 >
                   IŠVALYTI VISUS
@@ -198,6 +253,64 @@ export default function TrapsPage() {
 
             <Separator />
 
+            {/* Tags Filter */}
+            <div>
+              <div className="mb-3">
+                <Text size="3" weight="bold" className="text-gray-900 uppercase tracking-wide">
+                  Gyvūnų tipai
+                </Text>
+              </div>
+              
+              <div className="space-y-1 max-h-48 overflow-y-auto">
+                {tagsLoading ? (
+                  <div className="p-2 text-center">
+                    <Text size="2" className="text-gray-500">Kraunami filtrai...</Text>
+                  </div>
+                ) : availableTags.length === 0 ? (
+                  <div className="p-2 text-center">
+                    <Text size="2" className="text-gray-500">Filtrai neprieinami</Text>
+                  </div>
+                ) : (
+                  availableTags.map((tag) => {
+                    const isSelected = selectedTags.includes(tag);
+                    
+                    return (
+                      <label key={tag} className="flex items-center justify-between p-2 hover:bg-gray-50 rounded cursor-pointer">
+                        <div className="flex items-center gap-3">
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setSelectedTags([...selectedTags, tag]);
+                              } else {
+                                setSelectedTags(selectedTags.filter(t => t !== tag));
+                              }
+                            }}
+                            className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                          />
+                          <div>
+                            <Text size="2" className="text-gray-700 block">
+                              {tag}
+                            </Text>
+                          </div>
+                        </div>
+                        <Badge 
+                          variant="soft" 
+                          color={isSelected ? "blue" : "gray"} 
+                          size="1"
+                        >
+                          ✓
+                        </Badge>
+                      </label>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+
+            <Separator />
+
             {/* View Mode Filter */}
             <div>
               <div className="mb-3">
@@ -275,7 +388,10 @@ export default function TrapsPage() {
               <Button 
                 variant="outline" 
                 size="2"
-                onClick={() => setSelectedCategory('all')}
+                onClick={() => {
+                  setSelectedCategory('all');
+                  setSelectedTags([]);
+                }}
                 className="text-xs"
               >
                 IŠVALYTI
@@ -336,172 +452,18 @@ export default function TrapsPage() {
           ) : (
             <div className={viewMode === 'grid' 
               ? 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6' 
-              : 'space-y-4'
+              : 'grid grid-cols-1 gap-4'
             }>
-              {products.map((product) => {
-                const mainVariant = product.variants?.[0];
-                
-                // Simplified price calculation
-                let price = 0;
-                if (mainVariant?.prices && mainVariant.prices.length > 0) {
-                  const eurPrice = mainVariant.prices.find((p: any) => 
-                    p.currency_code === 'eur' || p.currency_code === 'EUR'
-                  );
-                  price = eurPrice?.amount || mainVariant.prices[0]?.amount || 0;
-                }
-                
-                const formattedPrice = price > 1000 ? `€${(price / 100).toFixed(2)}` : `€${price.toFixed(2)}`;
-
-                return (
-                  <Link key={product.id} href={`/products/${product.handle}`}>
-                    <div className="group hover:shadow-lg transition-all duration-300 bg-white rounded-lg border border-gray-200 overflow-hidden cursor-pointer">
-                      {viewMode === 'grid' ? (
-                        <div>
-                          {/* Product Image */}
-                          <div className="aspect-square bg-gray-100 overflow-hidden relative">
-                            {(() => {
-                              // Use thumbnail if available, otherwise use first image, otherwise fallback
-                              let imageUrl = product.thumbnail;
-                              
-                              // If no thumbnail but images exist, use the first image
-                              if (!imageUrl && product.images && product.images.length > 0) {
-                                // Sort images by rank and get the first one
-                                const sortedImages = [...product.images].sort((a, b) => a.rank - b.rank);
-                                imageUrl = sortedImages[0].url;
-                              }
-                              
-                              if (imageUrl) {
-                                return (
-                                  <Image
-                                    src={getOptimizedImageUrl(imageUrl)}
-                                    alt={product.title}
-                                    fill
-                                    className="object-cover group-hover:scale-105 transition-transform duration-300"
-                                  />
-                                );
-                              } else {
-                                return (
-                                  <div className="w-full h-full flex items-center justify-center text-gray-400">
-                                    <ShoppingCart className="w-12 h-12" />
-                                  </div>
-                                );
-                              }
-                            })()}
-                          </div>
-
-                          {/* Product Content */}
-                          <div className="p-4">
-                            {/* Product Title */}
-                            <h3 className="text-lg font-medium leading-tight mb-2 line-clamp-2" style={{ color: brandColors.primary }}>
-                              {product.title}
-                            </h3>
-                          
-                            {product.description && (
-                              <div className="text-sm text-gray-600 mb-3 line-clamp-2">
-                                {product.description}
-                              </div>
-                            )}
-
-                            {/* Categories */}
-                            {product.categories && product.categories.length > 0 && (
-                              <div className="flex gap-1 mb-3">
-                                {product.categories.slice(0, 2).map((category: any) => (
-                                  <span key={category.id} className="px-2 py-1 bg-gray-100 text-xs rounded">
-                                    {category.name}
-                                  </span>
-                                ))}
-                              </div>
-                            )}
-
-                            {/* Price and Add to Cart */}
-                            <div className="flex justify-between items-center">
-                              <span className="text-xl font-bold" style={{ color: brandColors.primary }}>
-                                {formattedPrice}
-                              </span>
-                              <button
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  mainVariant && handleAddToCart(mainVariant.id);
-                                }}
-                                disabled={cartLoading || !mainVariant}
-                                className="px-4 py-2 rounded-lg text-white font-medium flex items-center gap-2 hover:opacity-90 disabled:opacity-50"
-                                style={{ backgroundColor: brandColors.primary }}
-                              >
-                                <ShoppingCart className="w-4 h-4" />
-                                Į krepšelį
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      ) : (
-                        /* List View */
-                        <div className="flex p-4 gap-4">
-                          <div className="w-24 h-24 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0 relative">
-                            {(() => {
-                              // Use thumbnail if available, otherwise use first image, otherwise fallback
-                              let imageUrl = product.thumbnail;
-                              
-                              // If no thumbnail but images exist, use the first image
-                              if (!imageUrl && product.images && product.images.length > 0) {
-                                // Sort images by rank and get the first one
-                                const sortedImages = [...product.images].sort((a, b) => a.rank - b.rank);
-                                imageUrl = sortedImages[0].url;
-                              }
-                              
-                              if (imageUrl) {
-                                return (
-                                  <Image
-                                    src={getOptimizedImageUrl(imageUrl)}
-                                    alt={product.title}
-                                    fill
-                                    className="object-cover"
-                                  />
-                                );
-                              } else {
-                                return (
-                                  <div className="w-full h-full flex items-center justify-center text-gray-400">
-                                    <ShoppingCart className="w-8 h-8" />
-                                  </div>
-                                );
-                              }
-                            })()}
-                          </div>
-                          
-                          <div className="flex-1">
-                            <h3 className="text-lg font-medium mb-1" style={{ color: brandColors.primary }}>
-                              {product.title}
-                            </h3>
-                            
-                            {product.description && (
-                              <div className="text-sm text-gray-600 mb-2 line-clamp-2">
-                                {product.description}
-                              </div>
-                            )}
-                            
-                            <div className="flex justify-between items-center">
-                              <span className="text-xl font-bold" style={{ color: brandColors.primary }}>
-                                {formattedPrice}
-                              </span>
-                              <button
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  mainVariant && handleAddToCart(mainVariant.id);
-                                }}
-                                disabled={cartLoading || !mainVariant}
-                                className="px-4 py-2 rounded-lg text-white font-medium flex items-center gap-2 hover:opacity-90 disabled:opacity-50"
-                                style={{ backgroundColor: brandColors.primary }}
-                              >
-                                <ShoppingCart className="w-4 h-4" />
-                                Į krepšelį
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </Link>
-                );
-              })}
+              {products.map((product) => (
+                <ProductCard 
+                  key={product.id} 
+                  product={product} 
+                  variant={viewMode === 'list' ? 'compact' : 'default'}
+                  showAddToCart={true}
+                  onAddToCart={handleAddToCart}
+                  className={viewMode === 'list' ? 'w-full' : ''}
+                />
+              ))}
             </div>
           )}
         </div>

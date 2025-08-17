@@ -1,12 +1,9 @@
 "use client"
 
 import { useState, useEffect } from "react";
-import Image from "next/image";
-import Link from "next/link";
-import { Star } from "lucide-react";
 import { brandColors } from "@/utils/colors";
-import { getOptimizedImageUrl } from "@/utils/image";
 import { STORE_API_URL, MEDUSA_PUBLISHABLE_KEY } from "@/lib/config";
+import ProductCard from "@/components/product/ProductCard";
 
 interface Product {
   id: string;
@@ -39,7 +36,7 @@ async function fetchProducts() {
       console.log('Fetching more professional products from API...');
     }
     
-    const response = await fetch(`${STORE_API_URL}/products?fields=*,images.*`, {
+    const response = await fetch(`${STORE_API_URL}/products?fields=*,images.*,tags.*`, {
       cache: 'no-store', // Ensure fresh data
       headers: {
         'x-publishable-api-key': MEDUSA_PUBLISHABLE_KEY,
@@ -123,127 +120,13 @@ export default function MoreProfessionalTraps() {
 
           <div className="w-full max-w-7xl">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
-              {products.map((product, index) => {
-                const mainVariant = product.variants?.[0];
-                
-                // Try multiple approaches to get the price
-                let price = 0;
-                
-                // 1. Try calculated_price first (most accurate)
-                if (mainVariant?.calculated_price?.calculated_amount) {
-                  price = mainVariant.calculated_price.calculated_amount;
-                } 
-                // 2. Try regular prices array
-                else if (mainVariant?.prices && mainVariant.prices.length > 0) {
-                  const eurPrice = mainVariant.prices.find(p => 
-                    p.currency_code === 'eur' || p.currency_code === 'EUR'
-                  );
-                  price = eurPrice?.amount || mainVariant.prices[0]?.amount || 0;
-                }
-                
-                // Handle price formatting (prices can be in cents or whole numbers)
-                const formattedPrice = price > 1000 ? `€${(price / 100).toFixed(2)}` : `€${price.toFixed(2)}`;
-                
-                // Simulate some dynamic data based on product
-                const mockStock = index < 2 ? Math.floor(Math.random() * 5) + 1 : Math.floor(Math.random() * 20) + 10;
-                const mockRating = 4.4 + Math.random() * 0.5;
-                const mockReviews = Math.floor(Math.random() * 150) + 30;
-                
-                return (
-                  <Link key={product.id} href={`/products/${product.handle}`}>
-                    <div className="group relative bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden border border-gray-200 cursor-pointer">
-                    
-                    {/* Stock Urgency Badge */}
-                    {mockStock <= 5 && (
-                      <div className="absolute top-2 left-2 z-20">
-                        <div className="bg-red-500 text-white text-xs font-medium px-1.5 py-0.5 rounded">
-                          Tik {mockStock} liko
-                        </div>
-                      </div>
-                    )}
-                    
-                    {/* Professional Badge */}
-                    <div className="absolute top-2 right-2 z-20">
-                      <div className="bg-blue-600 text-white text-xs font-medium px-1.5 py-0.5 rounded">
-                        PROFESIONALUS
-                      </div>
-                    </div>
-                    
-                    {/* Product Image */}
-                    <div className="relative overflow-hidden bg-gray-50 h-48">
-                      {(() => {
-                        // Use thumbnail if available, otherwise use first image, otherwise fallback
-                        let imageUrl = product.thumbnail;
-                        
-                        // If no thumbnail but images exist, use the first image
-                        if (!imageUrl && product.images && product.images.length > 0) {
-                          // Sort images by rank and get the first one
-                          const sortedImages = [...product.images].sort((a, b) => a.rank - b.rank);
-                          imageUrl = sortedImages[0].url;
-                        }
-                        
-                        // Convert the URL to use our image optimization if needed
-                        const optimizedImageUrl = imageUrl ? getOptimizedImageUrl(imageUrl) : "/imagen5.jpg";
-                        
-                        return (
-                          <Image 
-                            src={optimizedImageUrl} 
-                            alt={product.title}
-                            fill
-                            className="object-cover group-hover:scale-102 transition-transform duration-200"
-                          />
-                        );
-                      })()}
-                    </div>
-                    
-                    {/* Product Content */}
-                    <div className="p-3">
-                      
-                      {/* Rating */}
-                      <div className="flex items-center gap-1 mb-2">
-                        <div className="flex items-center">
-                          {[...Array(5)].map((_, i) => (
-                            <Star key={i} className={`w-3 h-3 ${i < Math.floor(mockRating) ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} />
-                          ))}
-                        </div>
-                        <span className="text-xs text-gray-600 ml-1">({mockReviews})</span>
-                      </div>
-                      
-                      {/* Product Title */}
-                      <h3 className="text-sm font-medium leading-tight mb-2 line-clamp-2" style={{ color: brandColors.textPrimary }}>
-                        {product.title}
-                      </h3>
-                      
-                      {/* Key Feature */}
-                      <div className="text-xs text-gray-600 mb-2">
-                        Aukštos kokybės spąstas
-                      </div>
-                      
-                      {/* Pricing */}
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-1">
-                          <span className="text-lg font-bold" style={{ color: brandColors.primary }}>
-                            {formattedPrice}
-                          </span>
-                        </div>
-                      </div>
-                      
-                      {/* View Product Indicator */}
-                      <div className="text-center py-2">
-                        <span className="text-sm text-gray-500 group-hover:text-blue-600 transition-colors">
-                          Spustelėkite peržiūrėti produktą
-                        </span>
-                      </div>
-                      
-                      {/* Free Shipping */}
-                      <div className="text-center mt-2">
-                        <span className="text-xs text-green-600 font-medium">Nemokamas pristatymas</span>
-                      </div>
-                    </div>
-                  </div>
-                  </Link>
-                );
-              })}
+              {products.map((product) => (
+                <ProductCard 
+                  key={product.id} 
+                  product={product} 
+                  variant="default"
+                />
+              ))}
             </div>
           </div>
         </div>

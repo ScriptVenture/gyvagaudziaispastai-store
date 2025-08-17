@@ -155,8 +155,8 @@ export default function Home() {
               <div className="grid grid-cols-2 gap-3 sm:gap-4">
                 
                 {/* Main Featured Image - Best Quality */}
-                <div className="col-span-2 relative group">
-                  <div className="relative overflow-hidden rounded-2xl shadow-2xl transform transition-all duration-500 hover:scale-[1.02] hover:shadow-3xl">
+                <Link href="/traps" className="col-span-2 relative group block">
+                  <div className="relative overflow-hidden rounded-2xl shadow-2xl transform transition-all duration-500 hover:scale-[1.02] hover:shadow-3xl cursor-pointer">
                     <div className="aspect-[4/3] w-full">
                       <Image
                         src={heroContent.mainImage} 
@@ -192,48 +192,52 @@ export default function Home() {
                       </div>
                     </div>
                   </div>
-                </div>
+                </Link>
 
                 {/* Premium Supporting Images */}
-                <div className="relative overflow-hidden rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 group cursor-pointer">
-                  <div className="aspect-[4/3] w-full relative">
-                    <Image 
-                      src="/imagen1.jpg" 
-                      alt="Professional Trap Setup & Installation"
-                      fill
-                      className="object-cover object-center hover:scale-105 transition-transform duration-500 select-none"
-                      loading="lazy"
-                    />
-                  </div>
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent opacity-85 group-hover:opacity-70 transition-opacity duration-300"></div>
-                  
-                  <div className="absolute bottom-0 left-0 right-0 p-3">
-                    <div className="bg-gradient-to-t from-black/90 to-black/60 backdrop-blur-lg rounded-lg p-2.5 border border-white/20">
-                      <span className="text-white text-sm font-bold block drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">Montavimo gidas</span>
-                      <span className="text-white/90 text-xs drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">Profesionalus įdiegimas</span>
+                <Link href="/guide" className="block">
+                  <div className="relative overflow-hidden rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 group cursor-pointer">
+                    <div className="aspect-[4/3] w-full relative">
+                      <Image 
+                        src="/imagen1.jpg" 
+                        alt="Professional Trap Setup & Installation"
+                        fill
+                        className="object-cover object-center hover:scale-105 transition-transform duration-500 select-none"
+                        loading="lazy"
+                      />
+                    </div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent opacity-85 group-hover:opacity-70 transition-opacity duration-300"></div>
+                    
+                    <div className="absolute bottom-0 left-0 right-0 p-3">
+                      <div className="bg-gradient-to-t from-black/90 to-black/60 backdrop-blur-lg rounded-lg p-2.5 border border-white/20">
+                        <span className="text-white text-sm font-bold block drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">Montavimo gidas</span>
+                        <span className="text-white/90 text-xs drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">Profesionalus įdiegimas</span>
+                      </div>
                     </div>
                   </div>
-                </div>
+                </Link>
 
-                <div className="relative overflow-hidden rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 group cursor-pointer">
-                  <div className="aspect-[4/3] w-full relative">
-                    <Image 
-                      src="/imagen3.jpg" 
-                      alt="Expert Wildlife Control Techniques"
-                      fill
-                      className="object-cover object-center hover:scale-105 transition-transform duration-500 select-none"
-                      loading="lazy"
-                    />
-                  </div>
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent opacity-85 group-hover:opacity-70 transition-opacity duration-300"></div>
-                  
-                  <div className="absolute bottom-0 left-0 right-0 p-3">
-                    <div className="bg-gradient-to-t from-black/90 to-black/60 backdrop-blur-lg rounded-lg p-2.5 border border-white/20">
-                      <span className="text-white text-sm font-bold block drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">Eksperto patarimai</span>
-                      <span className="text-white/90 text-xs drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">Profesionalūs metodai</span>
+                <Link href="/support" className="block">
+                  <div className="relative overflow-hidden rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 group cursor-pointer">
+                    <div className="aspect-[4/3] w-full relative">
+                      <Image 
+                        src="/imagen3.jpg" 
+                        alt="Expert Wildlife Control Techniques"
+                        fill
+                        className="object-cover object-center hover:scale-105 transition-transform duration-500 select-none"
+                        loading="lazy"
+                      />
+                    </div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent opacity-85 group-hover:opacity-70 transition-opacity duration-300"></div>
+                    
+                    <div className="absolute bottom-0 left-0 right-0 p-3">
+                      <div className="bg-gradient-to-t from-black/90 to-black/60 backdrop-blur-lg rounded-lg p-2.5 border border-white/20">
+                        <span className="text-white text-sm font-bold block drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">Eksperto patarimai</span>
+                        <span className="text-white/90 text-xs drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">Profesionalūs metodai</span>
+                      </div>
                     </div>
                   </div>
-                </div>
+                </Link>
               </div>
 
               {/* Floating Elements */}

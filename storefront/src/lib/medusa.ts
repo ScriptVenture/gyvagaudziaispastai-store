@@ -27,7 +27,7 @@ async function medusaRequest(endpoint: string, options: RequestInit = {}) {
 // Get all products with optional category filter
 export async function getProducts(limit = 20, categoryId?: string) {
   try {
-    let url = `/store/products?limit=${limit}`
+    let url = `/store/products?limit=${limit}&fields=*,images.*,variants.*,variants.prices.*,categories.*,tags.*`
     if (categoryId) {
       url += `&category_id=${categoryId}`
     }
@@ -46,7 +46,7 @@ export async function getProduct(handleOrId: string) {
     
     // Get all products and filter by handle client-side
     // since MedusaJS doesn't support handle filtering via query params
-    const data = await medusaRequest(`/store/products?fields=*,images.*,variants.*,variants.prices.*,categories.*`);
+    const data = await medusaRequest(`/store/products?fields=*,images.*,variants.*,variants.prices.*,categories.*,tags.*`);
     
     if (data.products && data.products.length > 0) {
       // Filter by exact handle match
@@ -73,7 +73,7 @@ export async function getProduct(handleOrId: string) {
 // Get products by category
 export async function getProductsByCategory(categoryId: string) {
   try {
-    const data = await medusaRequest(`/store/products?category_id[]=${categoryId}`)
+    const data = await medusaRequest(`/store/products?category_id[]=${categoryId}&fields=*,images.*,variants.*,variants.prices.*,categories.*,tags.*`)
     return data.products || []
   } catch (error) {
     // Error logging removed to avoid exposing API details
