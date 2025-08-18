@@ -295,21 +295,31 @@ export default function Header() {
         {/* Mobile Navigation */}
         {isMenuOpen && (
           <div className="xl:hidden mt-4 sm:mt-6 pb-3 sm:pb-4 border-t pt-4 sm:pt-6" style={{ borderColor: brandColors.gray200 }}>
-            <div className="flex flex-col gap-1">
-              <Link href="/traps" className="w-full p-2 sm:p-3 text-left font-medium rounded-lg hover:bg-gray-50 transition-colors" style={{ color: brandColors.textSecondary }}>
-                Gyvūnų spąstai
-              </Link>
-              <Link href="/size" className="w-full p-2 sm:p-3 text-left font-medium rounded-lg hover:bg-gray-50 transition-colors" style={{ color: brandColors.textSecondary }}>
-                Pagal gyvūno dydį
-              </Link>
-              <Link href="/guide" className="w-full p-2 sm:p-3 text-left font-medium rounded-lg hover:bg-gray-50 transition-colors" style={{ color: brandColors.textSecondary }}>
-                Kaip naudoti
-              </Link>
-              <Link href="/support" className="w-full p-2 sm:p-3 text-left font-medium rounded-lg hover:bg-gray-50 transition-colors" style={{ color: brandColors.textSecondary }}>
-                Pagalba
-              </Link>
-              <div className="h-px my-3 bg-gray-200"></div>
-              <div className="lg:hidden mb-3">
+            <div className="flex flex-col gap-2">
+              {/* Main Navigation Links */}
+              {[
+                { label: 'Gyvūnų spąstai', href: '/traps', icon: '🪤' },
+                { label: 'Pagal dydį', href: '/size', icon: '📏' },
+                { label: 'Gidai', href: '/guide', icon: '📖' },
+                { label: 'Pagalba', href: '/support', icon: '💬' }
+              ].map((item) => (
+                <Link 
+                  key={item.label}
+                  href={item.href} 
+                  onClick={() => setIsMenuOpen(false)}
+                  className="w-full p-3 sm:p-4 text-left font-medium rounded-lg hover:bg-gray-50 transition-all duration-200 flex items-center gap-3 group" 
+                  style={{ color: brandColors.textSecondary }}
+                >
+                  <span className="text-lg group-hover:scale-110 transition-transform duration-200">{item.icon}</span>
+                  <span className="group-hover:text-green-700 transition-colors duration-200">{item.label}</span>
+                </Link>
+              ))}
+              
+              {/* Separator */}
+              <div className="h-px my-4 bg-gray-200"></div>
+              
+              {/* Mobile Search */}
+              <div className="lg:hidden mb-4">
                 <form onSubmit={(e) => {
                   e.preventDefault()
                   const formData = new FormData(e.currentTarget)
@@ -323,27 +333,63 @@ export default function Header() {
                     <input 
                       type="text"
                       name="search"
-                      placeholder="Ieškoti gyvūnų spąstų..."
-                      className="w-full p-3 pl-10 rounded-lg border text-sm"
+                      placeholder="Ieškoti spąstų pagal gyvūną..."
+                      className="w-full p-3 pl-10 pr-4 rounded-lg border text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
                       style={{ 
                         borderColor: brandColors.gray200,
-                        backgroundColor: brandColors.backgroundSecondary 
+                        backgroundColor: 'white'
                       }}
                     />
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4" style={{ color: brandColors.textTertiary }} />
                   </div>
                 </form>
               </div>
-              <Link href="/support" className="w-full">
+              
+              {/* User Account Links */}
+              <div className="space-y-2 mb-4">
+                <Link 
+                  href="/login" 
+                  onClick={() => setIsMenuOpen(false)}
+                  className="w-full p-3 text-left font-medium rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-3" 
+                  style={{ color: brandColors.textSecondary }}
+                >
+                  <User className="w-4 h-4" />
+                  Prisijungti
+                </Link>
+                <Link 
+                  href="/cart" 
+                  onClick={() => setIsMenuOpen(false)}
+                  className="w-full p-3 text-left font-medium rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-3 relative" 
+                  style={{ color: brandColors.textSecondary }}
+                >
+                  <ShoppingCart className="w-4 h-4" />
+                  <span>Krepšelis</span>
+                  {cartItemCount > 0 && (
+                    <div 
+                      className="ml-auto w-5 h-5 rounded-full flex items-center justify-center text-xs font-semibold"
+                      style={{ 
+                        backgroundColor: brandColors.secondary,
+                        color: brandColors.white,
+                        fontSize: '10px'
+                      }}
+                    >
+                      {cartItemCount > 99 ? '99+' : cartItemCount}
+                    </div>
+                  )}
+                </Link>
+              </div>
+              
+              {/* CTA Button */}
+              <Link href="/support" className="w-full" onClick={() => setIsMenuOpen(false)}>
                 <button 
-                  className="w-full p-3 font-medium rounded-lg text-white flex items-center justify-center gap-2 transition-all"
+                  className="w-full p-4 font-medium rounded-lg text-white flex items-center justify-center gap-3 transition-all duration-200 hover:shadow-lg transform hover:scale-[1.02]"
                   style={{ 
                     background: componentStyles.gradients.primary,
                     borderRadius: '12px'
                   }}
                 >
-                  <Phone className="w-4 h-4" />
-                  Gauti ekspertų pagalbą
+                  <Phone className="w-5 h-5" />
+                  <span className="text-base">Gauti ekspertų pagalbą</span>
                 </button>
               </Link>
             </div>

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from 'react'
-import { Heading, Text, Button, Card, Flex, Badge, Tabs, Box, Container } from '@radix-ui/themes'
+import { Heading, Text, Button, Card, Badge, Tabs, Container } from '@radix-ui/themes'
 import { Play, CheckCircle, AlertTriangle, Shield, Clock, MapPin, Phone, Download, ArrowRight } from 'lucide-react'
 import { brandColors } from '@/utils/colors'
 
@@ -131,44 +131,58 @@ export default function GuidePage() {
   const [activeAnimalTab, setActiveAnimalTab] = useState('cats')
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12">
-        {/* Header */}
-        <div className="text-center mb-8 sm:mb-12 lg:mb-16">
-          <Heading size="8" className="mb-4 sm:mb-6 text-2xl sm:text-3xl md:text-4xl lg:text-5xl" style={{ color: brandColors.primary }}>
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 overflow-x-hidden">
+      <div className="w-full max-w-4xl mx-auto px-2 sm:px-3 md:px-4 lg:px-6 py-2 sm:py-3 md:py-4 lg:py-6">
+        
+        {/* Header Section */}
+        <div className="text-center mb-4 sm:mb-6 md:mb-8">
+          <Heading 
+            size="4" 
+            className="mb-2 sm:mb-3 md:mb-4 !text-lg sm:!text-xl md:!text-2xl lg:!text-3xl leading-tight px-1" 
+            style={{ color: brandColors.primary }}
+          >
             Kaip naudoti gyvūnų spąstus
           </Heading>
-          <Text size="4" color="gray" className="mb-6 sm:mb-8 max-w-4xl mx-auto leading-relaxed text-base sm:text-lg">
+          <Text 
+            size="1" 
+            color="gray" 
+            className="mb-3 sm:mb-4 mx-auto leading-relaxed !text-xs sm:!text-sm md:!text-base px-2"
+          >
             Išsamus vadovas, kaip saugiai ir efektyviai naudoti humaniškus gyvūnų spąstus. 
             Sekite šiuos žingsnius optimaliam rezultatui.
           </Text>
           
-          <div className="flex flex-wrap justify-center gap-2 sm:gap-3">
-            <Badge size="2" className="bg-green-100 text-green-800 px-3 py-1.5 text-sm">
+          <div className="flex flex-wrap justify-center gap-1 px-2">
+            <Badge size="1" className="bg-green-100 text-green-800 !px-1.5 !py-0.5 !text-xs">
               100% Humaniška
             </Badge>
-            <Badge size="2" className="bg-blue-100 text-blue-800 px-3 py-1.5 text-sm">
+            <Badge size="1" className="bg-blue-100 text-blue-800 !px-1.5 !py-0.5 !text-xs">
               Profesionalūs patarimai
             </Badge>
-            <Badge size="2" className="bg-purple-100 text-purple-800 px-3 py-1.5 text-sm">
+            <Badge size="1" className="bg-purple-100 text-purple-800 !px-1.5 !py-0.5 !text-xs">
               Saugus metodas
             </Badge>
           </div>
         </div>
 
         {/* Quick Stats */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-12 sm:mb-16">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-1.5 sm:gap-2 md:gap-3 mb-4 sm:mb-6 md:mb-8">
           {[
             { number: "6", label: "Žingsniai", color: brandColors.primary },
             { number: "98%", label: "Sėkmės rodiklis", color: "#10B981" },
             { number: "2-4h", label: "Tikrinimo dažnis", color: "#F59E0B" },
             { number: "0", label: "Žala gyvūnui", color: "#EF4444" }
           ].map((stat, index) => (
-            <Card key={index} className="text-center p-4 sm:p-6 lg:p-8 bg-white shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105">
-              <Text size="7" weight="bold" className="block mb-2 text-2xl sm:text-3xl lg:text-4xl" style={{ color: stat.color }}>
+            <Card key={index} className="text-center !p-1.5 sm:!p-2 md:!p-3 bg-white shadow-sm hover:shadow-md transition-all duration-300">
+              <Text 
+                size="3" 
+                weight="bold" 
+                className="block mb-0.5 !text-base sm:!text-lg md:!text-xl" 
+                style={{ color: stat.color }}
+              >
                 {stat.number}
               </Text>
-              <Text size="2" color="gray" className="leading-tight text-sm sm:text-base">
+              <Text size="1" color="gray" className="leading-tight !text-xs">
                 {stat.label}
               </Text>
             </Card>
@@ -176,100 +190,129 @@ export default function GuidePage() {
         </div>
 
         {/* Step by Step Guide */}
-        <div className="mb-12 sm:mb-16">
-          <Heading size="6" className="mb-6 sm:mb-8 text-xl sm:text-2xl lg:text-3xl" style={{ color: brandColors.primary }}>
+        <div className="mb-4 sm:mb-6 md:mb-8">
+          <Heading 
+            size="3" 
+            className="mb-3 sm:mb-4 !text-base sm:!text-lg md:!text-xl text-center sm:text-left px-1" 
+            style={{ color: brandColors.primary }}
+          >
             6 žingsnių vadovas
           </Heading>
           
-          <div className="space-y-6 sm:space-y-8">
-            {guideSteps.map((step) => (
-              <Card key={step.id} className="p-6 sm:p-8 bg-white shadow-md hover:shadow-xl transition-all duration-300 hover:scale-[1.02]">
-                <div className="flex flex-col sm:flex-row gap-6 sm:gap-8">
-                  {/* Step Number and Icon */}
-                  <div className="flex-shrink-0 text-center sm:text-left">
-                    <div 
-                      className="rounded-full flex items-center justify-center text-white font-bold mb-3 mx-auto sm:mx-0"
-                      style={{ 
-                        backgroundColor: brandColors.primary,
-                        width: '50px',
-                        height: '50px',
-                        fontSize: '18px'
-                      }}
-                    >
-                      {step.id}
+          <div className="space-y-2 sm:space-y-3 md:space-y-4">
+            {guideSteps.map((step) => {
+              const IconComponent = step.icon
+              return (
+                <Card key={step.id} className="!p-2 sm:!p-3 md:!p-4 bg-white shadow-sm hover:shadow-md transition-all duration-300">
+                  <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 md:gap-4">
+                    {/* Step Number and Icon */}
+                    <div className="flex-shrink-0 text-center sm:text-left">
+                      <div 
+                        className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center text-white font-bold mb-1 sm:mb-2 mx-auto sm:mx-0 text-xs sm:text-sm"
+                        style={{ backgroundColor: brandColors.primary }}
+                      >
+                        {step.id}
+                      </div>
+                      <IconComponent className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 mx-auto sm:mx-0" style={{ color: brandColors.primary }} />
                     </div>
-                    <step.icon className="w-6 h-6 sm:w-7 sm:h-7 mx-auto sm:mx-0" style={{ color: brandColors.primary }} />
-                  </div>
-                  
-                  {/* Step Content */}
-                  <div className="flex-1 min-w-0">
-                    <Heading size="4" className="mb-3 sm:mb-4 text-lg sm:text-xl" style={{ color: brandColors.primary }}>
-                      {step.title}
-                    </Heading>
-                    <Text size="3" color="gray" className="mb-4 sm:mb-6 leading-relaxed text-base">
-                      {step.description}
-                    </Text>
                     
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
-                      {step.tips.map((tip, index) => (
-                        <div key={index} className="flex items-start gap-3">
-                          <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
-                          <Text size="2" color="gray" className="leading-relaxed text-sm sm:text-base">
-                            {tip}
-                          </Text>
-                        </div>
-                      ))}
+                    {/* Step Content */}
+                    <div className="flex-1 min-w-0 px-1">
+                      <Heading 
+                        size="2" 
+                        className="mb-1 sm:mb-2 !text-sm sm:!text-base md:!text-lg text-center sm:text-left" 
+                        style={{ color: brandColors.primary }}
+                      >
+                        {step.title}
+                      </Heading>
+                      <Text 
+                        size="1" 
+                        color="gray" 
+                        className="mb-2 sm:mb-3 leading-relaxed !text-xs sm:!text-sm text-center sm:text-left"
+                      >
+                        {step.description}
+                      </Text>
+                      
+                      <div className="space-y-1 sm:space-y-2">
+                        {step.tips.map((tip, index) => (
+                          <div key={index} className="flex items-start gap-1.5 sm:gap-2">
+                            <CheckCircle className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-green-500 flex-shrink-0 mt-1" />
+                            <Text size="1" color="gray" className="leading-relaxed !text-xs">
+                              {tip}
+                            </Text>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </div>
-                </div>
-              </Card>
-            ))}
+                </Card>
+              )
+            })}
           </div>
         </div>
 
         {/* Animal-Specific Guides */}
-        <div className="mb-12 sm:mb-16">
-          <Heading size="6" className="mb-6 sm:mb-8 text-xl sm:text-2xl lg:text-3xl" style={{ color: brandColors.primary }}>
+        <div className="mb-4 sm:mb-6 md:mb-8">
+          <Heading 
+            size="3" 
+            className="mb-3 sm:mb-4 !text-base sm:!text-lg md:!text-xl text-center sm:text-left px-1" 
+            style={{ color: brandColors.primary }}
+          >
             Spąstų tipai pagal gyvūną
           </Heading>
 
           <Tabs.Root value={activeAnimalTab} onValueChange={setActiveAnimalTab}>
-            <Tabs.List className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-8">
+            {/* Tab Navigation */}
+            <Tabs.List className="grid grid-cols-2 md:grid-cols-4 gap-1 sm:gap-1.5 mb-3 sm:mb-4 !bg-transparent !p-0">
               {Object.entries(animalGuides).map(([key, guide]) => (
                 <Tabs.Trigger 
                   key={key} 
                   value={key} 
-                  className="text-center border-2 rounded-xl hover:shadow-md transition-all duration-300 p-4 sm:p-6 bg-white hover:bg-gray-50 data-[state=active]:border-current data-[state=active]:shadow-lg data-[state=active]:scale-105"
-                  style={{ borderColor: activeAnimalTab === key ? guide.color : '#e5e7eb' }}
+                  className={`text-center border-2 rounded-lg hover:shadow-sm transition-all duration-300 !p-1.5 sm:!p-2 md:!p-3 bg-white hover:bg-gray-50 ${
+                    activeAnimalTab === key ? 'shadow-md scale-105' : ''
+                  }`}
+                  style={{ 
+                    borderColor: activeAnimalTab === key ? guide.color : '#e5e7eb'
+                  }}
                 >
-                  <div className="text-3xl sm:text-4xl mb-3">{guide.icon}</div>
-                  <Text size="2" weight="medium" style={{ color: guide.color }} className="leading-tight text-sm sm:text-base">
+                  <div className="text-lg sm:text-xl md:text-2xl mb-1">{guide.icon}</div>
+                  <Text 
+                    size="1" 
+                    weight="medium" 
+                    className="leading-tight !text-xs"
+                    style={{ color: guide.color }}
+                  >
                     {guide.title}
                   </Text>
                 </Tabs.Trigger>
               ))}
             </Tabs.List>
 
+            {/* Tab Content */}
             {Object.entries(animalGuides).map(([key, guide]) => (
               <Tabs.Content key={key} value={key}>
-                <Card className="p-6 sm:p-8 bg-white shadow-md">
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6 mb-6 sm:mb-8">
-                    <div className="text-4xl sm:text-5xl">{guide.icon}</div>
-                    <div className="text-center sm:text-left">
-                      <Heading size="5" style={{ color: guide.color }} className="mb-2 text-lg sm:text-xl">
+                <Card className="!p-2 sm:!p-3 md:!p-4 bg-white shadow-sm">
+                  <div className="flex flex-col sm:flex-row items-center sm:items-start gap-2 sm:gap-3 mb-3 sm:mb-4">
+                    <div className="text-xl sm:text-2xl md:text-3xl">{guide.icon}</div>
+                    <div className="text-center sm:text-left px-1">
+                      <Heading 
+                        size="2" 
+                        className="mb-1 !text-sm sm:!text-base md:!text-lg" 
+                        style={{ color: guide.color }}
+                      >
                         {guide.title}
                       </Heading>
-                      <Text size="3" color="gray" className="text-base">
+                      <Text size="1" color="gray" className="!text-xs sm:!text-sm">
                         Specialūs patarimai šiai gyvūnų grupei
                       </Text>
                     </div>
                   </div>
                   
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+                  <div className="space-y-1 sm:space-y-2">
                     {guide.tips.map((tip, index) => (
-                      <div key={index} className="flex items-start gap-3">
-                        <CheckCircle className="w-5 h-5 flex-shrink-0 mt-0.5" style={{ color: guide.color }} />
-                        <Text size="2" className="leading-relaxed text-sm sm:text-base">
+                      <div key={index} className="flex items-start gap-1.5 sm:gap-2 px-1">
+                        <CheckCircle className="w-2.5 h-2.5 sm:w-3 sm:h-3 flex-shrink-0 mt-1" style={{ color: guide.color }} />
+                        <Text size="1" className="leading-relaxed !text-xs">
                           {tip}
                         </Text>
                       </div>
@@ -282,96 +325,90 @@ export default function GuidePage() {
         </div>
 
         {/* Safety Warnings */}
-        <Card className="p-6 sm:p-8 mb-12 sm:mb-16 bg-amber-50 border-amber-200 shadow-md">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-6 sm:mb-8">
-            <AlertTriangle className="w-8 h-8 text-amber-600 flex-shrink-0" />
-            <Heading size="5" className="text-amber-800 text-lg sm:text-xl">
+        <Card className="!p-2 sm:!p-3 md:!p-4 mb-4 sm:mb-6 md:mb-8 bg-amber-50 border-2 border-amber-200 shadow-sm">
+          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-2 mb-3 sm:mb-4">
+            <AlertTriangle className="w-4 h-4 sm:w-5 sm:h-5 text-amber-600 flex-shrink-0" />
+            <Heading size="2" className="text-amber-800 !text-sm sm:!text-base md:!text-lg text-center sm:text-left px-1">
               Saugos nurodymai
             </Heading>
           </div>
           
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
-            <div>
-              <Text size="3" weight="medium" className="text-amber-800 mb-4 sm:mb-6 text-base sm:text-lg">
+          <div className="space-y-3 sm:space-y-4">
+            <div className="px-1">
+              <Text size="1" weight="medium" className="text-amber-800 mb-2 !text-xs sm:!text-sm">
                 Prieš naudojimą:
               </Text>
-              <div className="space-y-3 sm:space-y-4">
-                <div className="flex items-start gap-3">
-                  <div className="w-2 h-2 bg-amber-600 rounded-full mt-2 flex-shrink-0"></div>
-                  <Text size="2" className="text-amber-700 text-sm sm:text-base">
-                    Patikrinkite vietinės įstatymų
-                  </Text>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="w-2 h-2 bg-amber-600 rounded-full mt-2 flex-shrink-0"></div>
-                  <Text size="2" className="text-amber-700 text-sm sm:text-base">
-                    Įsitikinkite, kad spąstas tinkamas
-                  </Text>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="w-2 h-2 bg-amber-600 rounded-full mt-2 flex-shrink-0"></div>
-                  <Text size="2" className="text-amber-700 text-sm sm:text-base">
-                    Paruoškite apsaugos priemones
-                  </Text>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="w-2 h-2 bg-amber-600 rounded-full mt-2 flex-shrink-0"></div>
-                  <Text size="2" className="text-amber-700 text-sm sm:text-base">
-                    Suplanuokite gyvūno išleidimą
-                  </Text>
-                </div>
+              <div className="space-y-1 sm:space-y-2">
+                {[
+                  "Patikrinkite vietinės įstatymų",
+                  "Įsitikinkite, kad spąstas tinkamas",
+                  "Paruoškite apsaugos priemones",
+                  "Suplanuokite gyvūno išleidimą"
+                ].map((item, index) => (
+                  <div key={index} className="flex items-start gap-1.5">
+                    <div className="w-1 h-1 bg-amber-600 rounded-full mt-1.5 flex-shrink-0"></div>
+                    <Text size="1" className="text-amber-700 !text-xs">
+                      {item}
+                    </Text>
+                  </div>
+                ))}
               </div>
             </div>
-            <div>
-              <Text size="3" weight="medium" className="text-amber-800 mb-4 sm:mb-6 text-base sm:text-lg">
+            <div className="px-1">
+              <Text size="1" weight="medium" className="text-amber-800 mb-2 !text-xs sm:!text-sm">
                 Naudojimo metu:
               </Text>
-              <div className="space-y-3 sm:space-y-4">
-                <div className="flex items-start gap-3">
-                  <div className="w-2 h-2 bg-amber-600 rounded-full mt-2 flex-shrink-0"></div>
-                  <Text size="2" className="text-amber-700 text-sm sm:text-base">
-                    Niekada nepalikite spąsto be priežiūros ilgam
-                  </Text>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="w-2 h-2 bg-amber-600 rounded-full mt-2 flex-shrink-0"></div>
-                  <Text size="2" className="text-amber-700 text-sm sm:text-base">
-                    Dėvėkite apsaugines pirštines
-                  </Text>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="w-2 h-2 bg-amber-600 rounded-full mt-2 flex-shrink-0"></div>
-                  <Text size="2" className="text-amber-700 text-sm sm:text-base">
-                    Būkite atsargūs su laukiniais gyvūnais
-                  </Text>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="w-2 h-2 bg-amber-600 rounded-full mt-2 flex-shrink-0"></div>
-                  <Text size="2" className="text-amber-700 text-sm sm:text-base">
-                    Esant problemoms, kreipkitės į specialistus
-                  </Text>
-                </div>
+              <div className="space-y-1 sm:space-y-2">
+                {[
+                  "Niekada nepalikite spąsto be priežiūros ilgam",
+                  "Dėvėkite apsaugines pirštines",
+                  "Būkite atsargūs su laukiniais gyvūnais",
+                  "Esant problemoms, kreipkitės į specialistus"
+                ].map((item, index) => (
+                  <div key={index} className="flex items-start gap-1.5">
+                    <div className="w-1 h-1 bg-amber-600 rounded-full mt-1.5 flex-shrink-0"></div>
+                    <Text size="1" className="text-amber-700 !text-xs">
+                      {item}
+                    </Text>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
         </Card>
 
         {/* Contact Support */}
-        <Card className="p-6 sm:p-8 text-center bg-blue-50 border-blue-200 shadow-md">
-          <Heading size="5" className="mb-3 sm:mb-4 text-lg sm:text-xl" style={{ color: brandColors.primary }}>
+        <Card className="!p-2 sm:!p-3 md:!p-4 text-center bg-blue-50 border-2 border-blue-200 shadow-sm">
+          <Heading 
+            size="2" 
+            className="mb-2 !text-sm sm:!text-base md:!text-lg px-1" 
+            style={{ color: brandColors.primary }}
+          >
             Reikia pagalbos?
           </Heading>
-          <Text size="3" color="gray" className="mb-6 sm:mb-8 leading-relaxed text-base max-w-2xl mx-auto">
+          <Text 
+            size="1" 
+            color="gray" 
+            className="mb-3 sm:mb-4 leading-relaxed mx-auto !text-xs sm:!text-sm px-2"
+          >
             Susisiekite su mūsų ekspertais dėl individualių konsultacijų
           </Text>
           
-          <div className="flex flex-col sm:flex-row justify-center gap-4 sm:gap-6">
-            <Button size="3" style={{ backgroundColor: brandColors.primary }} className="w-full sm:w-auto px-6 py-3">
-              <Phone className="w-5 h-5 mr-2" />
+          <div className="flex flex-col sm:flex-row justify-center gap-1.5 sm:gap-2">
+            <Button 
+              size="1" 
+              className="w-full sm:w-auto !px-2 sm:!px-3 !py-1.5 !text-xs" 
+              style={{ backgroundColor: brandColors.primary }}
+            >
+              <Phone className="w-3 h-3 mr-1" />
               Skambinti ekspertams
             </Button>
-            <Button variant="outline" size="3" className="w-full sm:w-auto px-6 py-3">
-              <Download className="w-5 h-5 mr-2" />
+            <Button 
+              variant="outline" 
+              size="1" 
+              className="w-full sm:w-auto !px-2 sm:!px-3 !py-1.5 !text-xs"
+            >
+              <Download className="w-3 h-3 mr-1" />
               Atsisiųsti PDF vadovą
             </Button>
           </div>
