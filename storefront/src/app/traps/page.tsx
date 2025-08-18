@@ -2,12 +2,10 @@
 
 import { useState, useEffect } from 'react'
 import { Box, Heading, Text, Button, Flex, Card, Badge, Separator, ScrollArea, Container, IconButton } from '@radix-ui/themes'
-import { ShoppingCart, Grid, List, Menu, X, Filter, ChevronRight, Tag, Star } from 'lucide-react'
-import { useCart } from '@/contexts/cart-context'
+import { Grid, List, Menu, X, Filter, ChevronRight, Tag, Star } from 'lucide-react'
 import { useProducts, Product } from '@/hooks/useProducts'
 import { useCategories } from '@/hooks/useCategories'
 import { brandColors } from '@/utils/colors'
-import { CART_API_URL } from '@/lib/config'
 import ProductCard from '@/components/product/ProductCard'
 
 export default function TrapsPage() {
@@ -17,7 +15,6 @@ export default function TrapsPage() {
   const [sortBy, setSortBy] = useState<string>('newest')
   const [sidebarOpen, setSidebarOpen] = useState(false)
   
-  const { refreshCart, isLoading: cartLoading } = useCart()
   const { categories, loading: categoriesLoading } = useCategories()
   const { products: allProducts, loading: productsLoading } = useProducts(selectedCategory === 'all' ? undefined : selectedCategory)
 
@@ -72,30 +69,6 @@ export default function TrapsPage() {
     console.log('Debug - Products with tags:', allProducts.filter(p => p.tags && p.tags.length > 0).length);
     console.log('Debug - All tags found:', allTags);
     console.log('Debug - Sample product with tags:', allProducts.find(p => p.tags && p.tags.length > 0));
-  }
-
-  const handleAddToCart = async (variantId: string) => {
-    try {
-      const response = await fetch(`${CART_API_URL}/add`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          variantId,
-          quantity: 1
-        })
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to add to cart')
-      }
-
-      // Refresh cart after successful addition
-      await refreshCart()
-    } catch (error) {
-      console.error('Error adding to cart:', error)
-    }
   }
 
   const loading = productsLoading || categoriesLoading
@@ -459,8 +432,6 @@ export default function TrapsPage() {
                   key={product.id} 
                   product={product} 
                   variant={viewMode === 'list' ? 'compact' : 'default'}
-                  showAddToCart={true}
-                  onAddToCart={handleAddToCart}
                   className={viewMode === 'list' ? 'w-full' : ''}
                 />
               ))}
