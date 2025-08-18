@@ -1,7 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react'
 import { ShoppingCart, Search, Menu, X, User, Heart, Shield, Truck, Phone, Box } from 'lucide-react'
 import { Button, TextField, DropdownMenu, Flex, Text, Separator } from '@radix-ui/themes'
 import { brandColors, componentStyles } from '@/utils/colors'
@@ -10,9 +11,39 @@ import { useCart } from '@/contexts/cart-context'
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
   const { cart, isLoading } = useCart()
+  const router = useRouter()
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen)
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (searchQuery.trim()) {
+      router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`)
+      setSearchQuery('')
+    }
+  }
+
+  const handleQuickSearch = (term: string) => {
+    router.push(`/search?q=${encodeURIComponent(term)}`)
+  }
+
+  // Keyboard shortcut for search (Ctrl/Cmd + K)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault()
+        const searchInput = document.querySelector('input[placeholder*="Ieškoti spąstų"]') as HTMLInputElement
+        if (searchInput) {
+          searchInput.focus()
+        }
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [])
   
   // Calculate total items in cart
   const cartItemCount = cart?.items?.reduce((total, item) => total + item.quantity, 0) || 0
@@ -110,17 +141,11 @@ export default function Header() {
           <div className="flex items-center gap-1 sm:gap-2 md:gap-3">
             {/* Enhanced Search with modern styling */}
             <div className="hidden lg:block relative group">
-              <form onSubmit={(e) => {
-                e.preventDefault()
-                const formData = new FormData(e.currentTarget)
-                const searchQuery = formData.get('search') as string
-                if (searchQuery.trim()) {
-                  window.location.href = `/search?q=${encodeURIComponent(searchQuery.trim())}`
-                }
-              }}>
+              <form onSubmit={handleSearch}>
                 <div className="relative">
                   <TextField.Root 
-                    name="search"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Ieškoti spąstų pagal gyvūną..." 
                     size="3" 
                     className="w-56 lg:w-72 xl:w-96 transition-all duration-300 group-hover:shadow-lg"
@@ -134,6 +159,17 @@ export default function Header() {
                     <TextField.Slot>
                       <Search className="w-5 h-5 text-green-600 group-hover:scale-110 transition-transform duration-200" />
                     </TextField.Slot>
+                    {searchQuery && (
+                      <TextField.Slot>
+                        <button
+                          type="button"
+                          onClick={() => setSearchQuery('')}
+                          className="p-1 hover:bg-gray-100 rounded transition-colors"
+                        >
+                          <X className="w-4 h-4 text-gray-400" />
+                        </button>
+                      </TextField.Slot>
+                    )}
                   </TextField.Root>
                   
                   {/* Search suggestions indicator */}
@@ -149,7 +185,11 @@ export default function Header() {
                   <div className="text-xs text-gray-500 mb-2 font-medium">Populiarūs paieškos terminai:</div>
                   <div className="flex flex-wrap gap-2">
                     {['Meškėnų spąstai', 'Kačių spąstai', 'Voverių spąstai', 'Didelių gyvūnų'].map((term) => (
-                      <button key={term} className="px-3 py-1 bg-gray-50 hover:bg-green-50 rounded-full text-xs text-gray-700 hover:text-green-700 transition-colors duration-200">
+                      <button 
+                        key={term} 
+                        onClick={() => handleQuickSearch(term)}
+                        className="px-3 py-1 bg-gray-50 hover:bg-green-50 rounded-full text-xs text-gray-700 hover:text-green-700 transition-colors duration-200"
+                      >
                         {term}
                       </button>
                     ))}
@@ -275,7 +315,8 @@ export default function Header() {
                   const formData = new FormData(e.currentTarget)
                   const searchQuery = formData.get('search') as string
                   if (searchQuery.trim()) {
-                    window.location.href = `/search?q=${encodeURIComponent(searchQuery.trim())}`
+                    router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`)
+                    setIsMenuOpen(false) // Close mobile menu after search
                   }
                 }}>
                   <div className="relative">
