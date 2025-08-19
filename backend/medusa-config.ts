@@ -2,38 +2,23 @@ import { loadEnv, defineConfig } from '@medusajs/framework/utils'
 
 loadEnv(process.env.NODE_ENV || 'development', process.cwd())
 
-// Validate required environment variables
-const requiredEnvVars = [
-  'DATABASE_URL',
-  'REDIS_URL', 
-  'JWT_SECRET',
-  'COOKIE_SECRET',
-  'MEDUSA_BACKEND_URL'
-];
-
-// Only validate in production
-if (process.env.NODE_ENV === 'production') {
-  const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
-  if (missingVars.length > 0) {
-    throw new Error(`Missing required environment variables: ${missingVars.join(', ')}`);
-  }
-}
-
+// For development, use environment variables
+// For production, Elastic Beanstalk will inject the actual values
 module.exports = defineConfig({
   projectConfig: {
     databaseUrl: process.env.DATABASE_URL,
     databaseDriverOptions: {
-      ssl: process.env.DATABASE_SSL === "false" ? false : (process.env.NODE_ENV === "production" ? {
+      ssl: process.env.NODE_ENV === "production" ? {
         rejectUnauthorized: false
-      } : false),
+      } : false,
     },
     redisUrl: process.env.REDIS_URL,
     http: {
       storeCors: process.env.STORE_CORS || "https://gyva.appiolabs.com",
-      adminCors: process.env.ADMIN_CORS || "https://gyva.appiolabs.com",
+      adminCors: process.env.ADMIN_CORS || "https://gyva.appiolabs.com", 
       authCors: process.env.AUTH_CORS || "https://gyva.appiolabs.com",
-      jwtSecret: process.env.JWT_SECRET,  // No fallback - validated above
-      cookieSecret: process.env.COOKIE_SECRET,  // No fallback - validated above
+      jwtSecret: process.env.JWT_SECRET,
+      cookieSecret: process.env.COOKIE_SECRET,
       authMethodsPerActor: {
         user: ["session", "bearer", "emailpass"],
         customer: ["session", "bearer", "emailpass"]
@@ -61,23 +46,6 @@ module.exports = defineConfig({
       },
     },
     {
-      resolve: "@medusajs/auth",
-      options: {
-        providers: [
-          {
-            resolve: "@medusajs/auth-emailpass",
-            id: "emailpass",
-          },
-        ],
-      },
-    },
-    {
-      resolve: "@medusajs/user",
-      options: {
-        jwt_secret: process.env.JWT_SECRET,  // Removed fallback - will use validated env var
-      },
-    },
-    {
       resolve: "@medusajs/payment",
       options: {
         providers: [
@@ -97,10 +65,6 @@ module.exports = defineConfig({
       resolve: "@medusajs/fulfillment",
       options: {
         providers: [
-          {
-            resolve: "@medusajs/fulfillment-manual",
-            id: "manual",
-          },
           {
             resolve: "./src/modules/venipak",
             id: "venipak",
